@@ -9,42 +9,37 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Check out the repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-<<<<<<< HEAD
-=======
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 18
 
->>>>>>> 9146a21... Update deploy.yml
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+        if: steps.cache.outputs.cache-hit != 'true'
 
-      # Step 4: Configure AWS credentials
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ASIA4IM3HLT6YO5K5RQE
-          aws-secret-access-key: +D5Smv89iKeAPSqm5QonKuIcfQbZi3ZNIOZ3o5CA
-          aws-region: ca-central-1
+          aws-access-key-id: "ASIA4IM3HLT66PJRKHO7"
+          aws-secret-access-key: "I82Gs3kHvQEZVWx1aGaAbBQnVw1idArHAyZKWIjl"
+          aws-session-token: "IQoJb3JpZ2luX2VjENX//////////wEaDGNhLWNlbnRyYWwtMSJIMEYCIQDmwUkTJ4B+3/+mKSlrPWXUpA+T/01/5ygFDEbEwxdMdgIhAJyaaiOUBi9/FqlM+sLL5eO4tKM5mJIpFfNF2cx9JGLuKvsCCG8QABoMODQyNjc2MDAyMDQ1IgzOlsh4clS3F5KnRioq2AIRPrjOfGUv+ap6pL5xMqQ676TqSnfyBV3jgKq5pUj741AEF/rhWI5gfxjGgVaO8WFjTaXhZMFw1AtznZ8rZpctt7vht76/HPhkfUrSMZ8Q5Bk2AHj/nuvAVBlVVRVIXpeKNUgF63Kg6j54vXTRKSMWEidlSzaKABfQUdTmh33EHeLHHJIu+1CN4VaeEZY7/7N8FTHeM/VmGNvQlcHaZqRcvTgRH51cb5t5nHeVfX2d7CTJjQpoKPPkL05eTw+tuM3HFiQtqEEtVAuLHN/yPY4b7dQ8AmGosMPoWj3xROp6mWiW0mMO9Jkl29vkJI7tAj6UsKAorBd+YIAnDHysr1p2BSe9J39WdlScOwwGip6KaoCC4XXhrxPWTNOeQS5cFmmhHGKFa3f3HayvdFINfNHK5jmRUGPFTi6rhCqMHzmbQTrI6+15/GKY6LgW1T25JdunVKa9FS99ejDqw/C5BjqmAYX8BwohQ4XFQQg07xlWIQ3aGWFMh8XL1YcRgEe9Ir9SLYwYy/2xvtmw8cV9cyfak3MgfAOg7v5/POOpc3ShfptQp8jKso7VPKDmPa9s6b5Ewq9mOcavE+0fhqErNhPESbrVJI5yZ9yLukdx9X2/11mup82DtAVUVBUYbPjHbsTwVUZ2EW5+b0RqDXA4/fiEtqh5Wl26mhfrpju7JwkGg6IL2Lxmp+0="
+          aws-region: "ca-central-1"
 
-      # Step 5: Bootstrap CDK (if necessary)
       - name: CDK Bootstrap
-        run: cdk bootstrap || echo "Bootstrap already done"
+        working-directory: ./my-cdk-app
+        run: npx cdk bootstrap || echo "Bootstrap already done"
 
-      # Step 6: Deploy the stack
       - name: Deploy Stack
-        run: cdk deploy --require-approval never
+        working-directory: ./my-cdk-app
+        run: npx cdk deploy --require-approval never
