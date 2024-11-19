@@ -19,6 +19,14 @@ jobs:
         with:
           python-version: '3.9'
 
+<<<<<<< HEAD
+=======
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+
+>>>>>>> 9146a21... Update deploy.yml
       # Step 3: Install dependencies
       - name: Install dependencies
         run: |
