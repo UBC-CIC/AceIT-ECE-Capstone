@@ -1,0 +1,42 @@
+name: Deploy AWS Lambda with CDK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          aws-access-key-id: ASIA4IM3HLT6YO5K5RQE
+          aws-secret-access-key: +D5Smv89iKeAPSqm5QonKuIcfQbZi3ZNIOZ3o5CA
+          aws-region: ca-central-1
+
+      # Step 5: Bootstrap CDK (if necessary)
+      - name: CDK Bootstrap
+        run: cdk bootstrap || echo "Bootstrap already done"
+
+      # Step 6: Deploy the stack
+      - name: Deploy Stack
+        run: cdk deploy --require-approval never
