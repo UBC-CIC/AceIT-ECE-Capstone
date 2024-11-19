@@ -31,9 +31,9 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: "ASIA4IM3HLT66PJRKHO7"
-          aws-secret-access-key: "I82Gs3kHvQEZVWx1aGaAbBQnVw1idArHAyZKWIjl"
-          aws-session-token: "IQoJb3JpZ2luX2VjENX//////////wEaDGNhLWNlbnRyYWwtMSJIMEYCIQDmwUkTJ4B+3/+mKSlrPWXUpA+T/01/5ygFDEbEwxdMdgIhAJyaaiOUBi9/FqlM+sLL5eO4tKM5mJIpFfNF2cx9JGLuKvsCCG8QABoMODQyNjc2MDAyMDQ1IgzOlsh4clS3F5KnRioq2AIRPrjOfGUv+ap6pL5xMqQ676TqSnfyBV3jgKq5pUj741AEF/rhWI5gfxjGgVaO8WFjTaXhZMFw1AtznZ8rZpctt7vht76/HPhkfUrSMZ8Q5Bk2AHj/nuvAVBlVVRVIXpeKNUgF63Kg6j54vXTRKSMWEidlSzaKABfQUdTmh33EHeLHHJIu+1CN4VaeEZY7/7N8FTHeM/VmGNvQlcHaZqRcvTgRH51cb5t5nHeVfX2d7CTJjQpoKPPkL05eTw+tuM3HFiQtqEEtVAuLHN/yPY4b7dQ8AmGosMPoWj3xROp6mWiW0mMO9Jkl29vkJI7tAj6UsKAorBd+YIAnDHysr1p2BSe9J39WdlScOwwGip6KaoCC4XXhrxPWTNOeQS5cFmmhHGKFa3f3HayvdFINfNHK5jmRUGPFTi6rhCqMHzmbQTrI6+15/GKY6LgW1T25JdunVKa9FS99ejDqw/C5BjqmAYX8BwohQ4XFQQg07xlWIQ3aGWFMh8XL1YcRgEe9Ir9SLYwYy/2xvtmw8cV9cyfak3MgfAOg7v5/POOpc3ShfptQp8jKso7VPKDmPa9s6b5Ewq9mOcavE+0fhqErNhPESbrVJI5yZ9yLukdx9X2/11mup82DtAVUVBUYbPjHbsTwVUZ2EW5+b0RqDXA4/fiEtqh5Wl26mhfrpju7JwkGg6IL2Lxmp+0="
+          aws-access-key-id: "ASIA4IM3HLT6XCJESMBV"
+          aws-secret-access-key: "hhsyBhDlYDO9Kc6R7iOtqMuUSL6wtnW3wBO57EwT"
+          aws-session-token: "IQoJb3JpZ2luX2VjEOH//////////wEaDGNhLWNlbnRyYWwtMSJHMEUCIQDsX8/zZNpxYumL5YOuE0tdF545bhvH/Zy/YnGggvllpQIgOYd9n+Pn0BV4DrzG2D454SqauGhNG2DJnRA6jowANAAq+wIIexAAGgw4NDI2NzYwMDIwNDUiDMEXzHQ0g8ZFSLGMJCrYAg8IIZ5GDAA14e4jP0p9HUSPL9TQS1AFYPp/c3qPamVl8khEsBLoBMurcR4eOREUmn7M4bSV2/Pep/0vE08RmrSWM/SoQeRSJlC2W1pMch1bI0Vqp/Zz3VJRiqVq2gm57P+ue0nRZAKU41XCw+3AeixMT7rXV96UuAcPuvlQzy3Ky6P/D7M8XMY1Iorp+CULXstRYmLhyCOh5DRKpy7Os3UsYFOIZWz4VLFH1qbZ1bWRmTnhnEfRScui8dbTlyAuTF04UxRcCcxNXqHxIRe2dSefHicf2PK/Q1Uf9gvZRzUWQj3+pTmddOS92XFTyxazBexduEQ9DPU5Fq8RqTSCFvD3HGiomhIIzN5HZhRP5FAegaPSlghgm+nIZA4nPtvHbjomrVhc8bCVdlcZAu843dkAa7/ccK6z8rS//33s2/UZ92HdSGqfpSp5zxGUYuWF+LHzDTIdbZxhMLOW87kGOqcBFOhAMwMlGyXTagyQkKd0Z9Xdt9AN9ZcwAnRsXOjEXtu6cx+mBax676RBl/GbWZsRnRwx4SsquMCjZHzIHw21aOCi6u7hxwcZE7Xxser0TIazvdhGiygXZlFTtBjnK+H3aSMlMJzW9y63AGt4gLu10cW853aUKpC7MauttrGO+8QQLHV6OPoWQEZTJLD+vKfqEwGxOQRufgi6s0FhRvc3qI4Q5XLv1Ss="
           aws-region: "ca-central-1"
 
       - name: CDK Bootstrap
