@@ -1,0 +1,29 @@
+{
+  "name": "aceit-ece-capstone",
+  "version": "1.0.0",
+  "description": "This project was built for the UBC Cloud Innovation Centre as a part of the UBC ECE Capstone course.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@aws-amplify/backend": "^1.11.0",
+    "@aws-amplify/backend-cli": "^1.4.5",
+    "aws-cdk": "^2.173.2",
+    "aws-cdk-lib": "^2.173.2",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.24.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "aws-amplify": "^6.11.0"
+  }
+}
