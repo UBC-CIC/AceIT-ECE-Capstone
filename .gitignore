@@ -1,6 +1,10 @@
-node_modules
+*.swp
+package-lock.json
+__pycache__
+.pytest_cache
+.venv
+*.egg-info
 
-# amplify
-.amplify
-amplify_outputs*
-amplifyconfiguration*
+# CDK asset staging directory
+.cdk.staging
+cdk.out

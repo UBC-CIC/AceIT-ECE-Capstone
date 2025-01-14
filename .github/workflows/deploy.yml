@@ -31,24 +31,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm install
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::842676002045:role/permissions_lots
           aws-region: ca-central-1
       
-      - name: Build React App
-        working-directory: ./frontend
-        run: npm run build
-
       - name: CDK Bootstrap
-        working-directory: ./my-cdk-app
         run: npx cdk bootstrap
 
       - name: Deploy Stack
-        working-directory: ./my-cdk-app
         run: npx cdk deploy --require-approval never
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install --force
+
+      # Step 8: Build Frontend
+      - name: Build Frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      # Step 9: Deploy Frontend to S3 and CloudFront
+      # aws s3 sync ./frontend/build s3://YOUR_FRONTEND_BUCKET_NAME --delete
+      - name: Deploy Frontend
+        run: |
+          aws s3 sync ./frontend/build s3://myfrontendbucket3 --delete
+          aws cloudfront create-invalidation --distribution-id E27NHW8AC9BSDB --paths "/*"

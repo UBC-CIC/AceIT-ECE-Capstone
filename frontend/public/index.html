@@ -39,5 +39,28 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+
+  <script>
+    var callAPI = (num1,num2)=>{
+      var myheaders = new Headers();
+      myheaders.append("Content-Type", "application/json");
+      var raw = JSON.stringify({"num1" : num1, "num2" : num2});
+      var requestOptions = {
+        method: "POST",
+        headers: myheaders,
+        body: raw,
+        redirect: "follow"
+      };
+      fetch("https://1nxs3vcjg3.execute-api.us-west-2.amazonaws.com/testadd", requestOptions)
+      .then(response=>response.text())
+      .then(result=>alert(JSON.parse(result).body))
+    }
+
+    function handleSubmit() {
+      const num1 = document.getElementById('num1').value;
+      const num2 = document.getElementById('num2').value;
+      callAPI(num1, num2);
+    }
+  </script>
   </body>
 </html>
