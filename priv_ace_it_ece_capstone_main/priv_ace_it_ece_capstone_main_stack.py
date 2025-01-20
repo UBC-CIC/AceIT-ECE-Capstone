@@ -14,6 +14,35 @@ class PrivAceItEceCapstoneMainStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        # Set up layers for lambda functions
+        pymupdf_layer = _lambda.LayerVersion(
+            self, 
+            "PymuPDFLayer",
+            code=_lambda.Code.from_asset("layers/pymupdf-layer.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
+        langchain_layer = _lambda.LayerVersion(
+            self, 
+            "LangChainLayer",
+            code=_lambda.Code.from_asset("layers/langchain-layer.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
+        other_text_related_layer = _lambda.LayerVersion(
+            self, 
+            "TextRelatedLayer",
+            code=_lambda.Code.from_asset("layers/othertextformat-layer.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
+        boto3_layer = _lambda.LayerVersion(
+            self, 
+            "BotoLayer",
+            code=_lambda.Code.from_asset("layers/boto3-layer.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
         # Define the Lambda function resources
         fetchReadFromS3 = _lambda.Function(
             self,
@@ -21,6 +50,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,  # Use a Python runtime (e.g., Python 3.9)
             code=_lambda.Code.from_asset("lambda"),  # Points to the 'lambda' directory
             handler="fetchReadFromS3.lambda_handler",  # Points to the 'hello.py' file and 'handler' function
+            layers=[langchain_layer, pymupdf_layer, other_text_related_layer, boto3_layer],
         )
 
         recent_course_data_analysis = _lambda.Function(
@@ -186,8 +216,22 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # Attach S3 permissions to the Lambda functions
         fetchReadFromS3.add_to_role_policy(
             iam.PolicyStatement(
-                actions=["s3:GetObject"],  # Grant permission to read objects
-                resources=["arn:aws:s3:::bucketfortextextract/*"]  # Specify bucket and objects
+                actions=[
+                    "s3:GetObject",
+                    "s3:ListBucket"
+                ],
+                resources=[
+                    "arn:aws:s3:::bucketfortextextract",     # Needed for ListBucket
+                    "arn:aws:s3:::bucketfortextextract/*"    # Needed for GetObject
+                ]
+            )
+        )
+
+        # Attach Bedrock permissions to the Lambda function
+        fetchReadFromS3.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["bedrock:InvokeModel"],
+                resources=["arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0"]
             )
         )
 
