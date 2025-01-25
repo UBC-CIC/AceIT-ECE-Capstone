@@ -33,13 +33,14 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-d2z9wnhmh5ka.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-k9zj5cjjmn4b.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
         "password": password,
     }
-    ret1 = create_table_if_not_exists(DB_CONFIG)
+    
+    ret1 = create_table_if_not_exists(DB_CONFIG, course_id)
     query_embedding = generate_embeddings(str(query))
     ret2 = get_course_vector(DB_CONFIG, query_embedding, course_id, num_max_results)
 
@@ -54,7 +55,7 @@ def lambda_handler(event, context):
     }
 
 def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-KUVYnbkG81km"
+    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
     region_name = "us-west-2"
 
     # Create a Secrets Manager client
@@ -76,32 +77,35 @@ def get_secret():
     secret = get_secret_value_response['SecretString']
     return secret
 
-def create_table_if_not_exists(DB_CONFIG):
+def create_table_if_not_exists(DB_CONFIG, course_id):
     """
-    Ensure the embeddings table exists in the database.
+    Dynamically create a table for the given course ID if it doesn't exist.
     """
     connection = None
+    sanitized_course_id = course_id.replace("-", "_")  # Replace hyphens with underscores
     try:
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        
-        create_embeddings_query = """
+
+        # Dynamically construct table creation query
+        create_embeddings_query = f"""
         CREATE EXTENSION IF NOT EXISTS vector;
-        CREATE TABLE IF NOT EXISTS course_vectors (
+        CREATE TABLE IF NOT EXISTS course_vectors_{sanitized_course_id} (
             id SERIAL PRIMARY KEY,
-            course_id UUID REFERENCES course_configuration(course_id) ON DELETE CASCADE,
             document_name TEXT NOT NULL,
             embeddings VECTOR(1024),
-            created_at TIMESTAMP DEFAULT NOW()
+            created_at TIMESTAMP DEFAULT NOW(),
+            sourceURL TEXT DEFAULT 'https://www.example.com',
+            document_content TEXT
         );
         """
-
         cursor.execute(create_embeddings_query)
         connection.commit()
         cursor.close()
-        return "DBSuccess"
+        return "Table created or already exists"
     except Exception as e:
         print(f"Error creating table: {e}")
+        return "Error creating table"
     finally:
         if connection:
             connection.close()
@@ -112,27 +116,28 @@ def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
-        # Debugging: Print all embeddings for the given course_id
-        debug_sql = "SELECT document_name, embeddings FROM course_vectors WHERE course_id = %s;"
-        cursor.execute(debug_sql, (str(course_id),))
-        all_rows = cursor.fetchall()
-        print(f"All embeddings for course_id {course_id}: {all_rows}")
-
+        sanitized_course_id = course_id.replace("-", "_")
         # Query the vector database with explicit casting
-        query_vectors_sql = """
-        SELECT document_name, embeddings <-> %s::vector AS similarity
-        FROM course_vectors
-        WHERE course_id = %s
+        query_vectors_sql = f"""
+        SELECT document_name, sourceURL, document_content, embeddings <-> %s::vector AS similarity
+        FROM course_vectors_{sanitized_course_id}
         ORDER BY similarity
         LIMIT %s;
         """
         # Ensure the query is passed as a string formatted like '[0.1, 0.2, 0.3]'
-        formatted_query = f"[{', '.join(map(str, query))}]"  # Square brackets for VECTOR type
-        cursor.execute(query_vectors_sql, (formatted_query, str(course_id), num_max_results))
+        formatted_query = f"[{', '.join(map(str, query))}]"  # Format the query embedding
+        cursor.execute(query_vectors_sql, (formatted_query, num_max_results))
         rows = cursor.fetchall()
 
-        # Construct the response
-        results = [{"documentName": row[0], "similarity": row[1]} for row in rows]
+        results = [
+            {
+                "documentName": row[0],
+                "sourceUrl": row[1],  # Add source_url to the result
+                "documentContent": row[2],
+                "similarity": row[3]
+            }
+            for row in rows
+        ]
 
         cursor.close()
         connection.close()

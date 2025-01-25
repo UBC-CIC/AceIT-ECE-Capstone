@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-d2z9wnhmh5ka.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-k9zj5cjjmn4b.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
@@ -47,7 +47,7 @@ def lambda_handler(event, context):
     }
 
 def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-KUVYnbkG81km"
+    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
     region_name = "us-west-2"
 
     # Create a Secrets Manager client
@@ -75,17 +75,17 @@ def delete_all_from_this_course(DB_CONFIG, course_id):
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
+        sanitized_course_id = course_id.replace("-", "_")
 
         # Delete query
-        delete_query1 = """
-        DELETE FROM course_vectors
-        WHERE course_id = %s
+        delete_query1 = f"""
+        DROP TABLE IF EXISTS course_vectors_{sanitized_course_id};
         """
         delete_query2 = """
         DELETE FROM course_configuration
         WHERE course_id = %s
         """
-        cursor.execute(delete_query1, (course_id,))
+        cursor.execute(delete_query1)
         vectors_deleted = cursor.rowcount
         cursor.execute(delete_query2, (course_id,))
         configs_deleted = cursor.rowcount

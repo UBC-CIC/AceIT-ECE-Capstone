@@ -6,8 +6,6 @@ from datetime import datetime
 import uuid
 import psycopg2.extras
 
-s3_client = boto3.client('s3')
-
 def lambda_handler(event, context):
     
     # Extract and validate headers
@@ -67,7 +65,7 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-d2z9wnhmh5ka.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-k9zj5cjjmn4b.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
@@ -89,7 +87,7 @@ def lambda_handler(event, context):
     }
 
 def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-KUVYnbkG81km"
+    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
     region_name = "us-west-2"
 
     # Create a Secrets Manager client
@@ -116,6 +114,7 @@ def create_table_if_not_exists(DB_CONFIG):
     Ensure the embeddings table exists in the database.
     """
     connection = None
+    
     try:
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
@@ -126,7 +125,8 @@ def create_table_if_not_exists(DB_CONFIG):
             student_access_enabled BOOLEAN NOT NULL,             -- Whether student access is enabled
             selected_supported_questions JSONB NOT NULL,         -- Supported questions as JSON
             selected_included_course_content JSONB NOT NULL,     -- Included content as JSON
-            custom_response_format TEXT                          -- Instruction for LLM
+            custom_response_format TEXT,                          -- Instruction for LLM
+            last_updated_time TIMESTAMP DEFAULT '1970-01-01 00:00:00'
         );
         """
         cursor.execute(create_course_config_query)

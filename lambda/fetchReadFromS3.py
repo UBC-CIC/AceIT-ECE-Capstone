@@ -9,6 +9,7 @@ import docx
 from bs4 import BeautifulSoup
 import psycopg2
 from datetime import datetime
+import psycopg2.extras
 
 s3_client = boto3.client("s3")
 bedrock = boto3.client("bedrock-runtime",
@@ -16,11 +17,23 @@ bedrock = boto3.client("bedrock-runtime",
 
 def lambda_handler(event, context):
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=20000,
+        chunk_size=500,
         chunk_overlap=100
     )
 
-    course_id = "76cd9469-45cb-45a6-9737-aa1df4b4335d"
+    params = event.get("queryStringParameters", {})
+    course_id = params.get("course")
+
+    if not course_id:
+        return {
+            "statusCode": 400,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+            },
+            "body": json.dumps({"error": "Missing required fields: 'course' is required"})
+        }
 
     secret = get_secret()
     credentials = json.loads(secret)
@@ -28,13 +41,13 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-d2z9wnhmh5ka.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-k9zj5cjjmn4b.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
         "password": password,
     }
-    ret = create_table_if_not_exists(DB_CONFIG)
+    ret = create_table_if_not_exists(DB_CONFIG, course_id)
 
     # 1. Determine the S3 bucket. Could be from env or event.
     bucket_name = event.get("bucket_name", "bucketfortextextract")
@@ -78,7 +91,10 @@ def lambda_handler(event, context):
         for chunk in results[key]:
             chunk_embeddings = generate_embeddings(chunk)  # Assuming `generate_embeddings` calls your embedding model
             document_embeddings.append(chunk_embeddings)
-            retdb = store_embeddings(key, chunk_embeddings, course_id, DB_CONFIG)
+            # response = s3_client.head_object(Bucket=bucket_name, Key=s3_key)
+            # source_url = response["Metadata"].get("source-url", "Unknown source")
+            source_url = "Unknown source"
+            retdb = store_embeddings(key, chunk_embeddings, course_id, DB_CONFIG, source_url, chunk)
         embeddings.append({key: document_embeddings})
 
     # 4. Return the results
@@ -108,6 +124,7 @@ def read_pdf(text_splitter, local_path):
 
 def generate_embeddings(chunk):
     model_id = "amazon.titan-embed-text-v2:0"  # Or whatever the correct model ID
+    # model_id = "mistral.mistral-large-2407-v1:0"
     accept = "application/json"
     content_type = "application/json"
 
@@ -161,7 +178,7 @@ def read_as_plain_text(text_splitter, path):
         return chunks
 
 def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-KUVYnbkG81km"
+    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
     region_name = "us-west-2"
 
     # Create a Secrets Manager client
@@ -175,7 +192,7 @@ def get_secret():
         get_secret_value_response = client.get_secret_value(
             SecretId=secret_name
         )
-    except ClientError as e:
+    except Exception as e:
         # For a list of exceptions thrown, see
         # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
         raise e
@@ -184,62 +201,67 @@ def get_secret():
     return secret
 
 
-def store_embeddings(document_name, embeddings, course_id, DB_CONFIG):
+def store_embeddings(document_name, embeddings, course_id, DB_CONFIG, source_url, document_content):
     """
     Store embeddings into the PostgreSQL database.
     """
     connection = None
+    sanitized_course_id = course_id.replace("-", "_")  # Replace hyphens with underscores
     try:
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        
-        # Updated query to include course_id
-        insert_query = """
-        INSERT INTO course_vectors (course_id, document_name, embeddings, created_at)
-        VALUES (%s, %s, %s, %s)
+
+        # Dynamically construct insertion query
+        insert_query = f"""
+        INSERT INTO course_vectors_{sanitized_course_id} (document_name, embeddings, created_at, sourceURL, document_content)
+        VALUES (%s, %s, %s, %s, %s);
         """
-        cursor.execute(insert_query, (str(course_id), document_name, embeddings, datetime.now()))
-        
+        cursor.execute(insert_query, (document_name, embeddings, datetime.now(), source_url, document_content))
+
         # Commit the transaction
         connection.commit()
         cursor.close()
         print("SQL SUCCESS")
-        return "storeSuccess"
+        return "Embedding stored successfully"
     except Exception as e:
         print(f"Error inserting embeddings: {e}")
+        return "Error storing embeddings"
     finally:
         if connection:
             connection.close()
 
 
 
-def create_table_if_not_exists(DB_CONFIG):
+def create_table_if_not_exists(DB_CONFIG, course_id):
     """
-    Ensure the embeddings table exists in the database.
+    Dynamically create a table for the given course ID if it doesn't exist.
     """
     connection = None
+    sanitized_course_id = course_id.replace("-", "_")  # Replace hyphens with underscores
     try:
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        
-        create_embeddings_query = """
+
+        # Dynamically construct table creation query
+        create_embeddings_query = f"""
         CREATE EXTENSION IF NOT EXISTS vector;
-        CREATE TABLE IF NOT EXISTS course_vectors (
+        CREATE TABLE IF NOT EXISTS course_vectors_{sanitized_course_id} (
             id SERIAL PRIMARY KEY,
-            course_id UUID REFERENCES course_configuration(course_id) ON DELETE CASCADE,
             document_name TEXT NOT NULL,
             embeddings VECTOR(1024),
-            created_at TIMESTAMP DEFAULT NOW()
+            created_at TIMESTAMP DEFAULT NOW(),
+            sourceURL TEXT DEFAULT 'https://www.example.com',
+            document_content TEXT
         );
         """
-
         cursor.execute(create_embeddings_query)
         connection.commit()
         cursor.close()
-        return "DBSuccess"
+        return "Table created or already exists"
     except Exception as e:
         print(f"Error creating table: {e}")
+        return "Error creating table"
     finally:
         if connection:
             connection.close()
