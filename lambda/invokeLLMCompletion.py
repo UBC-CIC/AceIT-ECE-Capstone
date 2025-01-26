@@ -2,7 +2,7 @@ import json
 import boto3
 import psycopg2
 from psycopg2.extras import Json
-
+from utils.get_rds_secret import get_secret
 
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', 'us-west-2') 
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
         password = credentials['password']
         # Database connection parameters
         DB_CONFIG = {
-            "host": "privaceitececapstonemainstack-t4grdsdb098395df-k9zj5cjjmn4b.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+            "host": "privaceitececapstonemainstack-t4grdsdb098395df-qli4kax6xfly.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
             "port": 5432,
             "dbname": "postgres",
             "user": username,
@@ -81,31 +81,6 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": f"An unexpected error occurred: {str(e)}"})
         }
-
-
-def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
-    region_name = "us-west-2"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except Exception as e:
-        # For a list of exceptions thrown, see
-        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-        raise e
-
-    secret = get_secret_value_response['SecretString']
-    return secret
-
 
 def generate_embeddings(text):
     """Generates embeddings for the input text using Bedrock."""

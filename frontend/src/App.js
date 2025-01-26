@@ -14,7 +14,7 @@ function App() {
     try {
       // Replace this URL with your actual Lambda function URL
       // const lambdaUrl = "https://zmv8ad1dmk.execute-api.us-west-2.amazonaws.com/newstage";
-      const fetchReadS3lambdaUrl = "https://m4gqxf0odb.execute-api.us-west-2.amazonaws.com/prod/api/llm/content/canvas"
+      const fetchReadS3lambdaUrl = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/content/canvas"
 
       const response = await fetch(fetchReadS3lambdaUrl, {
         method: 'GET', // Change this method if your Lambda expects a POST request
@@ -39,7 +39,7 @@ function App() {
     setAnalysisError('');
     try {
       // Replace this URL with your actual Lambda function URL
-      const recentCourseDataAnalysisUrl = "https://m4gqxf0odb.execute-api.us-west-2.amazonaws.com/prod/api/llm/analysis/data";
+      const recentCourseDataAnalysisUrl = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/analysis/data";
       const courseId = "course-id-123"; // Replace with actual course ID
       const period = "WEEK"; // Replace with actual period, e.g., WEEK, MONTH, or TERM
 

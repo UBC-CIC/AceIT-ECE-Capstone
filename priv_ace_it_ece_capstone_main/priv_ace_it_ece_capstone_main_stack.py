@@ -8,6 +8,8 @@ from aws_cdk import (
     aws_iam as iam,
     aws_rds as rds,
     aws_secretsmanager as secretsmanager,
+    RemovalPolicy,
+    aws_dynamodb as dynamodb,
     CfnOutput # Import CfnOutput
 )
 from constructs import Construct
@@ -76,6 +78,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         my_rds = rds.DatabaseInstance(
             self,
             "t4gRDSdb",
+            # database_name="t4gRDSdb",
             engine=rds.DatabaseInstanceEngine.postgres(
                 version=rds.PostgresEngineVersion.VER_16_3
             ),
@@ -83,9 +86,55 @@ class PrivAceItEceCapstoneMainStack(Stack):
             vpc=my_vpc,
             security_groups=[my_rds_sg],
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS),
-            credentials=rds.Credentials.from_secret(db_secret)
+            credentials=rds.Credentials.from_secret(db_secret),
+            removal_policy=RemovalPolicy.DESTROY  # Allow recreation of the resource
         )
 
+        # Create the Messages Table
+        messages_table = dynamodb.Table(
+            self, "MessagesTable",
+            table_name="Messages",  # Custom name for the table
+            partition_key=dynamodb.Attribute(
+                name="message_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY  # Change to RETAIN for production
+        )
+        messages_table.add_global_secondary_index(
+            index_name="CourseIdIndex",
+            partition_key=dynamodb.Attribute(
+                name="course_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="timestamp",
+                type=dynamodb.AttributeType.STRING
+            )
+        )
+
+        # Create the Conversations Table
+        conversations_table = dynamodb.Table(
+            self, "ConversationsTable",
+            table_name="Conversations",  # Custom name for the table
+            partition_key=dynamodb.Attribute(
+                name="conversation_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY  # Change to RETAIN for production
+        )
+        conversations_table.add_global_secondary_index(
+            index_name="CourseStudentIndex",
+            partition_key=dynamodb.Attribute(
+                name="course_id",
+                type=dynamodb.AttributeType.STRING
+            ),
+            sort_key=dynamodb.Attribute(
+                name="student_id",
+                type=dynamodb.AttributeType.STRING
+            )
+        )
 
         # Set up layers for lambda functions
         pymupdf_layer = _lambda.LayerVersion(
@@ -123,11 +172,19 @@ class PrivAceItEceCapstoneMainStack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
         )
 
+        requests_layer = _lambda.LayerVersion(
+            self, 
+            "RequestsLayer",
+            code=_lambda.Code.from_asset("layers/requests-layer.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
         # Define the Lambda function resources
         fetchReadFromS3 = _lambda.Function(
             self,
             "FetchReadFromS3Function",
             runtime=_lambda.Runtime.PYTHON_3_9,  # Use a Python runtime (e.g., Python 3.9)
+            function_name="FetchReadFromS3Function",
             code=_lambda.Code.from_asset("lambda"),  # Points to the 'lambda' directory
             handler="fetchReadFromS3.lambda_handler",  # Points to the 'hello.py' file and 'handler' function
             layers=[langchain_layer, pymupdf_layer, other_text_related_layer, boto3_layer, psycopg_layer],
@@ -152,6 +209,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="topQuestions.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         top_materials_lambda = _lambda.Function(
@@ -160,6 +223,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="topMaterials.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         student_engagement_lambda = _lambda.Function(
@@ -168,6 +237,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="studentEngagement.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         get_course_configuration_lambda = _lambda.Function(
@@ -204,6 +279,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="studentSendMsg.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         get_user_info_lambda = _lambda.Function(
@@ -283,9 +364,16 @@ class PrivAceItEceCapstoneMainStack(Stack):
         refresh_content_lambda = _lambda.Function(
             self,
             "RefreshContentLambda",
+            function_name="RefreshContentLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="refreshContent.lambda_handler",
+            layers=[boto3_layer, psycopg_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         delete_all_course_data_lambda = _lambda.Function(
@@ -305,9 +393,16 @@ class PrivAceItEceCapstoneMainStack(Stack):
         refresh_all_existing_courses_lambda = _lambda.Function(
             self,
             "RefreshAllCoursesLambda",
+            function_name="RefreshAllCoursesLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="refreshAllCourses.lambda_handler",
+            layers=[boto3_layer, psycopg_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         generate_llm_prompt_lambda = _lambda.Function(
@@ -324,6 +419,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="invokeLLMCompletion.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         generate_llm_analysis_lambda = _lambda.Function(
@@ -340,6 +441,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),  # Points to the lambda directory
             handler="getPastSessions.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         restore_past_session_lambda = _lambda.Function(
@@ -348,9 +455,13 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),  # Points to the lambda directory
             handler="restorePastSession.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
-
-
 
         # Define the shared IAM role
         shared_policy_for_lambda = iam.Policy(
@@ -382,6 +493,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(delete_vector_lambda.role)
         shared_policy_for_lambda.attach_to_role(add_vector_lambda.role)
         shared_policy_for_lambda.attach_to_role(delete_all_course_data_lambda.role)
+        shared_policy_for_lambda.attach_to_role(refresh_content_lambda.role)
+        shared_policy_for_lambda.attach_to_role(refresh_all_existing_courses_lambda.role)
+        shared_policy_for_lambda.attach_to_role(invoke_llm_completion_lambda.role)
+        shared_policy_for_lambda.attach_to_role(student_send_msg_lambda.role)
+        shared_policy_for_lambda.attach_to_role(get_past_sessions_lambda.role)
+        shared_policy_for_lambda.attach_to_role(restore_past_session_lambda.role)
+        shared_policy_for_lambda.attach_to_role(top_questions_lambda.role)
+        shared_policy_for_lambda.attach_to_role(top_materials_lambda.role)
+        shared_policy_for_lambda.attach_to_role(student_engagement_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -407,8 +527,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
         user_resource = general_resource.add_resource("user")
         user_courses_resource = user_resource.add_resource("courses")
         student_resource = ui_resource.add_resource("student")
-        session_resource = student_resource.add_resource("session")
-        specific_session_resource = session_resource.add_resource("{sessionId}")
+        session_resource = student_resource.add_resource("sessions")
+        specific_session_resource = student_resource.add_resource("session")
         student_send_msg_resource = student_resource.add_resource("send-message")
         instructor_resource = ui_resource.add_resource("instructor")
         instructor_config_resource = instructor_resource.add_resource("config")
@@ -431,7 +551,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # POST /api/ui/general/log-in
         # TODO: Figure out how log in works
 
-        # GET /api/ui/student/session
+        # GET /api/ui/student/sessions
         session_resource.add_method(
             "GET",
             apigateway.LambdaIntegration(get_past_sessions_lambda),
@@ -973,7 +1093,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         # GET /api/llm/completion
         llm_completion_resource.add_method(
-            "GET",
+            "POST",
             apigateway.LambdaIntegration(invoke_llm_completion_lambda),
             request_parameters={
                 "method.request.header.Authorization": True,

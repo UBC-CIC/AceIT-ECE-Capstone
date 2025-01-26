@@ -5,6 +5,8 @@ import psycopg2
 from datetime import datetime
 import uuid
 import psycopg2.extras
+from utils.create_course_vectors_tables import create_table_if_not_exists
+from utils.get_rds_secret import get_secret
 
 bedrock = boto3.client("bedrock-runtime",
                        region_name = 'us-west-2')
@@ -33,7 +35,7 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-k9zj5cjjmn4b.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-qli4kax6xfly.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
@@ -53,62 +55,6 @@ def lambda_handler(event, context):
         },
         'body': json.dumps({"db": ret1, "get_vectors": ret2})
     }
-
-def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
-    region_name = "us-west-2"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except Exception as e:
-        # For a list of exceptions thrown, see
-        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-        raise e
-
-    secret = get_secret_value_response['SecretString']
-    return secret
-
-def create_table_if_not_exists(DB_CONFIG, course_id):
-    """
-    Dynamically create a table for the given course ID if it doesn't exist.
-    """
-    connection = None
-    sanitized_course_id = course_id.replace("-", "_")  # Replace hyphens with underscores
-    try:
-        connection = psycopg2.connect(**DB_CONFIG)
-        cursor = connection.cursor()
-
-        # Dynamically construct table creation query
-        create_embeddings_query = f"""
-        CREATE EXTENSION IF NOT EXISTS vector;
-        CREATE TABLE IF NOT EXISTS course_vectors_{sanitized_course_id} (
-            id SERIAL PRIMARY KEY,
-            document_name TEXT NOT NULL,
-            embeddings VECTOR(1024),
-            created_at TIMESTAMP DEFAULT NOW(),
-            sourceURL TEXT DEFAULT 'https://www.example.com',
-            document_content TEXT
-        );
-        """
-        cursor.execute(create_embeddings_query)
-        connection.commit()
-        cursor.close()
-        return "Table created or already exists"
-    except Exception as e:
-        print(f"Error creating table: {e}")
-        return "Error creating table"
-    finally:
-        if connection:
-            connection.close()
 
 def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
     # Connect to the PostgreSQL database
