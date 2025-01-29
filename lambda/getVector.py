@@ -35,7 +35,7 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-qli4kax6xfly.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-peocbczfvpie.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,

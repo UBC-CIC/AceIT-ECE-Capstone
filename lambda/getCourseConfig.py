@@ -25,17 +25,17 @@ def lambda_handler(event, context):
         }
     
     # Extract and validate headers
-    auth_token = event.get("headers", {}).get("Authorization")
-    if not auth_token:
-        return {
-            "statusCode": 401,
-            'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            "body": json.dumps({"error": "Missing Authorization header"})
-        }
+    # auth_token = event.get("headers", {}).get("Authorization")
+    # if not auth_token:
+    #     return {
+    #         "statusCode": 401,
+    #         'headers': {
+    #             'Access-Control-Allow-Headers': 'Content-Type',
+    #             'Access-Control-Allow-Origin': '*',
+    #             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+    #         },
+    #         "body": json.dumps({"error": "Missing Authorization header"})
+    #     }
 
     secret = get_secret()
     credentials = json.loads(secret)
@@ -43,7 +43,7 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-qli4kax6xfly.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-peocbczfvpie.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
@@ -72,7 +72,7 @@ def retrieve_course_config(DB_CONFIG, course_id):
         # Query the course configuration
         query = """
         SELECT student_access_enabled, selected_supported_questions, 
-               selected_included_course_content, custom_response_format, last_updated_time
+               selected_included_course_content, custom_response_format, system_prompt, material_last_updated_time
         FROM course_configuration
         WHERE course_id = %s
         """
@@ -88,7 +88,8 @@ def retrieve_course_config(DB_CONFIG, course_id):
             "selectedSupportedQuestions": row[1],
             "selectedIncludedCourseContent": row[2],
             "customResponseFormat": row[3],
-            "lastUpdatedTime": row[4].isoformat()
+            "systemPrompt": row[4],
+            "materialLastUpdatedTime": row[5].isoformat()
         }
 
         # Close database connection

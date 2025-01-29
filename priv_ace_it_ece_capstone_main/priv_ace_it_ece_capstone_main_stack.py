@@ -78,7 +78,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         my_rds = rds.DatabaseInstance(
             self,
             "t4gRDSdb",
-            # database_name="t4gRDSdb",
+            database_name="t4gRDSdb",
             engine=rds.DatabaseInstanceEngine.postgres(
                 version=rds.PostgresEngineVersion.VER_16_3
             ),
@@ -279,7 +279,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="studentSendMsg.lambda_handler",
-            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
@@ -411,6 +411,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="generateLLMPrompt.lambda_handler",
+            layers=[boto3_layer, psycopg_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         invoke_llm_completion_lambda = _lambda.Function(
@@ -502,6 +508,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(top_questions_lambda.role)
         shared_policy_for_lambda.attach_to_role(top_materials_lambda.role)
         shared_policy_for_lambda.attach_to_role(student_engagement_lambda.role)
+        shared_policy_for_lambda.attach_to_role(generate_llm_prompt_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -1063,9 +1070,9 @@ class PrivAceItEceCapstoneMainStack(Stack):
             allow_methods=["GET"],
         )
 
-        # GET /api/llm/chat/generate
+        # POST /api/llm/chat/generate
         gen_chat_resource.add_method(
-            "GET",
+            "POST",
             apigateway.LambdaIntegration(generate_llm_prompt_lambda),
             request_parameters={
                 "method.request.header.Authorization": True,

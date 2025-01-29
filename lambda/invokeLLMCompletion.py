@@ -15,6 +15,7 @@ def lambda_handler(event, context):
 
         # Validate required fields
         message = body.get("message")
+        print("Message got: ", message)
         if not message:
             return {
                 "statusCode": 400,
@@ -28,7 +29,8 @@ def lambda_handler(event, context):
 
         # Optional fields
         context = body.get("context", "")
-        sources = body.get("sources", [])
+        print("context:", context)
+        # sources = body.get("sources", [])
 
         secret = get_secret()
         credentials = json.loads(secret)
@@ -36,7 +38,7 @@ def lambda_handler(event, context):
         password = credentials['password']
         # Database connection parameters
         DB_CONFIG = {
-            "host": "privaceitececapstonemainstack-t4grdsdb098395df-qli4kax6xfly.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+            "host": "privaceitececapstonemainstack-t4grdsdb098395df-peocbczfvpie.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
             "port": 5432,
             "dbname": "postgres",
             "user": username,
@@ -47,7 +49,7 @@ def lambda_handler(event, context):
         query_embedding = generate_embeddings(message)
 
         # Retrieve relevant context from the database based on embeddings
-        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 10)
+        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 6)
         print("relevant_docs:", relevant_docs)
         print("document names:", relevant_docs[0]["documentName"])
 
@@ -123,7 +125,7 @@ def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
                 "documentName": row[0],
                 "sourceUrl": row[1],  # Add source_url to the result
                 "documentContent": row[2],
-                "similarity": row[3]
+                # "similarity": row[3]
             }
             for row in rows
         ]
@@ -138,15 +140,18 @@ def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
 
 def compose_input(message, context_data, relevant_docs):
     """Combines the message, context, and sources for the LLM."""
+    complete_msg = []
+    if context_data:
+        for past_conv in context_data:
+            complete_msg.append(past_conv)
     context = "\n".join([f"Document: {doc['documentName']}\n{doc['documentContent']}" for doc in relevant_docs])
-    prompt = f"Given the following documents, Answer the query. Documents:\n{context}\nQuery: {message}\nAnswer:"
+    prompt = f"Given the following documents, Answer the query. Documents:\n{context}\nQuery: {message}\n"
+    complete_msg.append({
+        'role': 'user', 
+                'content': prompt,
+    })
     body=json.dumps({
-            'messages': [ 
-                { 
-                    'role': 'user', 
-                    'content': prompt,
-                }
-             ], 
+            'messages': complete_msg
          })
 
     return body

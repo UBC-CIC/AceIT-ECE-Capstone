@@ -51,18 +51,18 @@ def lambda_handler(event, context):
         messages = response.get("Items", [])
         questions_asked = 0
         unique_students = set()
-        sessions = set()
+        conversations = set()
 
         for message in messages:
             if message.get("msg_source") == "STUDENT":
                 questions_asked += 1
                 unique_students.add(message.get("student_id"))
-                sessions.add(message.get("conversation_id"))
+                conversations.add(message.get("conversation_id"))
 
         # Prepare the response
         engagement_stats = {
             "questionsAsked": questions_asked,
-            "studentSessions": len(sessions),
+            "studentSessions": len(conversations),
             "uniqueStudents": len(unique_students)
         }
 

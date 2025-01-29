@@ -42,7 +42,7 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-qli4kax6xfly.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-peocbczfvpie.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
@@ -90,7 +90,7 @@ def update_course_last_update_time(course_id, DB_CONFIG):
     cursor = connection.cursor()
     update_query = """
     UPDATE course_configuration
-    SET last_updated_time = NOW()
+    SET material_last_updated_time = NOW()
     WHERE course_id = %s;
     """
     cursor.execute(update_query, (course_id,))
