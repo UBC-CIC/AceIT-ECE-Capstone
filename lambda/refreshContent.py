@@ -23,22 +23,22 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Course ID is required"})
         }
-    text_format = {""}
+    text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
     files = get_files(course_id)
     for file in files:
-        if file["locked"] == False and file["hidden"] == False and file["mime_class"] in text_format: # TODO: add more checks if needed
-        # TODO Store course documents into S3 buckets
-        # s3_client.upload_file(
-        #     local_file_path,
-        #     bucket_name,
-        #     s3_key,
-        #     ExtraArgs={
-        #         "Metadata": {
-        #             "source-url": canvas_file_metadata["url"]  # Source URL from Canvas
-        #         }
-        #     }
-        # )
-        pass
+        if file["locked"] == False and file["hidden"] == False and get_extension(file["display_name"]) in text_format: # TODO: add more checks if needed
+            # TODO Store course documents into S3 buckets
+            # s3_client.upload_file(
+            #     local_file_path,
+            #     bucket_name,
+            #     s3_key,
+            #     ExtraArgs={
+            #         "Metadata": {
+            #             "source-url": canvas_file_metadata["url"]  # Source URL from Canvas
+            #         }
+            #     }
+            # )
+            pass
 
     secret = utils.get_rds_secret.get_secret()
     credentials = json.loads(secret)
@@ -101,6 +101,11 @@ def get_files(course_id):
     url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
     response = requests.get(url, headers=HEADERS)
     return response.json()
+
+def get_extension(file_name):
+    parts = file_name.split(".")
+    extension = parts[-1]
+    return extension
 
 def update_course_last_update_time(course_id, DB_CONFIG):
     connection = psycopg2.connect(**DB_CONFIG)
