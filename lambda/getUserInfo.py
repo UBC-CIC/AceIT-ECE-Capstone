@@ -51,5 +51,5 @@ def get_user(token, course_id, user_id):
     HEADERS = {"Authorization": f"Bearer {token}"}
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/users/{user_id}"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, verify=False)
     return response.json()

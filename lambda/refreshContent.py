@@ -99,7 +99,7 @@ def get_files(course_id):
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, verify=False)
     return response.json()
 
 def get_extension(file_name):

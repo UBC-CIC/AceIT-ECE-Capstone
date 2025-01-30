@@ -31,7 +31,7 @@ def lambda_handler(event, context):
             "name": course["name"] # TODO: course may have nickname
         }
 
-        # TODO: heck course availability in db
+        # TODO: check course availability in db
 
 
         # add into its corresponding list
@@ -58,5 +58,5 @@ def get_courses(token, user_id):
     HEADERS = {"Authorization": f"Bearer {token}"}
 
     url = f"{BASE_URL}/api/v1/users/{user_id}/courses"
-    response = requests.get(url, headers=HEADERS)
+    response = requests.get(url, headers=HEADERS, verify=False)
     return response.json()
