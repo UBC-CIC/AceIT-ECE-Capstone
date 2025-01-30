@@ -10,6 +10,9 @@ from aws_cdk import (
     aws_secretsmanager as secretsmanager,
     RemovalPolicy,
     aws_dynamodb as dynamodb,
+    aws_events as events,
+    aws_events_targets as targets,
+    Duration,
     CfnOutput # Import CfnOutput
 )
 from constructs import Construct
@@ -439,6 +442,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="generateLLMAnalysis.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         get_past_sessions_lambda = _lambda.Function(
@@ -509,6 +518,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(top_materials_lambda.role)
         shared_policy_for_lambda.attach_to_role(student_engagement_lambda.role)
         shared_policy_for_lambda.attach_to_role(generate_llm_prompt_lambda.role)
+        shared_policy_for_lambda.attach_to_role(generate_llm_analysis_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -1153,3 +1163,13 @@ class PrivAceItEceCapstoneMainStack(Stack):
             allow_headers=["Authorization", "Content-Type"],
             allow_methods=["GET"],
         )
+
+
+        # Create an EventBridge rule that runs every 24 hours
+        rule = events.Rule(
+            self, "DailyTrigger",
+            schedule=events.Schedule.rate(Duration.hours(24))  # Run every 24 hours
+        )
+
+        # Set the Lambda as the target for the rule
+        rule.add_target(targets.LambdaFunction(refresh_all_existing_courses_lambda))

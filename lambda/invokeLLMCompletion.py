@@ -49,7 +49,7 @@ def lambda_handler(event, context):
         query_embedding = generate_embeddings(message)
 
         # Retrieve relevant context from the database based on embeddings
-        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 6)
+        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 8)
         print("relevant_docs:", relevant_docs)
         print("document names:", relevant_docs[0]["documentName"])
 

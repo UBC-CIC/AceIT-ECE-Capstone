@@ -52,6 +52,8 @@ def lambda_handler(event, context):
                 },
                 "body": json.dumps({"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
             }
+        
+        print("Time threshold calculates successfully")
 
         # Scan Messages table for the course and filter by timestamp and AI source
         response = messages_table.scan(
@@ -63,18 +65,24 @@ def lambda_handler(event, context):
             }
         )
 
+        print("Scan message table: ", response)
 
         # Count the frequency of each material referenced by AI responses
         messages = response.get("Items", [])
-        material_count = {}
+        material_dict = {}
         for message in messages:
             # Use the `msg_source` field to identify materials
-            material = message.get("msg_source", "").strip().lower()
-            if material:
-                material_count[material] = material_count.get(material, 0) + 1
+            msg_source = message.get("msg_source")
+            print("Msg source: ", msg_source)
+            if msg_source and isinstance(msg_source, list):
+                for source in msg_source:
+                    print("source: ", source)
+                    doc_name = source.get("documentName")
+                    material_dict[doc_name] = material_dict.get(doc_name, 0) + 1
+        print("Material dict:", material_dict)
 
         # Sort materials by frequency and get the top N
-        top_materials = sorted(material_count.items(), key=lambda x: x[1], reverse=True)[:num]
+        top_materials = sorted(material_dict.items(), key=lambda x: x[1], reverse=True)[:num]
 
         # Prepare the response
         top_materials_list = [material[0] for material in top_materials]
