@@ -53,7 +53,8 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
-        'body': json.dumps({"db": ret1, "get_vectors": ret2})
+        # 'body': json.dumps({"db": ret1, "get_vectors": ret2})
+        'body': json.dumps(ret2)
     }
 
 def get_course_vector(DB_CONFIG, query, course_id, num_max_results):

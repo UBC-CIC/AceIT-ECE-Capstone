@@ -105,7 +105,8 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
-        "body": json.dumps({"pdf_results": results, "embeddings": embeddings, "db":retdb})
+        # "body": json.dumps({"pdf_results": results, "embeddings": embeddings, "db":retdb})
+        "body": json.dumps(results)
     }
 
 def read_pdf(text_splitter, local_path):

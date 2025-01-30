@@ -60,7 +60,8 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
         # 'body': json.dumps("Returns the current course configuration.")
-        'body': json.dumps({"db create": ret1, "db retrieve": ret2,})
+        # 'body': json.dumps({"db create": ret1, "db retrieve": ret2,})
+        'body': json.dumps(ret2)
     }
 
 def retrieve_course_config(DB_CONFIG, course_id):
