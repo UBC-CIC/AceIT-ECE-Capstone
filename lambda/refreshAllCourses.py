@@ -5,33 +5,22 @@ import psycopg2.extras
 from psycopg2.extras import DictCursor
 import requests  # to make HTTP requests
 import base64
-from utils.get_rds_secret import get_secret
+import utils
+import utils.get_canvas_secret
+import utils.get_rds_secret
 
 s3_client = boto3.client('s3')
 lambda_client = boto3.client("lambda")
 
 def lambda_handler(event, context):
-    secret = get_secret()
-    credentials = json.loads(secret)
-    username = credentials['username']
-    password = credentials['password']
-    # Database connection parameters
-    DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-peocbczfvpie.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
-        "port": 5432,
-        "dbname": "postgres",
-        "user": username,
-        "password": password,
-    }
-
-    courses = get_all_courses(DB_CONFIG)
+    courses = get_all_courses()
     refreshed_courses = []
 
     # Invoke refreshCourse for each course
     for course in courses:
-        invoke_refresh_course(course["course_id"])
-        print(course["course_id"])
-        refreshed_courses.append(course["course_id"])
+        invoke_refresh_course(course["id"])
+        print(course["id"])
+        refreshed_courses.append(course["id"])
 
     response_message = f"Courses: {', '.join(map(str, refreshed_courses))} have been refreshed."
 
@@ -46,28 +35,20 @@ def lambda_handler(event, context):
     }
 
 
-def get_all_courses(DB_CONFIG):
+def get_all_courses():
     """
-    Fetch all courses from the course_configuration table.
+    Fetch all courses from canvas lms.
     """
-    connection = None
-    try:
-        # Connect to the PostgreSQL database
-        connection = psycopg2.connect(**DB_CONFIG)
-        cursor = connection.cursor(cursor_factory=DictCursor)  # Use DictCursor for dictionary-like access
+    secret = utils.get_canvas_secret.get_secret()
+    credentials = json.loads(secret)
+    BASE_URL = credentials['baseURL']
+    TOKEN = credentials['adminAccessToken']
+    HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
-        query = "SELECT course_id FROM course_configuration;"
-        cursor.execute(query)
-        rows = cursor.fetchall()
-
-        # Convert rows to list of dictionaries
-        return [{"course_id": row["course_id"]} for row in rows]
-    except Exception as e:
-        print(f"Error fetching courses: {e}")
-        return []
-    finally:
-        if connection:
-            connection.close()
+    url = f"{BASE_URL}/api/v1/accounts/1/courses"
+    response = requests.get(url, headers=HEADERS)
+    return response.json()
+    
 
 def invoke_refresh_course(course_id):
     # Here we are calling the function as an event, passing the course_id in the Payload as query params or as part of the body depending on your Lambda setup

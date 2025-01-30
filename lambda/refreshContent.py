@@ -3,7 +3,9 @@ import boto3
 import psycopg2.extras
 import psycopg2
 import requests  # to make HTTP requests
-from utils.get_rds_secret import get_secret
+import utils
+import utils.get_canvas_secret
+import utils.get_rds_secret
 
 s3_client = boto3.client('s3')
 
@@ -22,21 +24,22 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Course ID is required"})
         }
     
-    # TODO Fetch Documents from Canvas
-    
-    # TODO Store course documents into S3 buckets
-    # s3_client.upload_file(
-    #     local_file_path,
-    #     bucket_name,
-    #     s3_key,
-    #     ExtraArgs={
-    #         "Metadata": {
-    #             "source-url": canvas_file_metadata["url"]  # Source URL from Canvas
-    #         }
-    #     }
-    # )
+    documents = get_files(course_id)
+    for document in documents:
+        # TODO Store course documents into S3 buckets
+        # s3_client.upload_file(
+        #     local_file_path,
+        #     bucket_name,
+        #     s3_key,
+        #     ExtraArgs={
+        #         "Metadata": {
+        #             "source-url": canvas_file_metadata["url"]  # Source URL from Canvas
+        #         }
+        #     }
+        # )
+        pass
 
-    secret = get_secret()
+    secret = utils.get_rds_secret.get_secret()
     credentials = json.loads(secret)
     username = credentials['username']
     password = credentials['password']
@@ -84,6 +87,19 @@ def lambda_handler(event, context):
         'body': json.dumps({"message": f"Refreshed content for course {course_id}"})
     }
 
+def get_files(course_id):
+    """
+    Fetch all files from canvas lms.
+    """
+    secret = utils.get_canvas_secret.get_secret()
+    credentials = json.loads(secret)
+    BASE_URL = credentials['baseURL']
+    TOKEN = credentials['adminAccessToken']
+    HEADERS = {"Authorization": f"Bearer {TOKEN}"}
+
+    url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
+    response = requests.get(url, headers=HEADERS)
+    return response.json()
 
 def update_course_last_update_time(course_id, DB_CONFIG):
     connection = psycopg2.connect(**DB_CONFIG)
