@@ -18,9 +18,10 @@ def lambda_handler(event, context):
 
     # Invoke refreshCourse for each course
     for course in courses:
-        invoke_refresh_course(course["id"])
-        print(course["id"])
-        refreshed_courses.append(course["id"])
+        if course["is_public"] == True:
+            invoke_refresh_course(course["id"])
+            print(course["id"])
+            refreshed_courses.append(course["id"])
 
     response_message = f"Courses: {', '.join(map(str, refreshed_courses))} have been refreshed."
 

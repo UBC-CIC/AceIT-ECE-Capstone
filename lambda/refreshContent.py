@@ -23,9 +23,10 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Course ID is required"})
         }
-    
-    documents = get_files(course_id)
-    for document in documents:
+    text_format = {""}
+    files = get_files(course_id)
+    for file in files:
+        if file["locked"] == False and file["hidden"] == False and file["mime_class"] in text_format: # TODO: add more checks if needed
         # TODO Store course documents into S3 buckets
         # s3_client.upload_file(
         #     local_file_path,
