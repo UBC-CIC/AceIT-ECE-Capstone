@@ -1,0 +1,195 @@
+import { Message } from "./Message";
+import { SuggestionCard } from "./SuggestionCard";
+import { WelcomePrompt } from "./WelcomePrompt/WelcomePrompt";
+import { LoadingMessage } from "./LoadingMessage";
+import {
+  ChatSectionProps,
+  MessageProps,
+  ConversationSession,
+} from "../../types";
+import { useState, useEffect, useRef } from "react";
+import { sendMessageAPI, restorePastSessionAPI } from "../../api";
+import SendIcon from "../../assets/Send-Icon.svg";
+
+// TODO: Replace in the future with dynamic suggestions from the backend (generated via AI)
+const suggestions: string[] = [
+  "Give me the link to the course syllabus in Canvas",
+  "Give me a summary of the past class",
+  "Review my answers for the upcoming homework",
+  "Generate some practice problems for the last lecture",
+];
+
+export const ChatSection: React.FC<ChatSectionProps> = ({
+  selectedCourse,
+  useDarkStyle,
+  hidePastSessions,
+}) => {
+  const [messageList, setMessageList] = useState<MessageProps[]>([]);
+  const [suggestionList, setSuggestionList] = useState<string[]>(suggestions);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+
+  const messageEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messageList]);
+
+  useEffect(() => {
+    setSuggestionList(suggestions);
+    const messageInput = document.getElementById(
+      "messageInput"
+    ) as HTMLInputElement;
+    if (messageInput) {
+      messageInput.value = "";
+    }
+
+    // Invoke the message API to generate the conversationId and get the initial AI message prompt
+    invokeMessageAPI("");
+  }, [selectedCourse]);
+
+  const handleSuggestionClick = (suggestion: string) => {
+    const messageInput = document.getElementById(
+      "messageInput"
+    ) as HTMLInputElement;
+    if (messageInput) {
+      messageInput.value = suggestion;
+    }
+  };
+
+  const invokeMessageAPI = async (message: string) => {
+    const response = await sendMessageAPI(
+      selectedCourse.id,
+      message,
+      conversationId || undefined
+    );
+    setConversationId(response.conversation_id);
+    return response.messages.map((msg) => ({
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      content: msg.text,
+      isUserMessage: msg.source === "USER",
+    }));
+  };
+
+  const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const messageInput = document.getElementById(
+      "messageInput"
+    ) as HTMLInputElement;
+    if (messageInput && messageInput.value.trim() !== "") {
+      const formattedTime = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const userMessage = {
+        time: formattedTime,
+        content: messageInput.value,
+        isUserMessage: true,
+      };
+      setMessageList([...messageList, userMessage]);
+      messageInput.value = "";
+
+      setIsLoading(true);
+      setSuggestionList([]);
+
+      const aiResponses = await invokeMessageAPI(userMessage.content);
+      setMessageList((prevMessages) => [...prevMessages, ...aiResponses]);
+      setIsLoading(false);
+    }
+  };
+
+  const handleConversationSelect = async (
+    conversation: ConversationSession
+  ) => {
+    const response = await restorePastSessionAPI(conversation.conversation_id);
+    setConversationId(response.conversation_id);
+    const restoredMessages = response.messages.map((msg) => ({
+      time: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      content: msg.text,
+      isUserMessage: msg.source === "USER",
+    }));
+    setMessageList(restoredMessages);
+  };
+
+  return (
+    <div className="h-full flex flex-col chat-section">
+      <div className="flex-1 overflow-y-auto">
+        <div className="flex flex-col w-full max-w-full h-full">
+          <div className="mt-auto">
+            <div className="flex flex-col justify-center items-center w-full max-w-full mt-5">
+              <WelcomePrompt
+                selectedCourse={selectedCourse}
+                hidePastSessions={hidePastSessions}
+                onConversationSelect={handleConversationSelect}
+              />
+            </div>
+            <div style={{ marginTop: "150px" }}></div>
+            {messageList.map((message, index) => (
+              <div key={index} className="mb-4 last:mb-0">
+                <Message {...message} useDarkStyle={useDarkStyle} />
+              </div>
+            ))}
+            <div ref={messageEndRef} />
+            {isLoading && <LoadingMessage />}
+            {suggestionList != null && suggestionList.length > 0 && (
+              <div className="flex flex-col mt-5 w-full text-sm max-w-full">
+                <div className="font-bold text-slate-500 max-w-full">
+                  Suggestions on what to ask
+                </div>
+                <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-indigo-950 max-w-full">
+                  {suggestionList.map((suggestion, index) => (
+                    <SuggestionCard
+                      key={index}
+                      text={suggestion}
+                      onClick={() => handleSuggestionClick(suggestion)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <form
+        className="flex flex-wrap justify-between p-2.5 mt-5 w-full bg-white rounded-lg shadow-[0px_0px_40px_rgba(137,188,255,0.45)] max-md:max-w-full"
+        onSubmit={handleFormSubmit}
+      >
+        <label htmlFor="messageInput" className="sr-only">
+          Ask me anything about your class
+        </label>
+        <input
+          id="messageInput"
+          type="text"
+          className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
+          placeholder="Ask me anything about your class"
+          autoComplete="off"
+        />
+        <button
+          type="submit"
+          disabled={isLoading}
+          className={`flex overflow-hidden gap-2.5 justify-center items-end px-1.5 w-8 h-full ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          <img
+            loading="lazy"
+            src={SendIcon}
+            alt="Send message"
+            className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
+              isLoading ? "opacity-50" : ""
+            }`}
+          />
+        </button>
+      </form>
+    </div>
+  );
+};
