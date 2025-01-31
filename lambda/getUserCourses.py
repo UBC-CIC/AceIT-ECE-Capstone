@@ -2,13 +2,15 @@ import json
 import boto3
 import utils
 import requests
+import psycopg2
+
+import utils.get_rds_secret
 
 s3_client = boto3.client('s3')
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     token  = headers.get("Authorization")
-    id = headers.get("UserID") #TODO: missing this
     if not token:
         return {
             "statusCode": 400,
@@ -20,22 +22,34 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Authorization token is required"})
         }
 
-    courses = get_courses(token, id)
-    availableList = {}
-    unavailableList = {}
-    for course in courses:
-        #construct object
+    courses_as_students = get_student_courses(token)
+    courses_as_instructor = get_instructor_courses(token)
+    availableStudentList = {}
+    availableInstructorList = {}
+    unavailableStudentList = {}
+    for course in courses_as_students:
+        # construct object
         cur_course = {
-            "id": course["uuid"], # TODO: may need id
+            "id": course["uuid"],
             "courseCode": course["course_code"],
-            "name": course["name"] # TODO: course may have nickname
+            "name": course["name"]
         }
-
-        # TODO: check course availability in db
-
-
+        # check course availability in db
+        available = get_availability(course["uuid"])
         # add into its corresponding list
-        # availableList.append(cur_course)
+        if available:
+            availableStudentList.append(cur_course)
+        else:
+            unavailableStudentList.append(cur_course)
+
+    for course in courses_as_instructor:
+        # construct object
+        cur_course = {
+            "id": course["uuid"],
+            "courseCode": course["course_code"],
+            "name": course["name"]
+        }
+        availableInstructorList.append(cur_course)
 
     return {
         'statusCode': 200,
@@ -44,11 +58,14 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
-        'body': json.dumps({"availableCourses": availableList, "unavailableCourses": unavailableList})
+        'body': json.dumps({
+            "availableCoursesAsStudent": availableStudentList, 
+            "availableCoursesAsInstructor": availableInstructorList,
+            "unavailableCoursesAsStudent": unavailableStudentList})
     }
 
 # TODO: error handling
-def get_courses(token, user_id):
+def get_student_courses(token, user_id):
     """
     Fetch all courses for a user from canvas lms.
     """
@@ -57,6 +74,55 @@ def get_courses(token, user_id):
     BASE_URL = credentials['baseURL']
     HEADERS = {"Authorization": f"Bearer {token}"}
 
-    url = f"{BASE_URL}/api/v1/users/{user_id}/courses"
+    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=student"
     response = requests.get(url, headers=HEADERS, verify=False)
     return response.json()
+
+def get_instructor_courses(token, user_id):
+    secret = utils.get_canvas_secret.get_secret()
+    credentials = json.loads(secret)
+    BASE_URL = credentials['baseURL']
+    HEADERS = {"Authorization": f"Bearer {token}"}
+
+    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=teacher"
+    response = requests.get(url, headers=HEADERS, verify=False)
+    return response.json()
+
+def get_availability(course_id):
+    secret = utils.get_rds_secret.get_secret()
+    credentials = json.loads(secret)
+    username = credentials['username']
+    password = credentials['password']
+    # Database connection parameters
+    DB_CONFIG = {
+        "host": "privaceitececapstonemainstack-t4grdsdb098395df-peocbczfvpie.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "port": 5432,
+        "dbname": "postgres",
+        "user": username,
+        "password": password,
+    }
+    try:
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect(**DB_CONFIG)
+        cursor = connection.cursor()
+
+        # Query the course configuration
+        query = """
+        SELECT student_access_enabled
+        FROM course_configuration
+        WHERE course_id = %s
+        """
+        cursor.execute(query, (str(course_id),))  # Convert UUID to string
+        row = cursor.fetchone()
+
+        if not row:
+            return "Course configuration not found"
+
+        # Close database connection
+        cursor.close()
+        connection.close()
+
+        return row[0] 
+    except Exception as e:
+        print(f"Error: {e}")
+        return "Cannot connect to db"
