@@ -5,6 +5,8 @@ import {
   CourseConfiguration,
   CourseContentItem,
   CourseProps,
+  SupportedQuestions,
+  IncludedCourseContent,
   SupportedQuestionItem,
 } from "../../types";
 import toast from "react-hot-toast";
@@ -107,10 +109,13 @@ export const CourseConfigurationSection: React.FC<
   ];
 
   const supportedQuestions: SupportedQuestionItem[] = [
-    { title: "Learning Recommendations (Tips and Suggested Materials)" },
-    { title: "Practice Problem Generation" },
-    { title: "Solution Review / Feedback" },
-    { title: "Problem Explanation" },
+    {
+      title: "Learning Recommendations (Tips and Suggested Materials)",
+      type: "RECOMMENDATIONS",
+    },
+    { title: "Practice Problem Generation", type: "PRACTICE_PROBLEMS" },
+    { title: "Solution Review / Feedback", type: "SOLUTION_REVIEW" },
+    { title: "Problem Explanation", type: "EXPLANATION" },
   ];
 
   return (
@@ -192,13 +197,13 @@ export const CourseConfigurationSection: React.FC<
             <CheckboxItem
               key={item.title}
               title={item.title}
-              checked={selectedQuestions.has(item.title)}
+              checked={selectedQuestions.has(item.type)}
               onChange={() => {
                 const newSelected = new Set(selectedQuestions);
-                if (selectedQuestions.has(item.title)) {
-                  newSelected.delete(item.title);
+                if (selectedQuestions.has(item.type)) {
+                  newSelected.delete(item.type);
                 } else {
-                  newSelected.add(item.title);
+                  newSelected.add(item.type);
                 }
                 setSelectedQuestions(newSelected);
               }}

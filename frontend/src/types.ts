@@ -107,6 +107,7 @@ export interface CourseContentItem {
 
 export interface SupportedQuestionItem {
   title: string;
+  type: SupportedQuestions;
 }
 
 export interface CheckboxItemProps {
