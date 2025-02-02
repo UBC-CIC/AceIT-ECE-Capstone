@@ -4,7 +4,7 @@ import requests
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
-    token  = headers.get("Authorization")
+    token  = headers.get("Authorization", {})
 
     if not token:
         return {

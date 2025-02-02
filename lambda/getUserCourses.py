@@ -6,7 +6,7 @@ import utils.get_rds_secret
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
-    token  = headers.get("Authorization")
+    token  = headers.get("Authorization", {})
     if not token:
         return {
             "statusCode": 400,
@@ -63,7 +63,7 @@ def lambda_handler(event, context):
     }
 
 # TODO: error handling
-def get_student_courses(token, user_id):
+def get_student_courses(token):
     """
     Fetch all courses that user enrolled as a student.
     """
@@ -77,7 +77,7 @@ def get_student_courses(token, user_id):
     return response.json()
 
 # TODO: error handling
-def get_instructor_courses(token, user_id):
+def get_instructor_courses(token):
     """
     Fetch all courses that user enrolled as a instructor.
     """
