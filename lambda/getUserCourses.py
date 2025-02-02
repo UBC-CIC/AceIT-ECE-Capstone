@@ -1,12 +1,8 @@
 import json
-import boto3
 import utils
 import requests
 import psycopg2
-
 import utils.get_rds_secret
-
-s3_client = boto3.client('s3')
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
@@ -29,27 +25,29 @@ def lambda_handler(event, context):
     unavailableStudentList = {}
     for course in courses_as_students:
         # construct object
-        cur_course = {
-            "id": course["uuid"],
-            "courseCode": course["course_code"],
-            "name": course["name"]
-        }
-        # check course availability in db
-        available = get_availability(course["uuid"])
-        # add into its corresponding list
-        if available:
-            availableStudentList.append(cur_course)
-        else:
-            unavailableStudentList.append(cur_course)
+        if course["workflow_state"] == "available":
+            cur_course = {
+                "id": course["uuid"],
+                "courseCode": course["course_code"],
+                "name": course["name"]
+            }
+            # check course availability in db
+            available = get_availability(course["uuid"])
+            # add into its corresponding list
+            if available:
+                availableStudentList.append(cur_course)
+            else:
+                unavailableStudentList.append(cur_course)
 
     for course in courses_as_instructor:
         # construct object
-        cur_course = {
-            "id": course["uuid"],
-            "courseCode": course["course_code"],
-            "name": course["name"]
-        }
-        availableInstructorList.append(cur_course)
+        if course["workflow_state"] == "available":
+            cur_course = {
+                "id": course["uuid"],
+                "courseCode": course["course_code"],
+                "name": course["name"]
+            }
+            availableInstructorList.append(cur_course)
 
     return {
         'statusCode': 200,
@@ -67,7 +65,7 @@ def lambda_handler(event, context):
 # TODO: error handling
 def get_student_courses(token, user_id):
     """
-    Fetch all courses for a user from canvas lms.
+    Fetch all courses that user enrolled as a student.
     """
     secret = utils.get_canvas_secret.get_secret()
     credentials = json.loads(secret)
@@ -78,7 +76,11 @@ def get_student_courses(token, user_id):
     response = requests.get(url, headers=HEADERS, verify=False)
     return response.json()
 
+# TODO: error handling
 def get_instructor_courses(token, user_id):
+    """
+    Fetch all courses that user enrolled as a instructor.
+    """
     secret = utils.get_canvas_secret.get_secret()
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']

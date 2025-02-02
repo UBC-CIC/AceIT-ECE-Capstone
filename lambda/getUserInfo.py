@@ -1,9 +1,6 @@
 import json
-import boto3
 import utils
 import requests
-
-s3_client = boto3.client('s3')
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})

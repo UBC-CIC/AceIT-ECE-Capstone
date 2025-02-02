@@ -18,7 +18,7 @@ def lambda_handler(event, context):
 
     # Invoke refreshCourse for each course
     for course in courses:
-        if course["is_public"] == True:
+        if course["workflow_state"] == "available":
             invoke_refresh_course(course["id"])
             print(course["id"])
             refreshed_courses.append(course["id"])

@@ -296,6 +296,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getUserInfo.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         get_user_courses_lambda = _lambda.Function(
@@ -304,6 +310,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getUserCourses.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         login_lambda = _lambda.Function(
@@ -680,7 +692,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             allow_methods=["GET"],
         )
  
-        # GET /api/ui/general/user
+        # GET /api/ui/general/user/courses
         user_courses_resource.add_method(
             "GET",
             apigateway.LambdaIntegration(get_user_courses_lambda),
