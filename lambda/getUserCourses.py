@@ -2,6 +2,7 @@ import json
 import utils
 import requests
 import psycopg2
+import utils.get_canvas_secret
 import utils.get_rds_secret
 
 def lambda_handler(event, context):

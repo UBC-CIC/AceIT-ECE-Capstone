@@ -2,6 +2,8 @@ import json
 import utils
 import requests
 
+import utils.get_canvas_secret
+
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     token  = headers.get("Authorization", {})
