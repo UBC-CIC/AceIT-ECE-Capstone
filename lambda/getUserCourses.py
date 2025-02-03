@@ -21,9 +21,9 @@ def lambda_handler(event, context):
 
     courses_as_students = get_student_courses(token)
     courses_as_instructor = get_instructor_courses(token)
-    availableStudentList = {}
-    availableInstructorList = {}
-    unavailableStudentList = {}
+    availableStudentList = []
+    availableInstructorList = []
+    unavailableStudentList = []
     for course in courses_as_students:
         # construct object
         if course["workflow_state"] == "available":
