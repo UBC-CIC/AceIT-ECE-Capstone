@@ -11,7 +11,7 @@ s3_client = boto3.client('s3')
 
 def lambda_handler(event, context):
     body = json.loads(event.get("body", "{}"))
-    course_id = body.get("course")  # Read course ID from request body
+    course_id = body.get("course, {}")  # Read course ID from request body
 
     if not course_id:
         return {
@@ -25,6 +25,16 @@ def lambda_handler(event, context):
         }
     text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
     files = get_files(course_id)
+    if files is None:
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Failed to fetch files from Canvas API"})
+        }
     for file in files:
         if file["locked"] == False and file["hidden"] == False and get_extension(file["display_name"]) in text_format: # TODO: add more checks if needed
             # TODO Store course documents into S3 buckets
@@ -99,8 +109,17 @@ def get_files(course_id):
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
-    response = requests.get(url, headers=HEADERS, verify=False)
-    return response.json()
+
+    try:
+        response = requests.get(url, headers=HEADERS, verify=False)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
 
 def get_extension(file_name):
     parts = file_name.split(".")

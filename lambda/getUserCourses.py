@@ -7,6 +7,16 @@ import utils.get_rds_secret
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
+    if not headers:
+        return {
+            "statusCode": 400,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Header is missing"})
+        }
     token  = headers.get("Authorization", {})
     if not token:
         return {
@@ -20,7 +30,28 @@ def lambda_handler(event, context):
         }
 
     courses_as_students = get_student_courses(token)
+    if courses_as_students is None:
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Failed to fetch student courses from Canvas API"})
+        }
     courses_as_instructor = get_instructor_courses(token)
+        
+    if courses_as_instructor is None:
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Failed to fetch instructor courses from Canvas API"})
+        }
     availableStudentList = []
     availableInstructorList = []
     unavailableStudentList = []
@@ -63,7 +94,7 @@ def lambda_handler(event, context):
             "unavailableCoursesAsStudent": unavailableStudentList})
     }
 
-# TODO: error handling
+
 def get_student_courses(token):
     """
     Fetch all courses that user enrolled as a student.
@@ -74,10 +105,18 @@ def get_student_courses(token):
     HEADERS = {"Authorization": f"Bearer {token}"}
 
     url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=student"
-    response = requests.get(url, headers=HEADERS, verify=False)
-    return response.json()
 
-# TODO: error handling
+    try:
+        response = requests.get(url, headers=HEADERS, verify=False)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
+
 def get_instructor_courses(token):
     """
     Fetch all courses that user enrolled as a instructor.
@@ -88,8 +127,17 @@ def get_instructor_courses(token):
     HEADERS = {"Authorization": f"Bearer {token}"}
 
     url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=teacher"
-    response = requests.get(url, headers=HEADERS, verify=False)
-    return response.json()
+
+    try:
+        response = requests.get(url, headers=HEADERS, verify=False)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
 
 def get_availability(course_id):
     secret = utils.get_rds_secret.get_secret()
