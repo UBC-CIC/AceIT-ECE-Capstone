@@ -296,7 +296,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getUserInfo.lambda_handler",
-            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
+            layers=[langchain_layer, boto3_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
@@ -324,6 +324,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="login.lambda_handler",
+            layers=[langchain_layer, boto3_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         logout_lambda = _lambda.Function(
@@ -508,6 +514,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         # "arn:aws:s3:::bucketfortextextract/*",    # Needed for GetObject
                         # "arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0",
                         # "arn:aws:secretsmanager:us-west-2:842676002045:secret:MyRdsSecretF2FB5411-KUVYnbkG81km-9gvCxv"
+                        # "arn:aws:secretsmanager:us-west-2:842676002045:secret:CanvasSecret-81V6ha"
                         "*"
                     ]
                 )
@@ -578,7 +585,38 @@ class PrivAceItEceCapstoneMainStack(Stack):
         llm_completion_resource = llm_resource.add_resource("completion")
 
         # POST /api/ui/general/log-in
-        # TODO: Figure out how log in works
+        session_resource.add_method(
+            "POST",
+            apigateway.LambdaIntegration(login_lambda),
+            request_parameters={
+                "method.request.header.jwt": True,
+            },
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+            ],
+        )
+        session_resource.add_cors_preflight(
+            allow_origins=["*"],
+            allow_headers=["Authorization", "Content-Type"],
+            allow_methods=["POST"],
+        )
 
         # GET /api/ui/student/sessions
         session_resource.add_method(
@@ -684,6 +722,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
                 ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
             ],
         )
         user_resource.add_cors_preflight(
@@ -708,6 +752,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
@@ -1028,6 +1078,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
                 ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
             ],
         )
         refresh_resource.add_cors_preflight(
@@ -1084,7 +1140,14 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
                 ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
             ],
+            
         )
         refresh_all_existing_resource.add_cors_preflight(
             allow_origins=["*"],
