@@ -15,6 +15,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      
+      - name: Clean npm cache and remove node_modules
+        working-directory: ./frontend
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install --force
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -42,10 +49,6 @@ jobs:
 
       - name: Deploy Stack
         run: npx cdk deploy --require-approval never
-
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm install --force
 
       - name: Install TypeScript
         run: npm install -g typescript
