@@ -10,8 +10,8 @@ import utils.get_rds_secret
 s3_client = boto3.client('s3')
 
 def lambda_handler(event, context):
-    body = json.loads(event.get("body", "{}"))
-    course_id = body.get("course, {}")  # Read course ID from request body
+    body = json.loads(event.get("body", {}))
+    course_id = body.get("course", {})  # Read course ID from request body
 
     if not course_id:
         return {
@@ -62,6 +62,11 @@ def lambda_handler(event, context):
         "user": username,
         "password": password,
     }
+
+    # delete this course vector
+    del_response = delete_vectors_by_course(DB_CONFIG, course_id)
+    print("Delete vector response: ", del_response)
+
     url = f"https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/content/canvas?course={course_id}"
     response = requests.get(url)
     print(response.json())  # Log the response if needed
@@ -77,7 +82,7 @@ def lambda_handler(event, context):
         print(f"Parsed payload: {payload_data}")
     else:
         print(f"Error: Received status code {response.status_code} from the API.")
-    # TODO: delete fetched documents
+    # TODO: delete fetched documents in s3
     # List and delete all objects in the course-specific prefix
     # response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     # if "Contents" in response:
@@ -138,3 +143,26 @@ def update_course_last_update_time(course_id, DB_CONFIG):
     connection.commit()
     cursor.close()
     connection.close()
+
+
+def delete_vectors_by_course(DB_CONFIG, course_id):
+    # Connect to the PostgreSQL database
+    try:
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect(**DB_CONFIG)
+        cursor = connection.cursor()
+        sanitized_course_id = course_id.replace("-", "_")
+
+        # Delete query
+        drop_table_query = f"""
+        DROP TABLE IF EXISTS course_vectors_{sanitized_course_id};
+        """
+        cursor.execute(drop_table_query)
+
+        connection.commit()
+        cursor.close()
+        return "Vectors deleted successfully"
+
+    except Exception as e:
+        print(f"Error during deletion: {e}")
+        return "Error deleting vectors"
