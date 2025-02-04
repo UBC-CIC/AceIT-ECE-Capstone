@@ -93,6 +93,32 @@ class PrivAceItEceCapstoneMainStack(Stack):
             removal_policy=RemovalPolicy.DESTROY  # Allow recreation of the resource
         )
 
+        # Security Group for RDS Proxy
+        rds_proxy_sg = ec2.SecurityGroup(
+            self,
+            "RdsProxySG",
+            vpc=my_vpc,
+            description="Security group for RDS Proxy"
+        )
+        rds_proxy_sg.add_ingress_rule(lambda_sg, ec2.Port.tcp(5432), "Allow Lambda access to RDS Proxy")
+        my_rds_sg.add_ingress_rule(rds_proxy_sg, ec2.Port.tcp(5432), "Allow RDS Proxy to access RDS")
+
+        # RDS Proxy
+        rds_proxy = rds.DatabaseProxy(
+            self,
+            "MyRdsProxy",
+            proxy_target=rds.ProxyTarget.from_instance(my_rds),
+            secrets=[db_secret],
+            vpc=my_vpc,
+            security_groups=[rds_proxy_sg],
+            require_tls=True,
+            idle_client_timeout=Duration.minutes(30),
+            debug_logging=False
+        )
+
+        # Update Lambda Security Group to allow outbound to RDS Proxy
+        lambda_sg.add_ingress_rule(rds_proxy_sg, ec2.Port.tcp(5432), "Allow RDS Proxy to access Lambda")
+
         # Create the Messages Table
         messages_table = dynamodb.Table(
             self, "MessagesTable",
