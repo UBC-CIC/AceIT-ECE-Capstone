@@ -47,6 +47,9 @@ jobs:
         working-directory: ./frontend
         run: npm install --force
 
+      - name: Install TypeScript
+        run: npm install -g typescript
+    
       # Step 8: Build Frontend
       - name: Build Frontend
         working-directory: ./frontend
