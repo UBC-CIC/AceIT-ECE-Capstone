@@ -585,7 +585,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         llm_completion_resource = llm_resource.add_resource("completion")
 
         # POST /api/ui/general/log-in
-        session_resource.add_method(
+        login_resource.add_method(
             "POST",
             apigateway.LambdaIntegration(login_lambda),
             request_parameters={
@@ -612,7 +612,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 ),
             ],
         )
-        session_resource.add_cors_preflight(
+        login_resource.add_cors_preflight(
             allow_origins=["*"],
             allow_headers=["Authorization", "Content-Type"],
             allow_methods=["POST"],
