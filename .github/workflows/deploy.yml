@@ -56,8 +56,12 @@ jobs:
       # Step 8: Build Frontend
       - name: Build Frontend
         working-directory: ./frontend
-        run: npm run build
-            if [ ! -d "dist" ]; then echo "Build folder not found!"; exit 1; fi
+        run: |
+          npm run build
+          if [ ! -d "dist" ]; then
+            echo "Build folder not found!"
+            exit 1
+          fi
 
       # Step 9: Deploy Frontend to S3 and CloudFront
       # aws s3 sync ./frontend/build s3://YOUR_FRONTEND_BUCKET_NAME --delete
