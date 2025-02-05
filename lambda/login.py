@@ -1,5 +1,4 @@
 import json
-import boto3
 import utils.get_canvas_secret
 import requests
 
@@ -15,7 +14,7 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Header is missing"})
         }
-    jwt  = headers.get("jwt", {})
+    jwt = headers.get("jwt", {})
     if not jwt:
         return {
             "statusCode": 400,
@@ -26,8 +25,11 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Authorization token is required"})
         }
-    
-    access_token = get_access_token(jwt)
+    local = headers.get("isLocalTesting", {})
+    if not local:
+        local = False
+
+    access_token = get_access_token(jwt, local)
 
     if access_token is None:
         return {
@@ -50,14 +52,19 @@ def lambda_handler(event, context):
         'body': json.dumps(access_token)
     }
 
-
-def get_access_token(jwt):
+def get_access_token(jwt, local):
     secret = utils.get_canvas_secret.get_secret()
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
-    CLIENT_ID = credentials['ltiKeyId']
-    CLIENT_SECRET = credentials['ltiKey']
-    REDIRECT_URI = credentials['redirectURI']
+
+    if not local:
+        CLIENT_ID = credentials['ltiKeyId']
+        CLIENT_SECRET = credentials['ltiKey']
+        REDIRECT_URI = credentials['redirectURI']
+    if local:
+        CLIENT_ID = credentials['localLtiKeyId']
+        CLIENT_SECRET = credentials['localLtiKey']
+        REDIRECT_URI = credentials['localRedirectURI']
 
     url = f"{BASE_URL}/login/oauth2/token"
 
