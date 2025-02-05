@@ -15,6 +15,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      
+      - name: Clean npm cache and remove node_modules
+        working-directory: ./frontend
+        run: |
+          rm -rf node_modules package-lock.json
+          npm cache clean --force
+          npm install --force
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -43,18 +50,22 @@ jobs:
       - name: Deploy Stack
         run: npx cdk deploy --require-approval never
 
-      - name: Install frontend dependencies
-        working-directory: ./frontend
-        run: npm install --force
-
+      - name: Install TypeScript
+        run: npm install -g typescript
+    
       # Step 8: Build Frontend
       - name: Build Frontend
         working-directory: ./frontend
-        run: npm run build
+        run: |
+          npm run build
+          if [ ! -d "dist" ]; then
+            echo "Build folder not found!"
+            exit 1
+          fi
 
       # Step 9: Deploy Frontend to S3 and CloudFront
       # aws s3 sync ./frontend/build s3://YOUR_FRONTEND_BUCKET_NAME --delete
       - name: Deploy Frontend
         run: |
-          aws s3 sync ./frontend/build s3://myfrontendbucket3 --delete
+          aws s3 sync ./frontend/dist s3://myfrontendbucket3 --delete
           aws cloudfront create-invalidation --distribution-id E27NHW8AC9BSDB --paths "/*"

@@ -10,8 +10,8 @@ import utils.get_rds_secret
 s3_client = boto3.client('s3')
 
 def lambda_handler(event, context):
-    body = json.loads(event.get("body", "{}"))
-    course_id = body.get("course")  # Read course ID from request body
+    body = json.loads(event.get("body", {}))
+    course_id = body.get("course", {})  # Read course ID from request body
 
     if not course_id:
         return {
@@ -25,6 +25,16 @@ def lambda_handler(event, context):
         }
     text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
     files = get_files(course_id)
+    if files is None:
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Failed to fetch files from Canvas API"})
+        }
     for file in files:
         if file["locked"] == False and file["hidden"] == False and get_extension(file["display_name"]) in text_format: # TODO: add more checks if needed
             # TODO Store course documents into S3 buckets
@@ -46,12 +56,17 @@ def lambda_handler(event, context):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstack-t4grdsdb098395df-peocbczfvpie.czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "privaceitececapstonemainstackmyrdsproxy2ab0c3cf.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,
         "password": password,
     }
+
+    # delete this course vector
+    del_response = delete_vectors_by_course(DB_CONFIG, course_id)
+    print("Delete vector response: ", del_response)
+
     url = f"https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/content/canvas?course={course_id}"
     response = requests.get(url)
     print(response.json())  # Log the response if needed
@@ -67,7 +82,7 @@ def lambda_handler(event, context):
         print(f"Parsed payload: {payload_data}")
     else:
         print(f"Error: Received status code {response.status_code} from the API.")
-    # TODO: delete fetched documents
+    # TODO: delete fetched documents in s3
     # List and delete all objects in the course-specific prefix
     # response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     # if "Contents" in response:
@@ -99,8 +114,17 @@ def get_files(course_id):
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
-    response = requests.get(url, headers=HEADERS, verify=False)
-    return response.json()
+
+    try:
+        response = requests.get(url, headers=HEADERS, verify=False)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
 
 def get_extension(file_name):
     parts = file_name.split(".")
@@ -119,3 +143,26 @@ def update_course_last_update_time(course_id, DB_CONFIG):
     connection.commit()
     cursor.close()
     connection.close()
+
+
+def delete_vectors_by_course(DB_CONFIG, course_id):
+    # Connect to the PostgreSQL database
+    try:
+        # Connect to the PostgreSQL database
+        connection = psycopg2.connect(**DB_CONFIG)
+        cursor = connection.cursor()
+        sanitized_course_id = course_id.replace("-", "_")
+
+        # Delete query
+        drop_table_query = f"""
+        DROP TABLE IF EXISTS course_vectors_{sanitized_course_id};
+        """
+        cursor.execute(drop_table_query)
+
+        connection.commit()
+        cursor.close()
+        return "Vectors deleted successfully"
+
+    except Exception as e:
+        print(f"Error during deletion: {e}")
+        return "Error deleting vectors"

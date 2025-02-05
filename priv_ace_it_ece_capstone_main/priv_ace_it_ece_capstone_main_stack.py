@@ -93,6 +93,32 @@ class PrivAceItEceCapstoneMainStack(Stack):
             removal_policy=RemovalPolicy.DESTROY  # Allow recreation of the resource
         )
 
+        # Security Group for RDS Proxy
+        rds_proxy_sg = ec2.SecurityGroup(
+            self,
+            "RdsProxySG",
+            vpc=my_vpc,
+            description="Security group for RDS Proxy"
+        )
+        rds_proxy_sg.add_ingress_rule(lambda_sg, ec2.Port.tcp(5432), "Allow Lambda access to RDS Proxy")
+        my_rds_sg.add_ingress_rule(rds_proxy_sg, ec2.Port.tcp(5432), "Allow RDS Proxy to access RDS")
+
+        # RDS Proxy
+        rds_proxy = rds.DatabaseProxy(
+            self,
+            "MyRdsProxy",
+            proxy_target=rds.ProxyTarget.from_instance(my_rds),
+            secrets=[db_secret],
+            vpc=my_vpc,
+            security_groups=[rds_proxy_sg],
+            require_tls=True,
+            idle_client_timeout=Duration.minutes(30),
+            debug_logging=False
+        )
+
+        # Update Lambda Security Group to allow outbound to RDS Proxy
+        lambda_sg.add_ingress_rule(rds_proxy_sg, ec2.Port.tcp(5432), "Allow RDS Proxy to access Lambda")
+
         # Create the Messages Table
         messages_table = dynamodb.Table(
             self, "MessagesTable",
@@ -296,6 +322,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getUserInfo.lambda_handler",
+            layers=[langchain_layer, boto3_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         get_user_courses_lambda = _lambda.Function(
@@ -304,6 +336,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getUserCourses.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         login_lambda = _lambda.Function(
@@ -312,6 +350,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="login.lambda_handler",
+            layers=[langchain_layer, boto3_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         logout_lambda = _lambda.Function(
@@ -496,6 +540,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         # "arn:aws:s3:::bucketfortextextract/*",    # Needed for GetObject
                         # "arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0",
                         # "arn:aws:secretsmanager:us-west-2:842676002045:secret:MyRdsSecretF2FB5411-KUVYnbkG81km-9gvCxv"
+                        # "arn:aws:secretsmanager:us-west-2:842676002045:secret:CanvasSecret-81V6ha"
                         "*"
                     ]
                 )
@@ -566,7 +611,38 @@ class PrivAceItEceCapstoneMainStack(Stack):
         llm_completion_resource = llm_resource.add_resource("completion")
 
         # POST /api/ui/general/log-in
-        # TODO: Figure out how log in works
+        login_resource.add_method(
+            "POST",
+            apigateway.LambdaIntegration(login_lambda),
+            request_parameters={
+                "method.request.header.jwt": True,
+            },
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+            ],
+        )
+        login_resource.add_cors_preflight(
+            allow_origins=["*"],
+            allow_headers=["Authorization", "Content-Type"],
+            allow_methods=["POST"],
+        )
 
         # GET /api/ui/student/sessions
         session_resource.add_method(
@@ -672,6 +748,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
                 ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
             ],
         )
         user_resource.add_cors_preflight(
@@ -680,7 +762,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             allow_methods=["GET"],
         )
  
-        # GET /api/ui/general/user
+        # GET /api/ui/general/user/courses
         user_courses_resource.add_method(
             "GET",
             apigateway.LambdaIntegration(get_user_courses_lambda),
@@ -696,6 +778,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
@@ -1016,6 +1104,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
                 ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
             ],
         )
         refresh_resource.add_cors_preflight(
@@ -1072,7 +1166,14 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
                 ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
             ],
+            
         )
         refresh_all_existing_resource.add_cors_preflight(
             allow_origins=["*"],

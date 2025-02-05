@@ -14,11 +14,22 @@ lambda_client = boto3.client("lambda")
 
 def lambda_handler(event, context):
     courses = get_all_courses()
+    if courses is None:
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Failed to fetch courses from Canvas API"})
+        }
+
     refreshed_courses = []
 
     # Invoke refreshCourse for each course
     for course in courses:
-        if course["is_public"] == True:
+        if course["workflow_state"] == "available":
             invoke_refresh_course(course["id"])
             print(course["id"])
             refreshed_courses.append(course["id"])
@@ -47,8 +58,16 @@ def get_all_courses():
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
     url = f"{BASE_URL}/api/v1/accounts/1/courses"
-    response = requests.get(url, headers=HEADERS, verify=False)
-    return response.json()
+    try:
+        response = requests.get(url, headers=HEADERS, verify=False)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
     
 
 def invoke_refresh_course(course_id):

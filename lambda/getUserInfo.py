@@ -1,14 +1,22 @@
 import json
-import boto3
 import utils
 import requests
 
-s3_client = boto3.client('s3')
+import utils.get_canvas_secret
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
-    token  = headers.get("Authorization")
-
+    if not headers:
+        return {
+            "statusCode": 400,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Header is missing"})
+        }
+    token  = headers.get("Authorization", {})
     if not token:
         return {
             "statusCode": 400,
@@ -21,6 +29,16 @@ def lambda_handler(event, context):
         }
     
     user = get_user(token)
+    if user is None:
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Failed to fetch user info from Canvas API"})
+        }
 
     # construct response
     response = {
@@ -38,7 +56,6 @@ def lambda_handler(event, context):
         'body': json.dumps(response)
     }
 
-# TODO: error handling
 def get_user(token):
     """
     Fetch user info from canvas lms.
@@ -49,5 +66,13 @@ def get_user(token):
     HEADERS = {"Authorization": f"Bearer {token}"}
 
     url = f"{BASE_URL}/api/v1/users/self"
-    response = requests.get(url, headers=HEADERS, verify=False)
-    return response.json()
+    try:
+        response = requests.get(url, headers=HEADERS, verify=False)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None
