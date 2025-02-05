@@ -615,34 +615,40 @@ class PrivAceItEceCapstoneMainStack(Stack):
             "POST",
             apigateway.LambdaIntegration(login_lambda),
             request_parameters={
-                "method.request.header.jwt": True,
+                "method.request.header.jwt": True,  # Allow JWT header in request
             },
             method_responses=[
                 apigateway.MethodResponse(
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,  # Allow Headers
                     },
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
                     },
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
                     },
                 ),
             ],
         )
+
+        # Ensure CORS preflight allows JWT
         login_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
-            allow_methods=["POST"],
+            allow_headers=["Authorization", "Content-Type", "jwt"],  # Added "jwt"
+            allow_methods=["OPTIONS", "POST"],  # Ensure OPTIONS is allowed
         )
+
 
         # GET /api/ui/student/sessions
         session_resource.add_method(
