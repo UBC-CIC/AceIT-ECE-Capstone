@@ -4,8 +4,23 @@ import psycopg2
 from psycopg2.extras import Json
 from utils.get_rds_secret import get_secret
 
+SUPPORTED_LANGUAGES = {
+    "en": "English",
+    "fr-CA": "French",
+    "zh": "Chinese (Simplified)",
+    "ja": "Japanese",
+    "pa": "Punjabi",
+    "es": "Spanish",
+    "ar": "Arabic",
+    "tl": "Tagalog",
+    "de": "German",
+    "it": "Italian",
+    "pt": "Portuguese"
+}
+
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', 'us-west-2') 
+translate_client = boto3.client("translate", region_name="us-west-2")
 
 def lambda_handler(event, context):
     try:
@@ -15,6 +30,7 @@ def lambda_handler(event, context):
 
         # Validate required fields
         message = body.get("message")
+        student_language_pref = body.get("language", "en")
         print("Message got: ", message)
         if not message:
             return {
@@ -59,6 +75,8 @@ def lambda_handler(event, context):
 
         # Call the LLM API to generate a response
         llm_response = call_llm(final_input)
+        # Translate the response if needed
+        translated_response = translate_text(llm_response, student_language_pref)
 
         return {
             "statusCode": 200,
@@ -68,7 +86,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             "body": json.dumps({
-                "response": llm_response,
+                "response": translated_response,
                 "sources": relevant_docs
             })
         }
@@ -184,3 +202,21 @@ def call_llm(input_text):
     except Exception as e:
         print(f"Error generating answer: {e}")
         return "Sorry, there was an error generating an answer."
+    
+
+def translate_text(text, target_language):
+    """Translates text to the student's preferred language using Amazon Translate."""
+    if target_language not in SUPPORTED_LANGUAGES:
+        print(f"Language '{target_language}' not supported. Defaulting to English.")
+        return text  # Return original if the language is unsupported
+
+    try:
+        response = translate_client.translate_text(
+            Text=text,
+            SourceLanguageCode="auto",  # Auto-detect source language
+            TargetLanguageCode=target_language
+        )
+        return response["TranslatedText"]
+    except Exception as e:
+        print(f"Error translating text: {e}")
+        return text  # Return original text if translation fails

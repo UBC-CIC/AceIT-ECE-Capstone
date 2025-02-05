@@ -69,7 +69,7 @@ def lambda_handler(event, context):
             except requests.exceptions.RequestException as e:
                 print(f"Error sending get request to course {course_id}: {e}")
             res_json = response.json()
-            course_config_prompt = res_json.get("db retrieve", {}).get("systemPrompt")
+            course_config_prompt = res_json.get("systemPrompt", {})
             print("Course config prompt: ", course_config_prompt)
             recentCourseRelated_stuff = "Unavailable now"
             course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {studnet_name}, and here are some recent course material: {recentCourseRelated_stuff}. You need to first welcome this student, and provide a summary of the recent course updates."
