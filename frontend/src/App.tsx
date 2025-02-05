@@ -1,6 +1,5 @@
 import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 import "./index.css";
 import { StudyAssistant } from "./StudyAssistant.tsx";
 import { Toaster } from "react-hot-toast";
@@ -8,19 +7,6 @@ import { testAccessToken } from "./test-data.tsx";
 import { handleAuthentication } from "./auth.ts";
 import { setAccessToken } from "./api.ts";
 
-
-export const AuthResponse = () => {
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    handleAuthentication((token) => {
-      setAccessToken(token);
-      navigate("/"); // Redirect to the main app after login
-    });
-  }, []);
-
-  return <p>Processing authentication...</p>;  // Temporary loading message
-};
 
 export const App = () => {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);

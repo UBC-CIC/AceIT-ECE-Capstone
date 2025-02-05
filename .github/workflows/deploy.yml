@@ -52,8 +52,6 @@ jobs:
 
       - name: Install TypeScript
         run: npm install -g typescript
-            npm install react-router-dom
-
     
       # Step 8: Build Frontend
       - name: Build Frontend
