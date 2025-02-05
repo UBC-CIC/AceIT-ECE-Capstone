@@ -72,7 +72,6 @@ def get_access_token(jwt):
                                 "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
                                 "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
                                 "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-                                "https://canvas.instructure.com/auth/userinfo",
                                 "https://canvas.instructure.com/auth/courses.readonly"
                             ])
             }
