@@ -1,33 +1,27 @@
 import { setAccessToken } from "./api.ts";
 
-const clientId = import.meta.env.VITE_REACT_APP_CLIENT_ID;
-const clientSecret = import.meta.env.VITE_REACT_APP_CLIENT_SECRET;
-const redirectUri = import.meta.env.VITE_REACT_APP_HOST_URI;
 const canvasUrl = import.meta.env.VITE_REACT_APP_CANVAS_URL;
-
-let accessToken: string | null = null;
+const clientId = import.meta.env.VITE_REACT_APP_CLIENT_ID;
+const redirectUri = import.meta.env.VITE_REACT_APP_HOST_URI;
+const backendUrl = import.meta.env.VITE_REACT_APP_API_URL;
+const isLocalMode = import.meta.env.VITE_REACT_APP_LOCAL_MODE;
 
 export const redirectToCanvas = () => {
-  window.location.href = `${canvasUrl}/login/oauth2/auth?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&state=aceit&scope=/auth/userinfo`;
+  window.location.href = `${canvasUrl}/login/oauth2/auth?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&state=aceit`;
 };
 
 export const fetchAccessToken = async (code: string) => {
   try {
-    const formData = new FormData();
-    formData.append("grant_type", "authorization_code");
-    formData.append("client_id", clientId);
-    formData.append("client_secret", clientSecret);
-    formData.append("redirect_uri", redirectUri);
-    formData.append("code", code);
-
-    const response = await fetch(`${canvasUrl}/login/oauth2/token`, {
+    const response = await fetch(`${backendUrl}/ui/general/log-in`, {
       method: "POST",
-      body: formData,
+      headers: {
+        jwt: code,
+        isLocalTesting: isLocalMode,
+      },
     });
 
     const data = await response.json();
     localStorage.setItem("access_token", data.access_token);
-    localStorage.setItem("refresh_token", data.refresh_token);
     const expiryTime = new Date(
       new Date().getTime() + data.expires_in * 1000
     ).toString();
@@ -39,17 +33,14 @@ export const fetchAccessToken = async (code: string) => {
   }
 };
 
-export const refreshAccessToken = async (refreshToken: string) => {
+export const refreshAccessToken = async (accessToken: string) => {
   try {
-    const formData = new FormData();
-    formData.append("grant_type", "refresh_token");
-    formData.append("client_id", clientId);
-    formData.append("client_secret", clientSecret);
-    formData.append("refresh_token", refreshToken);
-
-    const response = await fetch(`${canvasUrl}/login/oauth2/token`, {
+    const response = await fetch(`${backendUrl}/ui/general/refresh-token`, {
       method: "POST",
-      body: formData,
+      headers: {
+        access_token: accessToken,
+        isLocalTesting: isLocalMode,
+      },
     });
 
     const data = await response.json();
@@ -90,11 +81,13 @@ export const handleAuthentication = async (
       setAccessTokenState(storedAccessToken);
       setAccessToken(storedAccessToken);
       setupTokenRefreshTimer(storedRefreshToken, expiryTime - currentTime);
+      window.history.replaceState({}, document.title, "/");
     } else {
       refreshAccessToken(storedRefreshToken)
         .then((newToken) => {
           setAccessTokenState(newToken);
           setAccessToken(newToken);
+          window.history.replaceState({}, document.title, "/");
         })
         .catch(redirectToCanvas);
     }
@@ -103,6 +96,7 @@ export const handleAuthentication = async (
       .then((newToken) => {
         setAccessTokenState(newToken);
         setAccessToken(newToken);
+        window.history.replaceState({}, document.title, "/");
       })
       .catch(console.error);
   } else if (error) {
@@ -110,39 +104,11 @@ export const handleAuthentication = async (
   } else {
     redirectToCanvas();
   }
-
-  accessToken = storedAccessToken;
 };
 
-export const logout = async (expireSessions: boolean = false) => {
-  try {
-    const url = new URL(`${canvasUrl}/login/oauth2/token`);
-    if (accessToken) {
-      url.searchParams.append("access_token", accessToken);
-    } else {
-      throw new Error("Access token is null");
-    }
-    if (expireSessions) {
-      url.searchParams.append("expire_sessions", "1");
-    }
-
-    const response = await fetch(url.toString(), {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    const data = await response.json();
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("token_expiry");
-
-    if (data.forward_url) {
-      window.location.href = data.forward_url;
-    }
-  } catch (error) {
-    console.error("Failed to logout:", error);
-    throw error;
-  }
+export const logout = () => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  localStorage.removeItem("token_expiry");
+  window.location.reload();
 };
