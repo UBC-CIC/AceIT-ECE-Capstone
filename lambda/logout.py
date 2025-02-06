@@ -30,7 +30,7 @@ def lambda_handler(event, context):
     if status is None:
         return {
             "statusCode": 500,
-            'headers': {
+            "headers": {
                 'Access-Control-Allow-Headers': 'Content-Type',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
@@ -45,7 +45,6 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
-        'body': json.dumps("User logout successfully")
     }
 
 

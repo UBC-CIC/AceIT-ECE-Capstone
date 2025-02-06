@@ -14,7 +14,7 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Header is missing"})
         }
-    jwt = headers.get("jwt", {})
+    jwt = headers.get("Authorization", {})
     if not jwt:
         return {
             "statusCode": 400,
@@ -29,19 +29,24 @@ def lambda_handler(event, context):
     if not local:
         local = False
 
-    access_token = get_access_token(jwt, local)
+    canvas_response = get_access_token(jwt, local)
 
-    # if access_token is None:
-    #     return {
-    #         "statusCode": 500,
-    #         'headers': {
-    #             'Access-Control-Allow-Headers': '*',
-    #             'Access-Control-Allow-Origin': '*',
-    #             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-    #         },
-    #         "body": json.dumps({"error": "Failed to fetch access_token from Canvas"})
-    #     }
+    if canvas_response is None:
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            },
+            "body": json.dumps({"error": "Failed to fetch access_token from Canvas"})
+        }
     
+    response = {
+        "access_token": canvas_response["access_token"],
+        "refresh_token": canvas_response["refresh_token"]
+    }
+
     return {
         'statusCode': 200,
         'headers': {
@@ -49,7 +54,7 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
-        'body': json.dumps(access_token)
+        'body': json.dumps(response)
     }
 
 def get_access_token(jwt, local):
@@ -89,16 +94,13 @@ def get_access_token(jwt, local):
             }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
-    # try:
-    #     response = requests.post(url, data=data, headers=headers, verify=False)
-    #     response.raise_for_status()
-    #     return response.json()
-    # except requests.exceptions.HTTPError as http_err:
-    #     print(f"HTTP error occurred: {http_err}")
-    #     return None
-    # except requests.exceptions.RequestException as req_err:
-    #     print(f"Request error occurred: {req_err}")
-    #     return None
-
-    response = requests.post(url, data=data, headers=headers, verify=False)
-    return response.json()
+    try:
+        response = requests.post(url, data=data, headers=headers, verify=False)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+        return None
+    except requests.exceptions.RequestException as req_err:
+        print(f"Request error occurred: {req_err}")
+        return None

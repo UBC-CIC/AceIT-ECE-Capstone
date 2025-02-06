@@ -30,9 +30,9 @@ def lambda_handler(event, context):
     if not local:
         local = False
 
-    access_token = refresh_token(refresh_token, local)
+    canvas_response = refresh_token(token, local)
 
-    if access_token is None:
+    if canvas_response is None:
         return {
             "statusCode": 500,
             'headers': {
@@ -43,6 +43,10 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Failed to refresh access_token from Canvas"})
         }
     
+    response = {
+        "access_token": canvas_response["access_token"]
+    }
+    
     return {
         'statusCode': 200,
         'headers': {
@@ -50,7 +54,7 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
-        'body': json.dumps(access_token)
+        'body': json.dumps(response)
     }
 
 def refresh_token(refresh_token, local):
