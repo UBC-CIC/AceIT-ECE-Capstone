@@ -64,6 +64,7 @@ def get_user(token):
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
     HEADERS = {"Authorization": f"Bearer {token}"}
+    print("Token: ", token)
 
     url = f"{BASE_URL}/api/v1/users/self"
     try:

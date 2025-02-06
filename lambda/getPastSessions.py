@@ -39,6 +39,7 @@ def lambda_handler(event, context):
                 "statusCode": 500,
                 "body": json.dumps({"error": "User ID not found"})
             }
+        student_id = str(student_id)
 
         # Parse input from the request query parameters
         query_params = event.get("queryStringParameters", {})
@@ -172,8 +173,11 @@ def get_user_info(auth_token):
     Calls Canvas API to get the user info based on the provided authentication token.
     """
     headers = {
+        "Content-Type": "application/json",
         "Authorization": f"Bearer {auth_token}"
     }
+
+    print("Auth_token: ", auth_token)
 
     try:
         response = requests.get("https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/ui/general/user", headers=headers)
