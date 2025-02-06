@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import psycopg2
 from datetime import datetime
 import psycopg2.extras
+from utils.get_rds_secret import get_secret
 
 s3_client = boto3.client("s3")
 bedrock = boto3.client("bedrock-runtime",
@@ -177,29 +178,6 @@ def read_as_plain_text(text_splitter, path):
         res = f.read()
         chunks = text_splitter.split_text(res)
         return chunks
-
-def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
-    region_name = "us-west-2"
-
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
-    try:
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
-        )
-    except Exception as e:
-        # For a list of exceptions thrown, see
-        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
-        raise e
-
-    secret = get_secret_value_response['SecretString']
-    return secret
 
 
 def store_embeddings(document_name, embeddings, course_id, DB_CONFIG, source_url, document_content):
