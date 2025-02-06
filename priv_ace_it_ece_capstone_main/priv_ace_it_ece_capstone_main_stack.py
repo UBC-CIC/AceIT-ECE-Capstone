@@ -1,5 +1,4 @@
 from aws_cdk import (
-    core as cdk,
     # Duration,
     Stack,
     # aws_sqs as sqs,
@@ -14,6 +13,7 @@ from aws_cdk import (
     aws_events as events,
     aws_events_targets as targets,
     Duration,
+    SecretValue,
     CfnOutput # Import CfnOutput
 )
 from constructs import Construct
@@ -93,7 +93,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             self, 
             "CanvasSecret",
             secret_name="CanvasSecret",
-            secret_string_value=cdk.SecretValue.unsafe_plain_text(json.dumps(canvas_secret_template))
+            secret_string_value=SecretValue.unsafe_plain_text(json.dumps(canvas_secret_template))
         )
 
         my_rds = rds.DatabaseInstance(
