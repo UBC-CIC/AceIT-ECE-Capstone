@@ -14,8 +14,8 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Header is missing"})
         }
-    access_token = headers.get("access_token", {})
-    if not access_token:
+    refresh_token = headers.get("access_token", {})
+    if not refresh_token:
         return {
             "statusCode": 400,
             'headers': {
@@ -23,11 +23,16 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            "body": json.dumps({"error": "Access token is required"})
+            "body": json.dumps({"error": "Refresh token is required"})
         }
+    
+    local = headers.get("isLocalTesting", {})
+    if not local:
+        local = False
 
-    status = log_out(access_token)
-    if status is None:
+    access_token = refresh_token(refresh_token, local)
+
+    if access_token is None:
         return {
             "statusCode": 500,
             'headers': {
@@ -35,7 +40,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            "body": json.dumps({"error": "Failed to delete access_token from Canvas"})
+            "body": json.dumps({"error": "Failed to refresh access_token from Canvas"})
         }
     
     return {
@@ -45,26 +50,36 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
         },
-        'body': json.dumps("User logout successfully")
+        'body': json.dumps(access_token)
     }
 
-
-def log_out(access_token):
+def refresh_token(refresh_token, local):
     secret = utils.get_canvas_secret.get_secret()
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
 
+    if not local:
+        CLIENT_ID = credentials['ltiKeyId']
+        CLIENT_SECRET = credentials['ltiKey']
+        REDIRECT_URI = credentials['redirectURI']
+    if local:
+        CLIENT_ID = credentials['localLtiKeyId']
+        CLIENT_SECRET = credentials['localLtiKey']
+        REDIRECT_URI = credentials['localRedirectURI']
+
     url = f"{BASE_URL}/login/oauth2/token"
 
-    headers = { 
-        "Authorization": f"Bearer {access_token}",
-        "Content-Type": "application/x-www-form-urlencoded"
-        }
-    
-    params = {"expire_sessions": "1"}
+    data = {
+            "client_id": f"{CLIENT_ID}",
+            "client_secret": f"{CLIENT_SECRET}",
+            "grant_type": "refresh_token",
+            "redirect_uri": f"{REDIRECT_URI}",
+            "code": f"{refresh_token}"
+            }
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     try:
-        response = requests.delete(url, headers=headers, params=params, verify=False)
+        response = requests.post(url, data=data, headers=headers, verify=False)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as http_err:

@@ -65,6 +65,16 @@ class PrivAceItEceCapstoneMainStack(Stack):
             "username": "rdsdbadmin",  # Placeholder for the username
             "password": ""   # Placeholder for the password to be generated
         }
+        canvas_secret_template = {
+            "adminAccessToken": "CXekV2e68mxaNx2vB2kWDhAwQ4vXHY63QFXDe6KyePrG7kQMZEaMQ3PxKkrFWfr6",
+            "baseURL": "https://15.157.251.49",
+            "ltiKeyId": "10000000000006",
+            "ltiKey": "C6nfwBv8tP4tPTVk4VKnk42cnwr4CrMUnu3zkttBU6JRWwDL3PWVTGMxMWL26vTc",
+            "redirectURI": "https://d2rs0jk5lfd7j4.cloudfront.net/auth-response",
+            "localLtiKeyId": "10000000000001",
+            "localLtiKey": "CE2T7Pff7nuLrwByQxBcyQZGUAN7WhkJAcTHxNEJM8zAAGVcFv87wMcJY9ZtButX",
+            "localRedirectURI": "http://localhost:5173/auth-response"
+        }
 
         # Create the secret in Secrets Manager for DB credentials
         db_secret = secretsmanager.Secret(
@@ -76,6 +86,13 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 exclude_punctuation=True,  # Optionally exclude punctuation from the generated password
                 password_length=16  # Length of the generated password
             )
+        )
+
+        canvas_secret = secretsmanager.Secret(
+            self, 
+            "CanvasSecret",
+            secret_name="CanvasSecret",
+            secret_string=json.dumps(canvas_secret_template)
         )
 
         my_rds = rds.DatabaseInstance(
@@ -350,7 +367,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="login.lambda_handler",
-            layers=[langchain_layer, boto3_layer, requests_layer],
+            layers=[boto3_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
+        )
+
+        refresh_token_lambda = _lambda.Function(
+            self,
+            "RefreshTokenLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            code=_lambda.Code.from_asset("lambda"),
+            handler="refreshToken.lambda_handler",
+            layers=[boto3_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
@@ -364,6 +395,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="logout.lambda_handler",
+            layers=[boto3_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
         )
 
         get_vector_lambda = _lambda.Function(
@@ -564,6 +601,11 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(student_engagement_lambda.role)
         shared_policy_for_lambda.attach_to_role(generate_llm_prompt_lambda.role)
         shared_policy_for_lambda.attach_to_role(generate_llm_analysis_lambda.role)
+        shared_policy_for_lambda.attach_to_role(get_user_courses_lambda.role)
+        shared_policy_for_lambda.attach_to_role(get_user_info_lambda.role)
+        shared_policy_for_lambda.attach_to_role(login_lambda.role)
+        shared_policy_for_lambda.attach_to_role(logout_lambda.role)
+        shared_policy_for_lambda.attach_to_role(refresh_token_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -585,6 +627,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         ui_resource = api_resource.add_resource("ui")
         general_resource = ui_resource.add_resource("general")
         login_resource = general_resource.add_resource("log-in")
+        refresh_token_resource = general_resource.add_resource("refresh-token")
         logout_resource = general_resource.add_resource("log-out")
         user_resource = general_resource.add_resource("user")
         user_courses_resource = user_resource.add_resource("courses")
@@ -616,6 +659,40 @@ class PrivAceItEceCapstoneMainStack(Stack):
             apigateway.LambdaIntegration(login_lambda),
             request_parameters={
                 "method.request.header.jwt": True,
+            },
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
+            ],
+        )
+        login_resource.add_cors_preflight(
+            allow_origins=["*"],
+            allow_headers=["Authorization", "Content-Type"],
+            allow_methods=["POST"],
+        )
+
+        # POST /api/ui/general/refresh-token
+        refresh_token_resource.add_method(
+            "POST",
+            apigateway.LambdaIntegration(refresh_token_lambda),
+            request_parameters={
+                "method.request.header.access_token": True,
             },
             method_responses=[
                 apigateway.MethodResponse(
