@@ -7,6 +7,7 @@ import { testAccessToken } from "./test-data.tsx";
 import { handleAuthentication } from "./auth.ts";
 import { setAccessToken } from "./api.ts";
 
+
 export const App = () => {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
 
@@ -26,5 +27,6 @@ export const App = () => {
     </div>
   );
 };
+
 
 createRoot(document.getElementById("root")!).render(<App />);

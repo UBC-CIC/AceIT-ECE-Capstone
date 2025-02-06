@@ -69,3 +69,4 @@ jobs:
         run: |
           aws s3 sync ./frontend/dist s3://myfrontendbucket3 --delete
           aws cloudfront create-invalidation --distribution-id E27NHW8AC9BSDB --paths "/*"
+          

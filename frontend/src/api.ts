@@ -19,7 +19,7 @@ export const setAccessToken = (token: string) => {
 
 export const fetchCoursesAPI = async (): Promise<CourseProps[]> => {
   if (!accessToken) throw new Error("Access token is not set");
-  const response = await fetch(`${API_BASE_URL}ui/general/user/courses`, {
+  const response = await fetch(`${API_BASE_URL}/ui/general/user/courses`, {
     headers: {
       Authorization: accessToken,
     },
@@ -48,7 +48,7 @@ export const fetchCoursesAPI = async (): Promise<CourseProps[]> => {
 
 export const fetchUserInfoAPI = async (): Promise<UserProps> => {
   if (!accessToken) throw new Error("Access token is not set");
-  const response = await fetch(`${API_BASE_URL}ui/general/user`, {
+  const response = await fetch(`${API_BASE_URL}/ui/general/user`, {
     headers: {
       Authorization: accessToken,
     },
@@ -63,7 +63,7 @@ export const sendMessageAPI = async (
   conversationId?: string
 ): Promise<{ conversation_id: string; messages: ConversationMessage[] }> => {
   if (!accessToken) throw new Error("Access token is not set");
-  const response = await fetch(`${API_BASE_URL}ui/student/send-message`, {
+  const response = await fetch(`${API_BASE_URL}/ui/student/send-message`, {
     method: "POST",
     headers: {
       Authorization: accessToken,
@@ -79,7 +79,7 @@ export const getPastSessionsForCourseAPI = async (
 ): Promise<ConversationSession[]> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(
-    `${API_BASE_URL}ui/student/sessions?course=${course}`,
+    `${API_BASE_URL}/ui/student/sessions?course=${course}`,
     {
       headers: {
         Authorization: accessToken,
@@ -94,7 +94,7 @@ export const restorePastSessionAPI = async (
 ): Promise<{ conversation_id: string; messages: ConversationMessage[] }> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(
-    `${API_BASE_URL}ui/student/session?conversation=${conversation}`,
+    `${API_BASE_URL}/ui/student/session?conversation=${conversation}`,
     {
       headers: {
         Authorization: accessToken,
@@ -111,7 +111,7 @@ export const getTopQuestionsByPeriodAPI = async (
 ): Promise<string[]> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(
-    `${API_BASE_URL}ui/instructor/analytics/top-questions?course=${course}&num=${num}&period=${period}`,
+    `${API_BASE_URL}/ui/instructor/analytics/top-questions?course=${course}&num=${num}&period=${period}`,
     {
       headers: {
         Authorization: accessToken,
@@ -128,7 +128,7 @@ export const getTopMaterialsByPeriodAPI = async (
 ): Promise<MaterialType[]> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(
-    `${API_BASE_URL}ui/instructor/analytics/top-materials?course=${course}&num=${num}&period=${period}`,
+    `${API_BASE_URL}/ui/instructor/analytics/top-materials?course=${course}&num=${num}&period=${period}`,
     {
       headers: {
         Authorization: accessToken,
@@ -144,7 +144,7 @@ export const getCourseStudentEngagementAPI = async (
 ): Promise<CourseStudentEngagement> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(
-    `${API_BASE_URL}ui/instructor/analytics/engagement?course=${course}&period=${period}`,
+    `${API_BASE_URL}/ui/instructor/analytics/engagement?course=${course}&period=${period}`,
     {
       headers: {
         Authorization: accessToken,
@@ -159,7 +159,7 @@ export const getCourseConfigurationAPI = async (
 ): Promise<CourseConfiguration> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(
-    `${API_BASE_URL}ui/instructor/config?course=${course}`,
+    `${API_BASE_URL}/ui/instructor/config?course=${course}`,
     {
       headers: {
         Authorization: accessToken,
@@ -174,7 +174,7 @@ export const updateCourseConfigurationAPI = async (
   configuration: CourseConfiguration
 ): Promise<void> => {
   if (!accessToken) throw new Error("Access token is not set");
-  await fetch(`${API_BASE_URL}ui/instructor/config`, {
+  await fetch(`${API_BASE_URL}/ui/instructor/config`, {
     method: "PUT",
     headers: {
       Authorization: accessToken,
