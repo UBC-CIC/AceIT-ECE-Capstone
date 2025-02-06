@@ -14,8 +14,8 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Header is missing"})
         }
-    refresh_token = headers.get("Authorization", {})
-    if not refresh_token:
+    token = headers.get("Authorization", {})
+    if not token:
         return {
             "statusCode": 400,
             'headers': {
