@@ -67,7 +67,7 @@ def lambda_handler(event, context):
 
         # Count the frequency of each question
         messages = response.get("Items", [])
-        system_prompt = f"You are an AI that extracts the most frequently asked questions from student discussion messages. Analyze and group similar questions together, then return a Valid JSON array containing only top {str(num)} most frequently asked questions, like this: ['The most frequent Question', '2nd Most frequent Question', ..., 'Top nth most frequent Question']. Do NOT include any explanations, descriptions, or extra text. Questions are separated by semicolons (;). Do not include any explanation or additional text. The given questions are separated by semi-colons:"
+        system_prompt = f"You are an AI that extracts the most frequently asked questions from student discussion messages. Analyze and group similar questions together, then return a Valid JSON array containing only top {str(num)} most frequently asked questions, like this: ['The most frequent Question', '2nd Most frequent Question', ..., 'Top nth most frequent Question']. Do NOT include any explanations, descriptions, or extra text. Questions are separated by semicolons (;). Do not include any explanation or additional text. If no questions are given, return an empty array. The given questions are separated by semi-colons:"
         for msg in messages:
             content = msg.get("content", "").strip().lower()
             if content:
