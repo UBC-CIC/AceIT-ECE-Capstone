@@ -25,7 +25,7 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Authorization token is required"})
         }
-    local = headers.get("isLocalTesting", {})
+    local = headers.get("Islocaltesting", {})
     if not local:
         local = False
 
