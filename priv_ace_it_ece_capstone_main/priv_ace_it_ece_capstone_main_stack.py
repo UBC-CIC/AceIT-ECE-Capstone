@@ -92,7 +92,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         canvas_secret = secretsmanager.Secret(
             self, 
             "CanvasSecret",
-            secret_name="CanvasSecret",
+            secret_name="canvasSecret",
             secret_string_value=SecretValue.unsafe_plain_text(json.dumps(canvas_secret_template))
         )
 
@@ -578,7 +578,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         # "arn:aws:s3:::bucketfortextextract/*",    # Needed for GetObject
                         # "arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0",
                         # "arn:aws:secretsmanager:us-west-2:842676002045:secret:MyRdsSecretF2FB5411-KUVYnbkG81km-9gvCxv"
-                        # "arn:aws:secretsmanager:us-west-2:842676002045:secret:CanvasSecret-81V6ha"
                         "*"
                     ]
                 )
