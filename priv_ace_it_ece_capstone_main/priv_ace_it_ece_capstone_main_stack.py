@@ -721,7 +721,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 ),
             ],
         )
-        login_resource.add_cors_preflight(
+        refresh_token_resource.add_cors_preflight(
             allow_origins=["*"],
             allow_headers=["*"],
             allow_methods=["OPTIONS", "POST"],
