@@ -15,6 +15,7 @@ import {
   updateCourseConfigurationAPI,
 } from "../../api";
 import { areSetsEqual } from "../../utils";
+import { ThreeDots } from "react-loader-spinner";
 
 type CourseConfigurationSectionProps = {
   selectedCourse: CourseProps;
@@ -25,6 +26,7 @@ export const CourseConfigurationSection: React.FC<
 > = ({ selectedCourse }) => {
   const [initialConfig, setInitialConfig] =
     React.useState<CourseConfiguration | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [isEnabled, setIsEnabled] = React.useState(false);
   const [selectedContent, setSelectedContent] = React.useState<
     Set<IncludedCourseContent>
@@ -37,6 +39,7 @@ export const CourseConfigurationSection: React.FC<
 
   React.useEffect(() => {
     const fetchConfig = async () => {
+      setIsLoading(true);
       try {
         const config = await getCourseConfigurationAPI(selectedCourse.id);
         setInitialConfig(config);
@@ -46,6 +49,8 @@ export const CourseConfigurationSection: React.FC<
         setResponseFormat(config.customResponseFormat);
       } catch (error) {
         console.error("Error fetching configuration:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchConfig();
@@ -117,6 +122,20 @@ export const CourseConfigurationSection: React.FC<
     { title: "Solution Review / Feedback", type: "SOLUTION_REVIEW" },
     { title: "Problem Explanation", type: "EXPLANATION" },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <ThreeDots
+          height="50"
+          width="50"
+          radius="9"
+          color="#1e1b4b"
+          ariaLabel="loading-configuration"
+        />
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSave}>

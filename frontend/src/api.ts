@@ -17,6 +17,10 @@ export const setAccessToken = (token: string) => {
   accessToken = token;
 };
 
+export const isAccessTokenSet = () => {
+  return accessToken !== null;
+};
+
 export const fetchCoursesAPI = async (): Promise<CourseProps[]> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(`${API_BASE_URL}/ui/general/user/courses`, {

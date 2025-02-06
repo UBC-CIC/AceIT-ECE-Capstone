@@ -5,7 +5,7 @@ import InfoIcon from "../../../assets/Info-Icon.png";
 
 interface SideBarProps {
   courses: CourseProps[];
-  selectedCourse: CourseProps;
+  selectedCourse: CourseProps | null;
   onCourseSelect: (course: CourseProps) => void;
 }
 
@@ -24,7 +24,7 @@ export const SideBar: React.FC<SideBarProps> = ({
   return (
     <div className="flex flex-wrap gap-3 items-start px-4 py-5 h-full text-sm rounded-xl border-white border-solid bg-white bg-opacity-50 border-[3px] min-w-[290px] text-indigo-950 w-[290px]">
       <div className="flex flex-col flex-1 shrink w-full basis-0 min-w-[240px]">
-        {availableCourses.length > 0 && (
+        {selectedCourse && availableCourses.length > 0 && (
           <>
             <div className="font-bold">Available Courses</div>
             {availableCourses.map((course, index) => (

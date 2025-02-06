@@ -27,9 +27,11 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex overflow-hidden flex-wrap flex-1 shrink justify-between px-3 py-1.5 w-full basis-0 min-w-[240px] max-md:max-w-full">
           <div className="flex overflow-hidden flex-wrap flex-1 shrink gap-3 items-center my-auto text-xl leading-snug basis-0 min-w-[240px] max-md:max-w-full">
             <div className="self-stretch my-auto font-semibold">
-              {currentCourse.courseCode}
+              {currentCourse ? currentCourse.courseCode : ""}
             </div>
-            <div className="self-stretch my-auto">{currentCourse.name}</div>
+            <div className="self-stretch my-auto">
+              {currentCourse ? currentCourse.name : ""}
+            </div>
           </div>
           <div className="flex gap-2.5 items-center h-full text-base leading-none text-right">
             <div className="self-stretch my-auto">{userName}</div>

@@ -1,5 +1,7 @@
 import json
 import boto3
+import requests
+
 
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', 'us-west-2') 
@@ -10,20 +12,50 @@ messages_table = dynamodb.Table('Messages')
 
 def lambda_handler(event, context):
     try:
-        # Parse input from the request query parameters
-        query_params = event.get("queryStringParameters", {})
-        course_id = query_params.get("course")
-        student_id = query_params.get("student_id")
-        
-        if not (course_id or student_id):
+        headers = event.get("headers", {})
+        auth_token = headers.get("Authorization", "")
+        if not auth_token:
             return {
                 "statusCode": 400,
                 'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                "body": json.dumps({"error": "Missing required parameter: need both course and student id"})
+                "body": json.dumps({"error": "Missing required Authorization token"})
+            }
+
+        # Call Canvas API to get user info
+        user_info = get_user_info(auth_token)
+        if not user_info:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
+            }
+        # Extract Canvas user ID
+        student_id = user_info.get("userId")
+        if not student_id:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": "User ID not found"})
+            }
+
+        # Parse input from the request query parameters
+        query_params = event.get("queryStringParameters", {})
+        course_id = query_params.get("course", "")
+
+        # student_id = query_params.get("student_id", "")
+        
+        
+        if not (course_id):
+            return {
+                "statusCode": 400,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": json.dumps({"error": "Missing required parameter: need course id"})
             }
         
         # Retrieve conversations for the given course ID
@@ -134,6 +166,28 @@ def call_llm(message_ids_list):
         print(f"Error generating summary: {e}")
         return "Summary not available."
     
+
+def get_user_info(auth_token):
+    """
+    Calls Canvas API to get the user info based on the provided authentication token.
+    """
+    headers = {
+        "Authorization": f"Bearer {auth_token}"
+    }
+
+    try:
+        response = requests.get("https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/ui/general/user", headers=headers)
+        response.raise_for_status()
+        print("Response from canvas: ", response.json())
+        return response.json()  # Returns user info (ID, name, etc.)
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as req_err:
+        print(f"Request error occurred: {req_err}")
+
+    return None
+
 
 def update_summary_in_db(conversation_id, summary):
     """
