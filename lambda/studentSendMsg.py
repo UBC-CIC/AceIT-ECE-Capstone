@@ -10,21 +10,49 @@ conversations_table = dynamodb.Table('Conversations')  # Replace with your table
 
 def lambda_handler(event, context):
     try:
-        # Parse input from the request body
+        # authenticate first
+        headers = event.get("headers", {})
+        auth_token = headers.get("Authorization", "")
+        if not auth_token:
+            return {
+                "statusCode": 400,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": json.dumps({"error": "Missing required Authorization token"})
+            }
+
+        # Call Canvas API to get user info
+        user_info = get_user_info(auth_token)
+        if not user_info:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
+            }
+        # Extract Canvas user ID
+        student_id = user_info.get("userId")
+        if not student_id:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": "User ID not found"})
+            }
+        student_id = str(student_id)
+        student_name = user_info.get("userName")
+
         body = event.get('body', {})
         if isinstance(body, str):
             body = json.loads(body)
         
         # Validate required fields
-        required_fields = ['course_id', 'student_id', 'message']
+        required_fields = ['course_id', 'message']
         for field in required_fields:
             if field not in body:
                 raise KeyError(f"Missing required field: {field}")
 
         course_id = body['course_id']
-        student_id = body['student_id']
         message_content = body.get('message', "Random message")
-        studnet_name = "Alice Test" #TODO create student and course database to match ids
         new_conversation = False
         conversation_id = body.get("conversation_id", "")
         new_message = {}
@@ -72,7 +100,8 @@ def lambda_handler(event, context):
             course_config_prompt = res_json.get("systemPrompt", {})
             print("Course config prompt: ", course_config_prompt)
             recentCourseRelated_stuff = "Unavailable now"
-            course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {studnet_name}, and here are some recent course material: {recentCourseRelated_stuff}. The first message you send must greet the student with a welcome message, and provide a summary of the recent course updates. For all subsequent messages, respond directly to the user's question **without any greetings, introductions, or unnecessary context**. "
+            welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff)
+            course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {student_name}, and here are some recent course material: {recentCourseRelated_stuff}. Respond to the user's question without any greetings, introductions, or unnecessary context."
             new_message = {
                 "message_id": message_id,
                 "content": course_config_prompt,
@@ -82,7 +111,46 @@ def lambda_handler(event, context):
                 "course_id": course_id
             }
             print("new system message: ", new_message)
-            message_content = course_config_prompt
+            # Insert the message into the Messages table
+            try:
+                messages_table.put_item(Item=new_message)
+                print(f"Message inserted successfully: {new_message}")
+            except Exception as e:
+                print(f"Failed to insert message: {e}")
+
+            # Update the Conversations table
+            update_conversation(conversation_id, course_id, student_id, message_id, timestamp)
+
+            # Create an AI response (mocked here, replace with real AI logic)
+            welcome_message_id = str(uuid.uuid4())
+            welcome_response_content = welcome_response.get('response')
+            welcome_response_sources = welcome_response.get("sources")
+            ai_message = {
+                "course_id": course_id,
+                "message_id": welcome_message_id,
+                "content": welcome_response_content,
+                "msg_source": welcome_response_sources,
+                "msg_timestamp": datetime.datetime.utcnow().isoformat(),
+            }
+
+            # Insert AI response into the Messages table
+            messages_table.put_item(Item=ai_message)
+
+            # Update the conversation with the AI response
+            update_conversation(conversation_id, course_id, student_id, welcome_message_id, timestamp)
+
+            return {
+                "statusCode": 200,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": json.dumps({
+                    "conversation_id": conversation_id,
+                    "messages": [new_message, ai_message]
+                })
+            }
         else:
             # call generate LLM prompt
             url = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/chat/generate"
@@ -114,46 +182,46 @@ def lambda_handler(event, context):
             }
             print("new message: ", new_message)
 
-        # Insert the message into the Messages table
-        try:
-            messages_table.put_item(Item=new_message)
-            print(f"Message inserted successfully: {new_message}")
-        except Exception as e:
-            print(f"Failed to insert message: {e}")
+            # Insert the message into the Messages table
+            try:
+                messages_table.put_item(Item=new_message)
+                print(f"Message inserted successfully: {new_message}")
+            except Exception as e:
+                print(f"Failed to insert message: {e}")
 
-        # Update the Conversations table
-        update_conversation(conversation_id, course_id, student_id, message_id, timestamp)
+            # Update the Conversations table
+            update_conversation(conversation_id, course_id, student_id, message_id, timestamp)
 
-        # Create an AI response (mocked here, replace with real AI logic)
-        ai_message_id = str(uuid.uuid4())
-        ai_response_dict = generate_ai_response(message_content, past_conversation)
-        ai_response_content = ai_response_dict.get('response')
-        ai_response_sources = ai_response_dict.get("sources")
-        ai_message = {
-            "course_id": course_id,
-            "message_id": ai_message_id,
-            "content": ai_response_content,
-            "msg_source": ai_response_sources,
-            "msg_timestamp": datetime.datetime.utcnow().isoformat(),
-        }
+            # Create an AI response (mocked here, replace with real AI logic)
+            ai_message_id = str(uuid.uuid4())
+            ai_response_dict = generate_ai_response(message_content, past_conversation)
+            ai_response_content = ai_response_dict.get('response')
+            ai_response_sources = ai_response_dict.get("sources")
+            ai_message = {
+                "course_id": course_id,
+                "message_id": ai_message_id,
+                "content": ai_response_content,
+                "msg_source": ai_response_sources,
+                "msg_timestamp": datetime.datetime.utcnow().isoformat(),
+            }
 
-        # Insert AI response into the Messages table
-        messages_table.put_item(Item=ai_message)
+            # Insert AI response into the Messages table
+            messages_table.put_item(Item=ai_message)
 
-        # Update the conversation with the AI response
-        update_conversation(conversation_id, course_id, student_id, ai_message_id, timestamp)
+            # Update the conversation with the AI response
+            update_conversation(conversation_id, course_id, student_id, ai_message_id, timestamp)
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            },
-            "body": json.dumps({
-                "conversation_id": conversation_id,
-                "messages": [new_message, ai_message]
-            })
+            return {
+                "statusCode": 200,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": json.dumps({
+                    "conversation_id": conversation_id,
+                    "messages": [new_message, ai_message]
+                })
         }
     except KeyError as e:
         return {
@@ -212,3 +280,49 @@ def generate_ai_response(message_content, past_conversation):
     print("AI response: ", response.json())
     response_json = response.json()
     return response_json
+
+def generate_welcome_message(course_config_str, name, course_related_stuff):
+    """
+    Mocked AI response generation logic.
+    Replace with real AI engine integration.
+    """
+    # call invoke llm completion
+    url = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/completion"
+    course_config_str += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 50 words, and do not talk about your ability and settings."
+    payload = {"message": course_config_str}
+    print("Welcome Payload: ", payload)
+    
+    try:
+        # Send a POST request
+        response = requests.post(url, json=payload)  # Use `json` to serialize the body as JSON
+        print(f"Sent post request to llm completion for message: {response.json()}")
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending post request to llm completion: {e}")
+    print("Welcome response: ", response.json())
+    response_json = response.json()
+    return response_json
+
+
+def get_user_info(auth_token):
+    """
+    Calls getuser info to get the user info based on the provided authentication token.
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": auth_token,
+    }
+
+    print("Auth_token: ", auth_token)
+
+    try:
+        response = requests.get("https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/ui/general/user", headers=headers)
+        response.raise_for_status()
+        print("Response from canvas: ", response.json())
+        return response.json()  # Returns user info (ID, name, etc.)
+
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as req_err:
+        print(f"Request error occurred: {req_err}")
+
+    return None

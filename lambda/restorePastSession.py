@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     try:
         # Extract path parameters to get conversation_id
         query_params = event.get("queryStringParameters", {})
-        conversation_id = query_params.get("conversation")
+        conversation_id = query_params.get("conversation_id")
         
         if not conversation_id:
             return {
@@ -58,7 +58,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             "body": json.dumps({
-                "conversation": conversation_data,
+                "conversation_id": conversation_data,
                 "messages": messages
             })
         }

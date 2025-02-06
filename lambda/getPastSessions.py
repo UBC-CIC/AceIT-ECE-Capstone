@@ -170,11 +170,11 @@ def call_llm(message_ids_list):
 
 def get_user_info(auth_token):
     """
-    Calls Canvas API to get the user info based on the provided authentication token.
+    Calls getuser info to get the user info based on the provided authentication token.
     """
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {auth_token}"
+        "Authorization": auth_token,
     }
 
     print("Auth_token: ", auth_token)
