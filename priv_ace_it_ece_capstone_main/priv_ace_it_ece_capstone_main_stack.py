@@ -1,5 +1,4 @@
 from aws_cdk import (
-    core as cdk,
     # Duration,
     Stack,
     # aws_sqs as sqs,
@@ -14,6 +13,7 @@ from aws_cdk import (
     aws_events as events,
     aws_events_targets as targets,
     Duration,
+    SecretValue,
     CfnOutput # Import CfnOutput
 )
 from constructs import Construct
@@ -92,8 +92,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
         canvas_secret = secretsmanager.Secret(
             self, 
             "CanvasSecret",
-            secret_name="CanvasSecret",
-            secret_string_value=cdk.SecretValue.unsafe_plain_text(json.dumps(canvas_secret_template))
+            secret_name="canvasSecret",
+            secret_string_value=SecretValue.unsafe_plain_text(json.dumps(canvas_secret_template))
         )
 
         my_rds = rds.DatabaseInstance(
@@ -578,7 +578,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         # "arn:aws:s3:::bucketfortextextract/*",    # Needed for GetObject
                         # "arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0",
                         # "arn:aws:secretsmanager:us-west-2:842676002045:secret:MyRdsSecretF2FB5411-KUVYnbkG81km-9gvCxv"
-                        # "arn:aws:secretsmanager:us-west-2:842676002045:secret:CanvasSecret-81V6ha"
                         "*"
                     ]
                 )
@@ -721,7 +720,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 ),
             ],
         )
-        login_resource.add_cors_preflight(
+        refresh_token_resource.add_cors_preflight(
             allow_origins=["*"],
             allow_headers=["*"],
             allow_methods=["OPTIONS", "POST"],

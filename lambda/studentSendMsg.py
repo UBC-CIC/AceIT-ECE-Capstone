@@ -72,7 +72,7 @@ def lambda_handler(event, context):
             course_config_prompt = res_json.get("systemPrompt", {})
             print("Course config prompt: ", course_config_prompt)
             recentCourseRelated_stuff = "Unavailable now"
-            course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {studnet_name}, and here are some recent course material: {recentCourseRelated_stuff}. You need to first welcome this student, and provide a summary of the recent course updates."
+            course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {studnet_name}, and here are some recent course material: {recentCourseRelated_stuff}. On the first interaction, greet the student with a welcome message, and provide a summary of the recent course updates. For all subsequent interactions, simply respond to the user questions without repeating the welcome message."
             new_message = {
                 "message_id": message_id,
                 "content": course_config_prompt,
