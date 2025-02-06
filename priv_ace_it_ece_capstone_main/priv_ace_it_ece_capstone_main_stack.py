@@ -92,7 +92,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             self, 
             "CanvasSecret",
             secret_name="CanvasSecret",
-            secret_string=json.dumps(canvas_secret_template)
+            secret_string_value=json.dumps(canvas_secret_template)
         )
 
         my_rds = rds.DatabaseInstance(
