@@ -722,8 +722,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         login_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
-            allow_methods=["POST"],
+            allow_headers=["*"],
+            allow_methods=["OPTIONS", "POST"],
         )
 
         # GET /api/ui/student/sessions
@@ -802,12 +802,18 @@ class PrivAceItEceCapstoneMainStack(Stack):
                         "method.response.header.Access-Control-Allow-Origin": True,
                     },
                 ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                    },
+                ),
             ],
         )
         logout_resource.add_cors_preflight(
             allow_origins=["*"],
             allow_headers=["Authorization", "Content-Type"],
-            allow_methods=["POST"],
+            allow_methods=["OPTIONS","POST"],
         )
 
         # GET /api/ui/general/user
