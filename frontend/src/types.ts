@@ -40,7 +40,7 @@ export interface ConversationMessage {
 
 export interface HeaderProps {
   userName: string;
-  currentCourse: CourseProps;
+  currentCourse: CourseProps | null;
   onLogout: () => void;
 }
 
@@ -169,6 +169,7 @@ export interface MetricsCardProps {
   title: string;
   value: number;
   iconSrc: string;
+  loading: boolean;
 }
 
 export interface EngagementCardProps {

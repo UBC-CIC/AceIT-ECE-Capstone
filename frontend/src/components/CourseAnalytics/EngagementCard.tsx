@@ -2,12 +2,18 @@ import * as React from "react";
 import { MetricsCardProps, EngagementCardProps } from "../../types";
 import { timeframeToDisplay, displayToTimeframe } from "../../utils";
 import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import BlueArrowIcon from "../../assets/Blue-Arrow-Icon.svg";
 import MessageIcon from "../../assets/Message-Icon.png";
 import PersonIcon from "../../assets/Person-Icon.png";
 import QuestionIcon from "../../assets/Question-Icon.png";
 
-const MetricsCard: React.FC<MetricsCardProps> = ({ title, value, iconSrc }) => {
+const MetricsCard: React.FC<MetricsCardProps> = ({
+  title,
+  value,
+  iconSrc,
+  loading,
+}) => {
   return (
     <div className="flex-1 min-w-[220px] max-w-[220px]">
       <div className="flex gap-3 items-center p-2">
@@ -19,7 +25,11 @@ const MetricsCard: React.FC<MetricsCardProps> = ({ title, value, iconSrc }) => {
         />
         <div className="flex flex-col min-w-0 flex-1">
           <div className="text-sm font-semibold truncate">{title}</div>
-          <div className="text-xl">{value}</div>
+          {loading ? (
+            <Skeleton width="100%" height={20} />
+          ) : (
+            <div className="text-xl">{value}</div>
+          )}
         </div>
       </div>
     </div>
@@ -76,27 +86,24 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
       </div>
 
       <div className="flex flex-wrap justify-evenly gap-4 p-6">
-        {loading ? (
-          <Skeleton height={100} width={220} count={3} />
-        ) : (
-          <>
-            <MetricsCard
-              title="Questions Asked"
-              value={questionsAsked}
-              iconSrc={QuestionIcon}
-            />
-            <MetricsCard
-              title="Student Sessions"
-              value={studentSessions}
-              iconSrc={MessageIcon}
-            />
-            <MetricsCard
-              title="Students Using Ace It"
-              value={studentsUsingAceIt}
-              iconSrc={PersonIcon}
-            />
-          </>
-        )}
+        <MetricsCard
+          title="Questions Asked"
+          value={questionsAsked}
+          iconSrc={QuestionIcon}
+          loading={loading}
+        />
+        <MetricsCard
+          title="Student Sessions"
+          value={studentSessions}
+          iconSrc={MessageIcon}
+          loading={loading}
+        />
+        <MetricsCard
+          title="Students Using Ace It"
+          value={studentsUsingAceIt}
+          iconSrc={PersonIcon}
+          loading={loading}
+        />
       </div>
     </div>
   );
