@@ -2,7 +2,7 @@ import json
 import boto3
 import requests
 
-
+lambda_client = boto3.client('lambda')
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', 'us-west-2') 
 # Initialize DynamoDB client
@@ -172,25 +172,36 @@ def get_user_info(auth_token):
     """
     Calls getuser info to get the user info based on the provided authentication token.
     """
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": auth_token,
+
+    # Query parameter
+    # course_id = event.get("queryStringParameters", {}).get("course_id", "default-course")
+
+    # Body message
+    # message_content = event.get("body", "{}")
+    # if isinstance(message_content, str):
+    #     message_content = json.loads(message_content)
+
+    payload = {
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": auth_token,
+        }
     }
-
-    print("Auth_token: ", auth_token)
-
     try:
-        response = requests.get("https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/ui/general/user", headers=headers)
-        response.raise_for_status()
-        print("Response from canvas: ", response.json())
-        return response.json()  # Returns user info (ID, name, etc.)
+        response = lambda_client.invoke(
+            FunctionName="GetUserInfoLambda",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        body_dict = json.loads(response_payload["body"])
+        print("Body: ", body_dict, "Type: ", type(body_dict))
+        return body_dict
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
 
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except Exception as req_err:
-        print(f"Request error occurred: {req_err}")
-
-    return None
 
 
 def update_summary_in_db(conversation_id, summary):

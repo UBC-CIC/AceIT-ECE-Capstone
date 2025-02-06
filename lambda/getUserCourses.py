@@ -146,7 +146,7 @@ def get_availability(course_id):
     password = credentials['password']
     # Database connection parameters
     DB_CONFIG = {
-        "host": "privaceitececapstonemainstackmyrdsproxy2ab0c3cf.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+        "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
         "port": 5432,
         "dbname": "postgres",
         "user": username,

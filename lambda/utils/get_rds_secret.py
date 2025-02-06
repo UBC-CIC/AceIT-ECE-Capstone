@@ -7,7 +7,7 @@ import uuid
 import psycopg2.extras
 
 def get_secret():
-    secret_name = "MyRdsSecretF2FB5411-AMahlTQtUobh"
+    secret_name = "MyRdsSecret"
     region_name = "us-west-2"
 
     # Create a Secrets Manager client
