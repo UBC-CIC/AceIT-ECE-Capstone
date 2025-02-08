@@ -1,5 +1,6 @@
 import json
 import boto3
+from utils.get_user_info import get_user_info
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -9,6 +10,35 @@ conversations_table = dynamodb.Table('Conversations')  # Replace with your table
 
 def lambda_handler(event, context):
     try:
+        headers = event.get("headers", {})
+        auth_token = headers.get("Authorization", "")
+        if not auth_token:
+            return {
+                "statusCode": 400,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": json.dumps({"error": "Missing required Authorization token"})
+            }
+
+        # Call Canvas API to get user info
+        user_info = get_user_info(auth_token)
+        if not user_info:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
+            }
+        # Extract Canvas user ID
+        student_id = user_info.get("userId")
+        if not student_id:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"error": "User ID not found"})
+            }
+        student_id = str(student_id)
+
         # Extract path parameters to get conversation_id
         query_params = event.get("queryStringParameters", {})
         conversation_id = query_params.get("conversation_id")

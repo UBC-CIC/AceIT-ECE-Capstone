@@ -7,21 +7,41 @@ import uuid
 import psycopg2.extras
 from utils.create_course_config_table import create_table_if_not_exists
 from utils.get_rds_secret import get_secret
+from utils.get_user_info import get_user_info
 
 def lambda_handler(event, context):
     
     # Extract and validate headers
-    auth_token = event.get("headers", {}).get("Authorization")
+    headers = event.get("headers", {})
+    auth_token = headers.get("Authorization", "")
     if not auth_token:
         return {
-            "statusCode": 401,
+            "statusCode": 400,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': '*'
+                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
-            "body": json.dumps({"error": "Missing Authorization header"})
+            "body": json.dumps({"error": "Missing required Authorization token"})
         }
+
+    # Call Canvas API to get user info
+    user_info = get_user_info(auth_token)
+    if not user_info:
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
+        }
+    # Extract Canvas user ID
+    student_id = user_info.get("userId")
+    if not student_id:
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": "User ID not found"})
+        }
+    student_id = str(student_id)
+
+    # TODO: need to check if this user is an instructor for this course
     
     # Parse and validate the request body
     body = ""

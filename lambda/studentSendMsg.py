@@ -3,7 +3,9 @@ import boto3
 import uuid
 import datetime
 import requests  # to make HTTP requests
+from utils.get_user_info import get_user_info
 
+lambda_client = boto3.client('lambda')
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 messages_table = dynamodb.Table('Messages')  # Replace with your table name
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
@@ -90,14 +92,8 @@ def lambda_handler(event, context):
             # generate a system prompt, add to msg
             message_id = str(uuid.uuid4())
             timestamp = datetime.datetime.utcnow().isoformat()
-            url = f"https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/ui/instructor/config?course={course_id}"
-            try:
-                response = requests.get(url)
-                print(f"Sent get request to for a new conversation: {response.json()}")
-            except requests.exceptions.RequestException as e:
-                print(f"Error sending get request to course {course_id}: {e}")
-            res_json = response.json()
-            course_config_prompt = res_json.get("systemPrompt", {})
+            response = call_get_course_config(auth_token, course_id)
+            course_config_prompt = response.get("systemPrompt", {})
             print("Course config prompt: ", course_config_prompt)
             recentCourseRelated_stuff = "Unavailable now"
             welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff)
@@ -303,26 +299,30 @@ def generate_welcome_message(course_config_str, name, course_related_stuff):
     return response_json
 
 
-def get_user_info(auth_token):
+def call_get_course_config(auth_token, course_id):
     """
-    Calls getuser info to get the user info based on the provided authentication token.
+    Calls getcourseconfig.
     """
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": auth_token,
+    payload = {
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": auth_token,
+        },
+        "queryStringParameters": {
+            "course": course_id
+        },
     }
-
-    print("Auth_token: ", auth_token)
-
     try:
-        response = requests.get("https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/ui/general/user", headers=headers)
-        response.raise_for_status()
-        print("Response from canvas: ", response.json())
-        return response.json()  # Returns user info (ID, name, etc.)
-
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except Exception as req_err:
-        print(f"Request error occurred: {req_err}")
-
-    return None
+        response = lambda_client.invoke(
+            FunctionName="GetCourseConfigLambda",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        body_dict = json.loads(response_payload["body"])
+        print("Body: ", body_dict, "Type: ", type(body_dict))
+        return body_dict
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
