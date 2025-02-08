@@ -139,9 +139,13 @@ def get_files(course_id):
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
+    print("url: ", url)
+    print("headers: ", HEADERS)
+    print("token: ", TOKEN)
 
     try:
         response = requests.get(url, headers=HEADERS, verify=False)
+        print("response: ", response.json())
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as http_err:

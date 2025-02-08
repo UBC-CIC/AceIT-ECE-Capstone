@@ -83,8 +83,7 @@ def invoke_refresh_course(course_id):
             InvocationType="Event",
             Payload=json.dumps(payload)
         )
-        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
-        print(f"Refreshed course {course_id}: {response_payload}")
+        print(f"Successfully invoked RefreshContentLambda for course {course_id}")
         return
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
