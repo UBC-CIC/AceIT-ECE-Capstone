@@ -1,6 +1,5 @@
 import json
 import boto3
-import requests
 from utils.get_user_info import get_user_info
 
 lambda_client = boto3.client('lambda')
@@ -45,9 +44,6 @@ def lambda_handler(event, context):
         # Parse input from the request query parameters
         query_params = event.get("queryStringParameters", {})
         course_id = query_params.get("course", "")
-
-        # student_id = query_params.get("student_id", "")
-        
         
         if not (course_id):
             return {

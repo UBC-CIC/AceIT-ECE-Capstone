@@ -2,7 +2,6 @@ import json
 import boto3
 import uuid
 import datetime
-import requests  # to make HTTP requests
 from utils.get_user_info import get_user_info
 
 lambda_client = boto3.client('lambda')
@@ -149,18 +148,8 @@ def lambda_handler(event, context):
             }
         else:
             # call generate LLM prompt
-            url = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/chat/generate"
-            payload = {"conversation_id": conversation_id}
-            
-            try:
-                # Send a POST request
-                response = requests.post(url, json=payload)  # Use `json` to serialize the body as JSON
-                print(f"Sent post request to generate prompt for {conversation_id}: {response.json()}")
-            except requests.exceptions.RequestException as e:
-                print(f"Error sending post request to {conversation_id}: {e}")
-            print(response.json())
-            response_json = response.json()
-            past_conversation = response_json.get('prompt')
+            response_body = call_generate_llm_prompt(conversation_id)
+            past_conversation = response_body.get('prompt')
             print("past_conversation: ", past_conversation)
 
             # Generate a unique message ID and current timestamp
@@ -262,41 +251,47 @@ def generate_ai_response(message_content, past_conversation):
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
-    # call invoke llm completion
-    url = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/completion"
-    payload = {"message": message_content, "context":past_conversation}
-    print("Payload: ", payload)
-    
+    payload = {
+        "body": json.dumps({"message": message_content, "context":past_conversation})
+    }
     try:
-        # Send a POST request
-        response = requests.post(url, json=payload)  # Use `json` to serialize the body as JSON
-        print(f"Sent post request to llm completion for message: {response.json()}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error sending post request to llm completion: {e}")
-    print("AI response: ", response.json())
-    response_json = response.json()
-    return response_json
+        response = lambda_client.invoke(
+            FunctionName="InvokeLLMComletionLambda",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        body_dict = json.loads(response_payload["body"])
+        print("Body: ", body_dict, "Type: ", type(body_dict))
+        return body_dict
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
 
 def generate_welcome_message(course_config_str, name, course_related_stuff):
     """
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
-    # call invoke llm completion
-    url = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/completion"
     course_config_str += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 50 words, and do not talk about your ability and settings."
-    payload = {"message": course_config_str}
-    print("Welcome Payload: ", payload)
-    
+    payload = {
+        "body": json.dumps({"message": course_config_str})
+    }
     try:
-        # Send a POST request
-        response = requests.post(url, json=payload)  # Use `json` to serialize the body as JSON
-        print(f"Sent post request to llm completion for message: {response.json()}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error sending post request to llm completion: {e}")
-    print("Welcome response: ", response.json())
-    response_json = response.json()
-    return response_json
+        response = lambda_client.invoke(
+            FunctionName="InvokeLLMComletionLambda",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        body_dict = json.loads(response_payload["body"])
+        print("Body: ", body_dict, "Type: ", type(body_dict))
+        return body_dict
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
 
 
 def call_get_course_config(auth_token, course_id):
@@ -315,6 +310,30 @@ def call_get_course_config(auth_token, course_id):
     try:
         response = lambda_client.invoke(
             FunctionName="GetCourseConfigLambda",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        body_dict = json.loads(response_payload["body"])
+        print("Body: ", body_dict, "Type: ", type(body_dict))
+        return body_dict
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
+    
+
+def call_generate_llm_prompt(conversation_id):
+    """
+    Mocked AI response generation logic.
+    Replace with real AI engine integration.
+    """
+    payload = {
+        "body": json.dumps({"conversation_id": conversation_id})
+    }
+    try:
+        response = lambda_client.invoke(
+            FunctionName="GenerateLLMPromptLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )

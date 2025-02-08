@@ -72,6 +72,7 @@ def lambda_handler(event, context):
     embeddings = []
     for obj in response["Contents"]:
         key = obj["Key"]
+        print("Key", key)
 
         local_path = f"/tmp/{os.path.basename(key)}"
         s3_client.download_file(bucket_name, key, local_path)

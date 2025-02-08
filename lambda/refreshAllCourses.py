@@ -1,4 +1,5 @@
 import json
+import uuid
 import boto3
 import psycopg2
 import psycopg2.extras
@@ -14,6 +15,7 @@ lambda_client = boto3.client("lambda")
 
 def lambda_handler(event, context):
     courses = get_all_courses()
+    print("Courses: ", courses)
     if courses is None:
         return {
             "statusCode": 500,
@@ -71,15 +73,19 @@ def get_all_courses():
     
 
 def invoke_refresh_course(course_id):
-    # Here we are calling the function as an event, passing the course_id in the Payload as query params or as part of the body depending on your Lambda setup
-    url = "https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/content/refresh"
-
-    # Prepare the payload
-    payload = {"course": course_id}
-    
+    payload = {
+        "body": json.dumps({"course": course_id}) 
+    }
     try:
-        # Send a POST request
-        response = requests.post(url, json=payload)  # Use `json` to serialize the body as JSON
-        print(f"Refreshed course {course_id}: {response.json()}")
-    except requests.exceptions.RequestException as e:
-        print(f"Error refreshing course {course_id}: {e}")
+        response = lambda_client.invoke(
+            FunctionName="RefreshContentLambda",  # Replace with actual function name
+            # InvocationType="RequestResponse",  # Use 'Event' for async calls
+            InvocationType="Event",
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print(f"Refreshed course {course_id}: {response_payload}")
+        return
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return

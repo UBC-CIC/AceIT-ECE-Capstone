@@ -10,6 +10,7 @@ import utils.get_rds_secret
 
 s3_client = boto3.client('s3')
 bucket_name = 'bucketfortextextract'
+lambda_client = boto3.client("lambda")
 
 def lambda_handler(event, context):
     body = json.loads(event.get("body", {}))
@@ -26,6 +27,7 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Course ID is required"})
         }
     files = get_files(course_id)
+    print("files: ", files)
     if files is None:
         return {
             "statusCode": 500,
@@ -39,42 +41,74 @@ def lambda_handler(event, context):
     # Store course documents into S3 buckets
     text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
     for file in files:
-        if file["locked"] == False and file["hidden"] == False and get_extension(file["display_name"]) in text_format:
+        if file["locked"] == False and file['upload_status'] == 'success' and file["hidden"] == False and get_extension(file["display_name"]) in text_format:
             file_name = file["display_name"]
-            # Download the file locally
-            response = requests.get(file["url"], stream=True)
-            if response.status_code == 200:
-                with open(file_name, "wb") as local_file:
-                    for chunk in response.iter_content(1024):
-                        local_file.write(chunk)
-                print(f"File {file_name} downloaded successfully.")
-            else:
-                return {
-                    "statusCode": 500,
-                    'headers': {
-                        'Access-Control-Allow-Headers': 'Content-Type',
-                        'Access-Control-Allow-Origin': '*',
-                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-                    },
-                    "body": json.dumps({"error": "Failed to download file from Canvas provided url"})
-                }
-            # Upload into S3 bucket
+            print("file name: ", file_name)
+
+            file_url = file["url"]  # Canvas file URL
+            file_key = f"{course_id}/{file['filename']}"  # Store in "course_id/" folder
+            file_size = file["size"]
+            file_updated = file["updated_at"]
+        
             try:
-                s3_client.upload_file(
-                    file_name,
-                    bucket_name,
-                    file_name,
-                    ExtraArgs={
-                        "Metadata": {
-                            "course-id": file["id"], 
-                            "source-url": file["url"]  # Source URL from Canvas
+                print(f"Streaming {file_key} to S3...")
+
+                with requests.get(file_url, stream=True, verify=False) as response:
+                    response.raise_for_status()  # Ensure request success
+
+                    # Upload stream directly to S3 with metadata
+                    s3_client.upload_fileobj(
+                        response.raw,
+                        bucket_name,
+                        file_key,
+                        ExtraArgs={
+                            "Metadata": {
+                                "original_url": file_url,
+                                "display_name": file_name,
+                                "updated_at": file_updated,
+                            }
                         }
-                    }
-                )
-                # Delete the local file after upload
-                os.remove(file_name)
+                    )
+
+                print(f"Successfully uploaded {file_key} to S3 with metadata.")
+            
             except Exception as e:
-                print("Error uploading file to S3:", e)
+                print(f"Failed to upload {file_key}: {e}")
+
+            # Download the file locally
+            # response = requests.get(file["url"], stream=True, verify=False)
+            # if response.status_code == 200:
+            #     with open(file_name, "wb") as local_file:
+            #         for chunk in response.iter_content(1024):
+            #             local_file.write(chunk)
+            #     print(f"File {file_name} downloaded successfully.")
+            # else:
+            #     return {
+            #         "statusCode": 500,
+            #         'headers': {
+            #             'Access-Control-Allow-Headers': 'Content-Type',
+            #             'Access-Control-Allow-Origin': '*',
+            #             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            #         },
+            #         "body": json.dumps({"error": "Failed to download file from Canvas provided url"})
+            #     }
+            # # Upload into S3 bucket
+            # try:
+            #     s3_client.upload_file(
+            #         file_name,
+            #         bucket_name,
+            #         file_name,
+            #         ExtraArgs={
+            #             "Metadata": {
+            #                 "course-id": file["id"], 
+            #                 "source-url": file["url"]  # Source URL from Canvas
+            #             }
+            #         }
+            #     )
+            #     # Delete the local file after upload
+            #     os.remove(file_name)
+            # except Exception as e:
+            #     print("Error uploading file to S3:", e)
             
     secret = utils.get_rds_secret.get_secret()
     credentials = json.loads(secret)
@@ -108,11 +142,11 @@ def lambda_handler(event, context):
         print(f"Parsed payload: {payload_data}")
     else:
         print(f"Error: Received status code {response.status_code} from the API.")
-    # clear documents in s3
-    bucket_objects = s3_client.list_objects_v2(Bucket=bucket_name)
-    if "Contents" in bucket_objects:
-        for obj in bucket_objects["Contents"]:
-            s3_client.delete_objects(Bucket=bucket_name, Key=obj["Key"])
+    # # clear documents in s3
+    # bucket_objects = s3_client.list_objects_v2(Bucket=bucket_name)
+    # if "Contents" in bucket_objects:
+    #     for obj in bucket_objects["Contents"]:
+    #         s3_client.delete_objects(Bucket=bucket_name, Key=obj["Key"])
     
     # Update the last_updated time
     update_course_last_update_time(course_id, DB_CONFIG)
@@ -175,11 +209,10 @@ def delete_vectors_by_course(DB_CONFIG, course_id):
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        sanitized_course_id = course_id.replace("-", "_")
 
         # Delete query
         drop_table_query = f"""
-        DROP TABLE IF EXISTS course_vectors_{sanitized_course_id};
+        DROP TABLE IF EXISTS course_vectors_{course_id};
         """
         cursor.execute(drop_table_query)
 
@@ -190,3 +223,22 @@ def delete_vectors_by_course(DB_CONFIG, course_id):
     except Exception as e:
         print(f"Error during deletion: {e}")
         return "Error deleting vectors"
+    
+
+def invoke_fetch_from_s3(course_id):
+    payload = {
+        "body": json.dumps({"course": course_id}) 
+    }
+    try:
+        response = lambda_client.invoke(
+            FunctionName="FetchReadFromS3Function",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            # InvocationType="Event",
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print(f"Refreshed course {course_id}: {response_payload}")
+        return
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return
