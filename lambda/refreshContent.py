@@ -9,7 +9,7 @@ import utils.get_canvas_secret
 import utils.get_rds_secret
 
 s3_client = boto3.client('s3')
-bucket_name = 'bucketfortextextract'
+bucket_name = 'bucket-for-course-documents'
 lambda_client = boto3.client("lambda")
 
 def lambda_handler(event, context):
@@ -74,41 +74,6 @@ def lambda_handler(event, context):
             
             except Exception as e:
                 print(f"Failed to upload {file_key}: {e}")
-
-            # Download the file locally
-            # response = requests.get(file["url"], stream=True, verify=False)
-            # if response.status_code == 200:
-            #     with open(file_name, "wb") as local_file:
-            #         for chunk in response.iter_content(1024):
-            #             local_file.write(chunk)
-            #     print(f"File {file_name} downloaded successfully.")
-            # else:
-            #     return {
-            #         "statusCode": 500,
-            #         'headers': {
-            #             'Access-Control-Allow-Headers': 'Content-Type',
-            #             'Access-Control-Allow-Origin': '*',
-            #             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-            #         },
-            #         "body": json.dumps({"error": "Failed to download file from Canvas provided url"})
-            #     }
-            # # Upload into S3 bucket
-            # try:
-            #     s3_client.upload_file(
-            #         file_name,
-            #         bucket_name,
-            #         file_name,
-            #         ExtraArgs={
-            #             "Metadata": {
-            #                 "course-id": file["id"], 
-            #                 "source-url": file["url"]  # Source URL from Canvas
-            #             }
-            #         }
-            #     )
-            #     # Delete the local file after upload
-            #     os.remove(file_name)
-            # except Exception as e:
-            #     print("Error uploading file to S3:", e)
             
     secret = utils.get_rds_secret.get_secret()
     credentials = json.loads(secret)
@@ -131,7 +96,7 @@ def lambda_handler(event, context):
     response = requests.get(url)
     print(response.json())  # Log the response if needed
     
-    # Check if the response was successful (status code 200)
+    # # Check if the response was successful (status code 200)
     if response.status_code == 200:
         # Log the response JSON
         print(f"Response from API: {response.json()}")  # This will print the parsed JSON response
@@ -142,6 +107,7 @@ def lambda_handler(event, context):
         print(f"Parsed payload: {payload_data}")
     else:
         print(f"Error: Received status code {response.status_code} from the API.")
+
     # # clear documents in s3
     # bucket_objects = s3_client.list_objects_v2(Bucket=bucket_name)
     # if "Contents" in bucket_objects:

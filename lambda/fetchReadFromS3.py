@@ -17,6 +17,8 @@ bedrock = boto3.client("bedrock-runtime",
                        region_name = 'us-west-2')
 
 def lambda_handler(event, context):
+    bucket_name = "bucket-for-course-documents"
+
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=500,
         chunk_overlap=100
@@ -35,6 +37,31 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Missing required fields: 'course' is required"})
         }
+    
+    prefix = f"{course_id}/"  # Assuming course_id is used as a folder structure
+    response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    
+    files_metadata = []
+
+    if "Contents" in response:
+        for obj in response["Contents"]:
+            file_key = obj["Key"]
+
+            # Fetch file metadata
+            metadata_response = s3_client.head_object(Bucket=bucket_name, Key=file_key)
+            metadata = metadata_response.get("Metadata", {})
+
+            files_metadata.append({
+                "file_key": file_key,
+                "s3_url": f"s3://{bucket_name}/{file_key}",
+                "original_url": metadata.get("original_url", "N/A"),
+                "display_name": metadata.get("display_name", "N/A"),
+                "updated_at": metadata.get("updated_at", "N/A"),
+            })
+    
+    print("file metadata: ", files_metadata)
+    
+    return files_metadata
 
     secret = get_secret()
     credentials = json.loads(secret)

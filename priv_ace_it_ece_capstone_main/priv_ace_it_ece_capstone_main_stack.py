@@ -4,6 +4,7 @@ from aws_cdk import (
     # aws_sqs as sqs,
     aws_lambda as _lambda,
     aws_ec2 as ec2,
+    aws_s3 as s3,
     aws_apigateway as apigateway,
     aws_iam as iam,
     aws_rds as rds,
@@ -14,6 +15,7 @@ from aws_cdk import (
     aws_events_targets as targets,
     Duration,
     SecretValue,
+    aws_s3_notifications as s3_notifications,
     CfnOutput # Import CfnOutput
 )
 from constructs import Construct
@@ -23,6 +25,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        # Create an S3 Bucket
+        course_doc_bucket = s3.Bucket(
+            self, "CourseDocumentsBucket",
+            bucket_name="bucket-for-course-documents",
+            versioned=True,  # Enable versioning
+            removal_policy=RemovalPolicy.DESTROY,  # Delete on stack removal
+            auto_delete_objects=True
+        )
 
         # 1. Create a new VPC with 1 NAT Gateway
         my_vpc = ec2.Vpc(
@@ -1408,3 +1419,9 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         # Set the Lambda as the target for the rule
         rule.add_target(targets.LambdaFunction(refresh_all_existing_courses_lambda))
+
+        # Add S3 Event Notification (Trigger Lambda when a new file is uploaded)
+        # course_doc_bucket.add_event_notification(
+        #     s3.EventType.OBJECT_CREATED,
+        #     s3_notifications.LambdaDestination(fetchReadFromS3)
+        # )
