@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import psycopg2.extras
@@ -8,6 +9,7 @@ import utils.get_canvas_secret
 import utils.get_rds_secret
 
 s3_client = boto3.client('s3')
+bucket_name = 'bucketfortextextract'
 
 def lambda_handler(event, context):
     body = json.loads(event.get("body", {}))
@@ -23,7 +25,6 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Course ID is required"})
         }
-    text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
     files = get_files(course_id)
     if files is None:
         return {
@@ -35,21 +36,46 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Failed to fetch files from Canvas API"})
         }
+    # Store course documents into S3 buckets
+    text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
     for file in files:
-        if file["locked"] == False and file["hidden"] == False and get_extension(file["display_name"]) in text_format: # TODO: add more checks if needed
-            # TODO Store course documents into S3 buckets
-            # s3_client.upload_file(
-            #     local_file_path,
-            #     bucket_name,
-            #     s3_key,
-            #     ExtraArgs={
-            #         "Metadata": {
-            #             "source-url": canvas_file_metadata["url"]  # Source URL from Canvas
-            #         }
-            #     }
-            # )
-            pass
-
+        if file["locked"] == False and file["hidden"] == False and get_extension(file["display_name"]) in text_format:
+            file_name = file["display_name"]
+            # Download the file locally
+            response = requests.get(file["url"], stream=True)
+            if response.status_code == 200:
+                with open(file_name, "wb") as local_file:
+                    for chunk in response.iter_content(1024):
+                        local_file.write(chunk)
+                print(f"File {file_name} downloaded successfully.")
+            else:
+                return {
+                    "statusCode": 500,
+                    'headers': {
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    },
+                    "body": json.dumps({"error": "Failed to download file from Canvas provided url"})
+                }
+            # Upload into S3 bucket
+            try:
+                s3_client.upload_file(
+                    file_name,
+                    bucket_name,
+                    file_name,
+                    ExtraArgs={
+                        "Metadata": {
+                            "course-id": file["id"], 
+                            "source-url": file["url"]  # Source URL from Canvas
+                        }
+                    }
+                )
+                # Delete the local file after upload
+                os.remove(file_name)
+            except Exception as e:
+                print("Error uploading file to S3:", e)
+            
     secret = utils.get_rds_secret.get_secret()
     credentials = json.loads(secret)
     username = credentials['username']
@@ -82,12 +108,11 @@ def lambda_handler(event, context):
         print(f"Parsed payload: {payload_data}")
     else:
         print(f"Error: Received status code {response.status_code} from the API.")
-    # TODO: delete fetched documents in s3
-    # List and delete all objects in the course-specific prefix
-    # response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
-    # if "Contents" in response:
-    #     keys_to_delete = [{"Key": obj["Key"]} for obj in response["Contents"]]
-    #     s3_client.delete_objects(Bucket=bucket_name, Delete={"Objects": keys_to_delete})
+    # clear documents in s3
+    bucket_objects = s3_client.list_objects_v2(Bucket=bucket_name)
+    if "Contents" in bucket_objects:
+        for obj in bucket_objects["Contents"]:
+            s3_client.delete_objects(Bucket=bucket_name, Key=obj["Key"])
     
     # Update the last_updated time
     update_course_last_update_time(course_id, DB_CONFIG)
@@ -143,7 +168,6 @@ def update_course_last_update_time(course_id, DB_CONFIG):
     connection.commit()
     cursor.close()
     connection.close()
-
 
 def delete_vectors_by_course(DB_CONFIG, course_id):
     # Connect to the PostgreSQL database
