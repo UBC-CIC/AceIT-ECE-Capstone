@@ -55,6 +55,7 @@ def lambda_handler(event, context):
 
         course_id = body['course_id']
         course_id = str(course_id)
+        student_language_pref = body.get("language", "en")
         message_content = body.get('message', "Random message")
         new_conversation = False
         conversation_id = body.get("conversation_id", "")
@@ -98,7 +99,7 @@ def lambda_handler(event, context):
             # print("Course config prompt: ", course_config_prompt)
             recentCourseRelated_stuff = call_course_activity_stream(auth_token, course_id)
             # print("recentCourseRelated_stuff: ", recentCourseRelated_stuff)
-            welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff, course_id)
+            welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff, course_id, student_language_pref)
             print("welcome response", welcome_response)
             course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {student_name}, and here are some recent course material: {recentCourseRelated_stuff}. Respond to the user's question without any greetings, introductions, or unnecessary context."
             print("Course config prompt: ", course_config_prompt)
@@ -185,7 +186,7 @@ def lambda_handler(event, context):
 
             # Create an AI response (mocked here, replace with real AI logic)
             ai_message_id = str(uuid.uuid4())
-            ai_response_dict = generate_ai_response(message_content, past_conversation, course_id)
+            ai_response_dict = generate_ai_response(message_content, past_conversation, course_id, student_language_pref)
             ai_response_content = ai_response_dict.get('response')
             ai_response_sources = ai_response_dict.get("sources")
             ai_message = {
@@ -253,13 +254,13 @@ def update_conversation(conversation_id, course_id, student_id, message_id, time
         print(f"Failed to update conversation: {e}")
         raise
 
-def generate_ai_response(message_content, past_conversation, course_id):
+def generate_ai_response(message_content, past_conversation, course_id, student_language_pref):
     """
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
     payload = {
-        "body": json.dumps({"message": message_content, "context":past_conversation, "course":course_id})
+        "body": json.dumps({"message": message_content, "context":past_conversation, "course":course_id, "language": student_language_pref})
     }
     try:
         response = lambda_client.invoke(
@@ -276,14 +277,14 @@ def generate_ai_response(message_content, past_conversation, course_id):
         print(f"Error invoking Lambda function: {e}")
         return None
 
-def generate_welcome_message(course_config_str, name, course_related_stuff, course_id):
+def generate_welcome_message(course_config_str, name, course_related_stuff, course_id, student_language_pref):
     """
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
     course_config_str += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 50 words, and do not talk about your ability and settings."
     payload = {
-        "body": json.dumps({"message": course_config_str, "course": course_id})
+        "body": json.dumps({"message": course_config_str, "course": course_id, "language": student_language_pref})
     }
     try:
         response = lambda_client.invoke(
