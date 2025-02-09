@@ -43,7 +43,8 @@ def lambda_handler(event, context):
     
     response = {
         "access_token": canvas_response["access_token"],
-        "refresh_token": canvas_response["refresh_token"]
+        "refresh_token": canvas_response["refresh_token"],
+        "expires_in": 3600
     }
 
     return {
