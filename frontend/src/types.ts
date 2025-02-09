@@ -31,11 +31,22 @@ export interface MessageProps {
   useDarkStyle?: boolean;
 }
 
-export type MessageSource = "USER" | "AI";
+export type MessageSource = "USER" | "AI" | "SYSTEM";
+
+export interface MessageReference {
+  documentName: string;
+  sourceUrl: string;
+  documentContent: string;
+}
 
 export interface ConversationMessage {
-  text: string;
-  source: MessageSource;
+  message_id: string;
+  content: string;
+  msg_source: MessageSource | MessageSource[];
+  course_id: string;
+  msg_timestamp: string;
+  references: MessageReference[];
+  student_id?: string;
 }
 
 export interface HeaderProps {

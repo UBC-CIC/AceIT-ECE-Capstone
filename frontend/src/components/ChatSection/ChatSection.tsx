@@ -66,14 +66,16 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       conversationId || undefined
     );
     setConversationId(response.conversation_id);
-    return response.messages.map((msg) => ({
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      content: msg.text,
-      isUserMessage: msg.source === "USER",
-    }));
+    return response.messages
+      .filter((msg) => msg.msg_source !== "SYSTEM")
+      .map((msg) => ({
+        time: new Date(msg.msg_timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        content: msg.content,
+        isUserMessage: msg.msg_source === "USER",
+      }));
   };
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -108,14 +110,16 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   ) => {
     const response = await restorePastSessionAPI(conversation.conversation_id);
     setConversationId(response.conversation_id);
-    const restoredMessages = response.messages.map((msg) => ({
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      content: msg.text,
-      isUserMessage: msg.source === "USER",
-    }));
+    const restoredMessages = response.messages
+      .filter((msg) => msg.msg_source !== "SYSTEM")
+      .map((msg) => ({
+        time: new Date(msg.msg_timestamp).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        content: msg.content,
+        isUserMessage: msg.msg_source === "USER",
+      }));
     setMessageList(restoredMessages);
   };
 
