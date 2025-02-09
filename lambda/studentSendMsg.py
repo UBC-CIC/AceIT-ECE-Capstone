@@ -3,6 +3,7 @@ import boto3
 import uuid
 import datetime
 from utils.get_user_info import get_user_info
+from utils.get_course_related_stuff import call_course_activity_stream
 
 lambda_client = boto3.client('lambda')
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -53,6 +54,7 @@ def lambda_handler(event, context):
                 raise KeyError(f"Missing required field: {field}")
 
         course_id = body['course_id']
+        course_id = str(course_id)
         message_content = body.get('message', "Random message")
         new_conversation = False
         conversation_id = body.get("conversation_id", "")
@@ -93,17 +95,20 @@ def lambda_handler(event, context):
             timestamp = datetime.datetime.utcnow().isoformat()
             response = call_get_course_config(auth_token, course_id)
             course_config_prompt = response.get("systemPrompt", {})
-            print("Course config prompt: ", course_config_prompt)
-            recentCourseRelated_stuff = "Unavailable now"
-            welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff)
+            # print("Course config prompt: ", course_config_prompt)
+            recentCourseRelated_stuff = call_course_activity_stream(auth_token, course_id)
+            # print("recentCourseRelated_stuff: ", recentCourseRelated_stuff)
+            welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff, course_id)
+            print("welcome response", welcome_response)
             course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {student_name}, and here are some recent course material: {recentCourseRelated_stuff}. Respond to the user's question without any greetings, introductions, or unnecessary context."
+            print("Course config prompt: ", course_config_prompt)
             new_message = {
                 "message_id": message_id,
                 "content": course_config_prompt,
                 "msg_source": "SYSTEM",
                 "student_id": student_id,
                 "msg_timestamp": timestamp,
-                "course_id": course_id
+                "course_id": str(course_id)
             }
             print("new system message: ", new_message)
             # Insert the message into the Messages table
@@ -121,12 +126,13 @@ def lambda_handler(event, context):
             welcome_response_content = welcome_response.get('response')
             welcome_response_sources = welcome_response.get("sources")
             ai_message = {
-                "course_id": course_id,
+                "course_id": str(course_id),
                 "message_id": welcome_message_id,
                 "content": welcome_response_content,
                 "msg_source": welcome_response_sources,
                 "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
+            print("AI response: ", ai_message)
 
             # Insert AI response into the Messages table
             messages_table.put_item(Item=ai_message)
@@ -148,7 +154,7 @@ def lambda_handler(event, context):
             }
         else:
             # call generate LLM prompt
-            response_body = call_generate_llm_prompt(conversation_id)
+            response_body = call_generate_llm_prompt(conversation_id, course_id)
             past_conversation = response_body.get('prompt')
             print("past_conversation: ", past_conversation)
 
@@ -179,7 +185,7 @@ def lambda_handler(event, context):
 
             # Create an AI response (mocked here, replace with real AI logic)
             ai_message_id = str(uuid.uuid4())
-            ai_response_dict = generate_ai_response(message_content, past_conversation)
+            ai_response_dict = generate_ai_response(message_content, past_conversation, course_id)
             ai_response_content = ai_response_dict.get('response')
             ai_response_sources = ai_response_dict.get("sources")
             ai_message = {
@@ -221,6 +227,7 @@ def update_conversation(conversation_id, course_id, student_id, message_id, time
     """
     Updates the Conversations table with the new message.
     """
+    course_id = str(course_id)
     try:
         conversations_table.update_item(
             Key={"conversation_id": conversation_id},
@@ -246,13 +253,13 @@ def update_conversation(conversation_id, course_id, student_id, message_id, time
         print(f"Failed to update conversation: {e}")
         raise
 
-def generate_ai_response(message_content, past_conversation):
+def generate_ai_response(message_content, past_conversation, course_id):
     """
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
     payload = {
-        "body": json.dumps({"message": message_content, "context":past_conversation})
+        "body": json.dumps({"message": message_content, "context":past_conversation, "course":course_id})
     }
     try:
         response = lambda_client.invoke(
@@ -269,14 +276,14 @@ def generate_ai_response(message_content, past_conversation):
         print(f"Error invoking Lambda function: {e}")
         return None
 
-def generate_welcome_message(course_config_str, name, course_related_stuff):
+def generate_welcome_message(course_config_str, name, course_related_stuff, course_id):
     """
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
     course_config_str += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 50 words, and do not talk about your ability and settings."
     payload = {
-        "body": json.dumps({"message": course_config_str})
+        "body": json.dumps({"message": course_config_str, "course": course_id})
     }
     try:
         response = lambda_client.invoke(
@@ -323,13 +330,13 @@ def call_get_course_config(auth_token, course_id):
         return None
     
 
-def call_generate_llm_prompt(conversation_id):
+def call_generate_llm_prompt(conversation_id, course_id):
     """
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
     payload = {
-        "body": json.dumps({"conversation_id": conversation_id})
+        "body": json.dumps({"conversation_id": conversation_id, "course":course_id})
     }
     try:
         response = lambda_client.invoke(

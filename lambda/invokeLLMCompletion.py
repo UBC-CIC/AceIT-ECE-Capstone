@@ -26,7 +26,9 @@ def lambda_handler(event, context):
     try:
         # Parse the request body
         body = json.loads(event.get("body", "{}"))
-        course_id = "76cd9469-45cb-45a6-9737-aa1df4b4335d"
+        # course_id = "1"
+        course_id = body.get("course")  # Ensure course_id is extracted
+        course_id = str(course_id)
 
         # Validate required fields
         message = body.get("message")
@@ -125,11 +127,11 @@ def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
-        sanitized_course_id = course_id.replace("-", "_")
+        # sanitized_course_id = course_id.replace("-", "_")
         # Query the vector database with explicit casting
         query_vectors_sql = f"""
         SELECT document_name, sourceURL, document_content, embeddings <-> %s::vector AS similarity
-        FROM course_vectors_{sanitized_course_id}
+        FROM course_vectors_{course_id}
         ORDER BY similarity
         LIMIT %s;
         """
