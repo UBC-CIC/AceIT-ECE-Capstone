@@ -31,6 +31,11 @@ def lambda_handler(event, context):
         if not user_info:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
         # Extract Canvas user ID
@@ -38,6 +43,11 @@ def lambda_handler(event, context):
         if not student_id:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
                 "body": json.dumps({"error": "User ID not found"})
             }
         student_id = str(student_id)
@@ -218,11 +228,22 @@ def lambda_handler(event, context):
     except KeyError as e:
         return {
             "statusCode": 400,
+            'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
             "body": json.dumps({"error": f"Bad Request: {str(e)}"})
         }
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, "body": "Internal Server Error"}
+        return {"statusCode": 500, 
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": "Internal Server Error"}
 
 def update_conversation(conversation_id, course_id, student_id, message_id, timestamp):
     """
