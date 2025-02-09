@@ -53,7 +53,7 @@ def lambda_handler(event, context):
             if field not in body:
                 raise KeyError(f"Missing required field: {field}")
 
-        course_id = body['course_id']
+        course_id = body['course']
         course_id = str(course_id)
         student_language_pref = body.get("language", "en")
         message_content = body.get('message', "Random message")
