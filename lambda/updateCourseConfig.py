@@ -135,6 +135,20 @@ def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_
             json.dumps(selected_supported_questions), 
             json.dumps(selected_included_course_content), 
             custom_response_format, system_prompt))
+        # query = """DROP TABLE IF EXISTS course_configuration CASCADE;"""
+        # cursor.execute(query)
+        # create_course_config_query = """
+        # CREATE TABLE IF NOT EXISTS course_configuration (
+        #     course_id TEXT PRIMARY KEY,                         -- Unique ID for the course
+        #     student_access_enabled BOOLEAN NOT NULL,             -- Whether student access is enabled
+        #     selected_supported_questions JSONB NOT NULL,         -- Supported questions as JSON -- controlled from system msg
+        #     selected_included_course_content JSONB NOT NULL,     -- Included content as JSON -- controlled from s3 buckets download
+        #     custom_response_format TEXT,                          -- Instruction for LLM -- controlled from system msg
+        #     system_prompt TEXT,                                  -- Auto-generated system prompt for the assistant
+        #     material_last_updated_time TIMESTAMP DEFAULT '1970-01-01 00:00:00'
+        # );
+        # """
+        # cursor.execute(create_course_config_query)
         connection.commit()
         cursor.close()
         connection.close()
