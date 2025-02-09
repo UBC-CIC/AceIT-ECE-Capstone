@@ -18,7 +18,7 @@ def create_table_if_not_exists(DB_CONFIG):
 
         create_course_config_query = """
         CREATE TABLE IF NOT EXISTS course_configuration (
-            course_id INTEGER PRIMARY KEY,                          -- Unique ID for the course
+            course_id TEXT PRIMARY KEY,                         -- Unique ID for the course
             student_access_enabled BOOLEAN NOT NULL,             -- Whether student access is enabled
             selected_supported_questions JSONB NOT NULL,         -- Supported questions as JSON -- controlled from system msg
             selected_included_course_content JSONB NOT NULL,     -- Included content as JSON -- controlled from s3 buckets download

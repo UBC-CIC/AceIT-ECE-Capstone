@@ -186,7 +186,7 @@ export const updateCourseConfigurationAPI = async (
     },
     body: JSON.stringify({
       course,
-      configuration,
+      ...configuration,
     }),
   });
 };
