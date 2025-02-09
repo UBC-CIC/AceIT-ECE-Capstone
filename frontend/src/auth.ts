@@ -15,8 +15,8 @@ export const fetchAccessToken = async (code: string) => {
     const response = await fetch(`${backendUrl}/ui/general/log-in`, {
       method: "POST",
       headers: {
-        jwt: code,
-        isLocalTesting: isLocalMode,
+        Authorization: code,
+        Islocaltesting: isLocalMode,
       },
     });
 
