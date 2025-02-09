@@ -25,9 +25,8 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Authorization token is required"})
         }
-    local = headers.get("Islocaltesting", {})
-    if not local:
-        local = False
+    
+    local = str(headers.get("Islocaltesting", "false")).lower() == "true"
 
     canvas_response = get_access_token(jwt, local)
 
