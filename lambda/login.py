@@ -3,7 +3,6 @@ import utils.get_canvas_secret
 import requests
 
 def lambda_handler(event, context):
-    print("Received event:", json.dumps(event))  # Debug incoming request
     headers = event.get("headers", {})
     if not headers:
         return {
@@ -95,31 +94,12 @@ def get_access_token(jwt, local):
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
     try:
-        print(f"JWT received: {jwt}")  # Debug JWT value
-        print(f"Local mode: {local}")  # Debug local mode
-        print(f"Making request to Canvas with URL: {url}")
-        print(f"Request data: {data}")
-        print(f"Request headers: {headers}")
-        
-        response = requests.post(url, 
-            data=data, 
-            headers={
-                "Content-Type": "application/x-www-form-urlencoded",
-                "Accept": "application/json"
-            },
-            verify=False
-        )
-        print(f"Canvas response status: {response.status_code}")
-        print(f"Canvas response headers: {dict(response.headers)}")
-        print(f"Canvas response body: {response.text}")
-        
+        response = requests.post(url, data=data, headers=headers, verify=False)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
-        print(f"Error response body: {http_err.response.text if hasattr(http_err, 'response') else 'No response body'}")
         return None
     except requests.exceptions.RequestException as req_err:
         print(f"Request error occurred: {req_err}")
-        print(f"Request data that failed: {data}")
         return None

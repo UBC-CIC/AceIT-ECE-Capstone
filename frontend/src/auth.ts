@@ -14,14 +14,16 @@ export const fetchAccessToken = async (code: string) => {
   try {
     const response = await fetch(`${backendUrl}/ui/general/log-in`, {
       method: "POST",
-      headers: {
-        Authorization: code,
-        Islocaltesting: isLocalMode,
-      },
+      headers: new Headers({
+        Authorization: String(code),
+        Islocaltesting: String(isLocalMode),
+        "Content-Type": "application/json",
+      }),
     });
 
     const data = await response.json();
     localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("refresh_token", data.refresh_token);
     const expiryTime = new Date(
       new Date().getTime() + data.expires_in * 1000
     ).toString();
@@ -33,18 +35,19 @@ export const fetchAccessToken = async (code: string) => {
   }
 };
 
-export const refreshAccessToken = async (accessToken: string) => {
+export const refreshAccessToken = async (refreshToken: string) => {
   try {
     const response = await fetch(`${backendUrl}/ui/general/refresh-token`, {
       method: "POST",
       headers: {
-        access_token: accessToken,
-        isLocalTesting: isLocalMode,
+        Authorization: refreshToken,
+        Islocaltesting: String(isLocalMode),
       },
     });
 
     const data = await response.json();
     localStorage.setItem("access_token", data.access_token);
+    localStorage.setItem("refresh_token", data.refresh_token);
     const expiryTime = new Date(
       new Date().getTime() + data.expires_in * 1000
     ).toString();
@@ -56,9 +59,9 @@ export const refreshAccessToken = async (accessToken: string) => {
   }
 };
 
-export const setupTokenRefreshTimer = (accessToken: string, delay: number) => {
+export const setupTokenRefreshTimer = (refreshToken: string, delay: number) => {
   setTimeout(() => {
-    refreshAccessToken(accessToken);
+    refreshAccessToken(refreshToken);
   }, delay - 60000); // Refresh 1 minute before expiry
 };
 
@@ -70,19 +73,20 @@ export const handleAuthentication = async (
   const error = urlParams.get("error");
 
   const storedAccessToken = localStorage.getItem("access_token");
+  const storedRefreshToken = localStorage.getItem("refresh_token");
   const tokenExpiry = localStorage.getItem("token_expiry");
 
-  if (storedAccessToken && tokenExpiry) {
+  if (storedAccessToken && storedRefreshToken && tokenExpiry) {
     const expiryTime = new Date(tokenExpiry).getTime();
     const currentTime = new Date().getTime();
 
     if (currentTime < expiryTime) {
       setAccessTokenState(storedAccessToken);
       setAccessToken(storedAccessToken);
-      setupTokenRefreshTimer(storedAccessToken, expiryTime - currentTime);
+      setupTokenRefreshTimer(storedRefreshToken, expiryTime - currentTime);
       window.history.replaceState({}, document.title, "/");
     } else {
-      refreshAccessToken(storedAccessToken)
+      refreshAccessToken(storedRefreshToken)
         .then((newToken) => {
           setAccessTokenState(newToken);
           setAccessToken(newToken);
@@ -107,6 +111,7 @@ export const handleAuthentication = async (
 
 export const logout = () => {
   localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
   localStorage.removeItem("token_expiry");
   window.location.reload();
 };
