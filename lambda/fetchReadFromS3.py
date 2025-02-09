@@ -12,6 +12,7 @@ from datetime import datetime
 import psycopg2.extras
 from utils.get_rds_secret import get_secret
 from io import BytesIO
+from utils.create_course_vectors_tables import create_table_if_not_exists
 from bs4 import BeautifulSoup
 
 s3_client = boto3.client("s3")
@@ -252,41 +253,6 @@ def store_embeddings(document_name, embeddings, course_id, DB_CONFIG, source_url
     except Exception as e:
         print(f"Error inserting embeddings: {e}")
         return "Error storing embeddings"
-    finally:
-        if connection:
-            connection.close()
-
-
-
-def create_table_if_not_exists(DB_CONFIG, course_id):
-    """
-    Dynamically create a table for the given course ID if it doesn't exist.
-    """
-    connection = None
-    sanitized_course_id = course_id.replace("-", "_")  # Replace hyphens with underscores
-    try:
-        connection = psycopg2.connect(**DB_CONFIG)
-        cursor = connection.cursor()
-
-        # Dynamically construct table creation query
-        create_embeddings_query = f"""
-        CREATE EXTENSION IF NOT EXISTS vector;
-        CREATE TABLE IF NOT EXISTS course_vectors_{sanitized_course_id} (
-            id SERIAL PRIMARY KEY,
-            document_name TEXT NOT NULL,
-            embeddings VECTOR(1024),
-            created_at TIMESTAMP DEFAULT NOW(),
-            sourceURL TEXT DEFAULT 'https://www.example.com',
-            document_content TEXT
-        );
-        """
-        cursor.execute(create_embeddings_query)
-        connection.commit()
-        cursor.close()
-        return "Table created or already exists"
-    except Exception as e:
-        print(f"Error creating table: {e}")
-        return "Error creating table"
     finally:
         if connection:
             connection.close()

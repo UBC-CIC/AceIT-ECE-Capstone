@@ -75,11 +75,12 @@ def lambda_handler(event, context):
         # construct object
         if course["workflow_state"] == "available":
             cur_course = {
-                "id": course["uuid"],
+                "id": course["id"],
                 "courseCode": course["course_code"],
                 "name": course["name"]
             }
             availableInstructorList.append(cur_course)
+            print("type of id", type(course["id"]))
 
     return {
         'statusCode': 200,

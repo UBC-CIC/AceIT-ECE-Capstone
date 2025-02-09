@@ -53,11 +53,10 @@ def delete_all_from_this_course(DB_CONFIG, course_id):
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        sanitized_course_id = course_id.replace("-", "_")
 
         # Delete query
         delete_query1 = f"""
-        DROP TABLE IF EXISTS course_vectors_{sanitized_course_id};
+        DROP TABLE IF EXISTS course_vectors_{course_id};
         """
         delete_query2 = """
         DELETE FROM course_configuration

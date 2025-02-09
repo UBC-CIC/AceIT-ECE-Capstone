@@ -88,7 +88,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
             "body": json.dumps({
-                "conversation_id": conversation_data,
+                "conversation": conversation_data,
                 "messages": messages
             })
         }

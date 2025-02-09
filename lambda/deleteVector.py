@@ -52,11 +52,10 @@ def delete_vectors_by_course(DB_CONFIG, course_id):
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
-        sanitized_course_id = course_id.replace("-", "_")
 
         # Delete query
         drop_table_query = f"""
-        DROP TABLE IF EXISTS course_vectors_{sanitized_course_id};
+        DROP TABLE IF EXISTS course_vectors_{course_id};
         """
         cursor.execute(drop_table_query)
 
