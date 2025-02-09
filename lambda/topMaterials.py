@@ -103,24 +103,20 @@ def lambda_handler(event, context):
         # Count the frequency of each material referenced by AI responses
         messages = response.get("Items", [])
         material_dict = {}
+        
         for message in messages:
-            # Use the `msg_source` field to identify materials
-            msg_source = message.get("msg_source")
-            print("Msg source: ", msg_source)
-            if msg_source == "AI":
+            if message.get("msg_source") == "AI":
                 references = message.get("references")
                 if references and isinstance(references, list):
                     for source in references:
-                        print("source: ", source)
+                        doc_url = source.get("sourceUrl")
                         doc_name = source.get("documentName")
-                        material_dict[doc_name] = material_dict.get(doc_name, 0) + 1
-        print("Material dict:", material_dict)
-
-        # Sort materials by frequency and get the top N
+                        if doc_name and doc_url:
+                            material_dict[(doc_name, doc_url)] = material_dict.get((doc_name, doc_url), 0) + 1
+        
         top_materials = sorted(material_dict.items(), key=lambda x: x[1], reverse=True)[:num]
-
-        # Prepare the response
-        top_materials_list = [material[0] for material in top_materials]
+        
+        top_materials_list = [{"title": material[0], "link": material[1]} for (material, _count) in top_materials]
 
         return {
             "statusCode": 200,
