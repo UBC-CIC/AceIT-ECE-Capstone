@@ -48,7 +48,7 @@ def lambda_handler(event, context):
             body = json.loads(body)
         
         # Validate required fields
-        required_fields = ['course_id', 'message']
+        required_fields = ['course', 'message']
         for field in required_fields:
             if field not in body:
                 raise KeyError(f"Missing required field: {field}")
