@@ -17,6 +17,10 @@ export const setAccessToken = (token: string) => {
   accessToken = token;
 };
 
+export const getAccessToken = () => {
+  return accessToken;
+};
+
 export const isAccessTokenSet = () => {
   return accessToken !== null;
 };
