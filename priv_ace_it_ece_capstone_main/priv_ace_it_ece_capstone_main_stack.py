@@ -715,7 +715,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             "POST",
             apigateway.LambdaIntegration(login_lambda, proxy=True),
             request_parameters={
-                "method.request.header.jwt": True,  # Allow JWT header in request
+                "method.request.header.Authorization": True,
             },
             method_responses=[
                 apigateway.MethodResponse(
@@ -742,10 +742,9 @@ class PrivAceItEceCapstoneMainStack(Stack):
             ],
         )
 
-        # Ensure CORS preflight allows JWT
         login_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["*"],  # Added "jwt"
+            allow_headers=["*"],
             allow_methods=["OPTIONS", "POST"],  # Ensure OPTIONS is allowed
         )
 
@@ -754,7 +753,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             "POST",
             apigateway.LambdaIntegration(refresh_token_lambda),
             request_parameters={
-                "method.request.header.access_token": True,
+                "method.request.header.Authorization": True,
             },
             method_responses=[
                 apigateway.MethodResponse(
