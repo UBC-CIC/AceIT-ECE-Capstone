@@ -70,32 +70,30 @@ def lambda_handler(event, context):
                 "body": json.dumps({"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
             }
 
-        # Fetch messages for the course and time period
-        response = messages_table.scan(
-            FilterExpression="course_id = :course_id AND msg_timestamp >= :time_threshold",
+        # Query the Conversations table for conversations in the given course
+        response = conversations_table.scan(
+            FilterExpression="course_id = :course_id AND time_created >= :time_threshold",
             ExpressionAttributeValues={
                 ":course_id": course_id,
                 ":time_threshold": time_threshold
             }
         )
 
-        # Aggregate engagement statistics
-        messages = response.get("Items", [])
-        questions_asked = 0
+        # Extract relevant data
+        conversations = response.get("Items", [])
         unique_students = set()
-        conversations = set()
+        total_messages = 0
 
-        for message in messages:
-            if message.get("msg_source") == "STUDENT":
-                questions_asked += 1
-                unique_students.add(message.get("student_id"))
-                conversations.add(message.get("conversation_id"))
+        for conversation in conversations:
+            unique_students.add(conversation.get("student_id"))
+            message_list = conversation.get("message_list", [])
+            total_messages += len(message_list)
 
         # Prepare the response
         engagement_stats = {
-            "questionsAsked": questions_asked,
-            "studentSessions": len(conversations),
-            "uniqueStudents": len(unique_students)
+            "questionsAsked": total_messages,  # Total messages from all conversations
+            "studentSessions": len(conversations),  # Unique conversations
+            "uniqueStudents": len(unique_students)  # Unique students engaged
         }
 
         return {

@@ -16,7 +16,7 @@ def lambda_handler(event, context):
         
         conversation_id = body.get("conversation_id")
         relevant_source_content = body.get("relevantSourceContent", [])
-        new_conversation = body.get("newConversation", False)
+        # new_conversation = body.get("newConversation", False)
 
         if not conversation_id:
             return {
