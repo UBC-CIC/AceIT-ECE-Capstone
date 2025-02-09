@@ -8,6 +8,7 @@ import psycopg2.extras
 from utils.create_course_config_table import create_table_if_not_exists
 from utils.get_rds_secret import get_secret
 from utils.get_user_info import get_user_info
+import re
 
 s3_client = boto3.client('s3')
 
