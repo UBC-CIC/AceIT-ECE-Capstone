@@ -15,6 +15,7 @@ lambda_client = boto3.client("lambda")
 def lambda_handler(event, context):
     body = json.loads(event.get("body", {}))
     course_id = body.get("course", {})  # Read course ID from request body
+    course_id = str(course_id)
 
     if not course_id:
         return {

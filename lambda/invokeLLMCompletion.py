@@ -32,7 +32,7 @@ def lambda_handler(event, context):
 
         # Validate required fields
         message = body.get("message")
-        student_language_pref = body.get("language", "en")
+        student_language_pref = body.get("language", "")
         print("Message got: ", message)
         if not message:
             return {
@@ -78,7 +78,8 @@ def lambda_handler(event, context):
         # Call the LLM API to generate a response
         llm_response = call_llm(final_input)
         # Translate the response if needed
-        translated_response = translate_text(llm_response, student_language_pref)
+        if student_language_pref and student_language_pref != "":
+            translated_response = translate_text(llm_response, student_language_pref)
 
         return {
             "statusCode": 200,

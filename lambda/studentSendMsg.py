@@ -55,7 +55,7 @@ def lambda_handler(event, context):
 
         course_id = body['course']
         course_id = str(course_id)
-        student_language_pref = body.get("language", "en")
+        student_language_pref = body.get("language", "")
         message_content = body.get('message', "Random message")
         new_conversation = False
         conversation_id = body.get("conversation_id", "")
