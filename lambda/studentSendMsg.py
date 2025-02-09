@@ -140,7 +140,8 @@ def lambda_handler(event, context):
                 "course_id": str(course_id),
                 "message_id": welcome_message_id,
                 "content": welcome_response_content,
-                "msg_source": welcome_response_sources,
+                "msg_source": "AI",
+                "references": welcome_response_sources,
                 "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
             print("AI response: ", ai_message)
@@ -203,7 +204,8 @@ def lambda_handler(event, context):
                 "course_id": course_id,
                 "message_id": ai_message_id,
                 "content": ai_response_content,
-                "msg_source": ai_response_sources,
+                "msg_source": "AI",
+                "references": ai_response_sources,
                 "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
 

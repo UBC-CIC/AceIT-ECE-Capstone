@@ -122,7 +122,7 @@ def generate_summary_input(message_ids_list):
         content = message.get("content")
         if msg_source == "STUDENT":
             conversation_hist += "STUDENT: " + content
-        elif msg_source != "SYSTEM":
+        elif msg_source != "SYSTEM": # AI
             conversation_hist += "ASSISTANT: " + content
 
     complete_msg = []

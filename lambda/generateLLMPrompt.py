@@ -68,10 +68,11 @@ def lambda_handler(event, context):
                 mistral_messages.append({"role": "user", "content": content})
             elif msg_source == "SYSTEM":
                 mistral_messages.append({"role": "system", "content": content})
-            else:
+            else: # AI
                 complete_content = content + ";\n Reference materials: "
-                if msg_source and isinstance(msg_source, list):
-                    for source in msg_source:
+                references = message.get("references")
+                if references and isinstance(references, list):
+                    for source in references:
                         if source['documentContent'] and source['documentContent'] not in ai_sources:
                             ai_sources.add(source['documentContent'])
                             complete_content += source['documentContent'] + ";\n"

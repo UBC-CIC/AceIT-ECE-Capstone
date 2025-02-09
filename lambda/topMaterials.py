@@ -89,11 +89,12 @@ def lambda_handler(event, context):
 
         # Scan Messages table for the course and filter by timestamp and AI source
         response = messages_table.scan(
-            FilterExpression="course_id = :course_id AND msg_timestamp >= :time_threshold AND msg_source <> :excluded_source",
+            FilterExpression="course_id = :course_id AND msg_timestamp >= :time_threshold AND msg_source <> :excluded_source AND msg_source <> :excluded_source_system",
             ExpressionAttributeValues={
                 ":course_id": course_id,
                 ":time_threshold": time_threshold,
-                ":excluded_source": "STUDENT"  # Exclude messages with this source
+                ":excluded_source": "STUDENT",  # Exclude messages with this source
+                ":excluded_source_system": "SYSTEM"
             }
         )
 
@@ -106,11 +107,13 @@ def lambda_handler(event, context):
             # Use the `msg_source` field to identify materials
             msg_source = message.get("msg_source")
             print("Msg source: ", msg_source)
-            if msg_source and isinstance(msg_source, list):
-                for source in msg_source:
-                    print("source: ", source)
-                    doc_name = source.get("documentName")
-                    material_dict[doc_name] = material_dict.get(doc_name, 0) + 1
+            if msg_source == "AI":
+                references = message.get("references")
+                if references and isinstance(references, list):
+                    for source in references:
+                        print("source: ", source)
+                        doc_name = source.get("documentName")
+                        material_dict[doc_name] = material_dict.get(doc_name, 0) + 1
         print("Material dict:", material_dict)
 
         # Sort materials by frequency and get the top N
