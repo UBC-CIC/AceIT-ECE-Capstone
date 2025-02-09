@@ -82,7 +82,7 @@ def refresh_token(refresh_token, local):
             "client_secret": f"{CLIENT_SECRET}",
             "grant_type": "refresh_token",
             "redirect_uri": f"{REDIRECT_URI}",
-            "refresh_token ": f"{refresh_token}"
+            "refresh_token": f"{refresh_token}"
             }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
