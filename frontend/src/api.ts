@@ -9,6 +9,8 @@ import {
   Timeframe,
   MaterialType,
 } from "./types";
+import { getCachedData, setCachedData } from "./utils/cache";
+import { RequestManager, debounce } from "./utils/request";
 
 const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_URL;
 let accessToken: string | null = null;
@@ -27,6 +29,11 @@ export const isAccessTokenSet = () => {
 
 export const fetchCoursesAPI = async (): Promise<CourseProps[]> => {
   if (!accessToken) throw new Error("Access token is not set");
+
+  const cacheKey = "courses";
+  const cachedData = getCachedData<CourseProps[]>(cacheKey);
+  if (cachedData) return cachedData;
+
   const response = await fetch(`${API_BASE_URL}/ui/general/user/courses`, {
     headers: {
       Authorization: accessToken,
@@ -51,17 +58,24 @@ export const fetchCoursesAPI = async (): Promise<CourseProps[]> => {
     })),
   ];
 
+  setCachedData(cacheKey, courses);
   return courses;
 };
 
 export const fetchUserInfoAPI = async (): Promise<UserProps> => {
   if (!accessToken) throw new Error("Access token is not set");
+
+  const cacheKey = "userInfo";
+  const cachedData = getCachedData<UserProps>(cacheKey);
+  if (cachedData) return cachedData;
+
   const response = await fetch(`${API_BASE_URL}/ui/general/user`, {
     headers: {
       Authorization: accessToken,
     },
   });
   const data = await response.json();
+  setCachedData(cacheKey, data);
   return data;
 };
 
@@ -112,60 +126,97 @@ export const restorePastSessionAPI = async (
   return response.json();
 };
 
-export const getTopQuestionsByPeriodAPI = async (
-  course: string,
-  num: number,
-  period: Timeframe
-): Promise<string[]> => {
-  if (!accessToken) throw new Error("Access token is not set");
-  const response = await fetch(
-    `${API_BASE_URL}/ui/instructor/analytics/top-questions?course=${course}&num=${num}&period=${period}`,
-    {
-      headers: {
-        Authorization: accessToken,
-      },
-    }
-  );
-  return response.json();
-};
+const questionsRequestManager = new RequestManager();
+export const getTopQuestionsByPeriodAPI = debounce(
+  async (course: string, num: number, period: Timeframe): Promise<string[]> => {
+    if (!accessToken) throw new Error("Access token is not set");
 
-export const getTopMaterialsByPeriodAPI = async (
-  course: string,
-  num: number,
-  period: Timeframe
-): Promise<MaterialType[]> => {
-  if (!accessToken) throw new Error("Access token is not set");
-  const response = await fetch(
-    `${API_BASE_URL}/ui/instructor/analytics/top-materials?course=${course}&num=${num}&period=${period}`,
-    {
-      headers: {
-        Authorization: accessToken,
-      },
-    }
-  );
-  return response.json();
-};
+    const cacheKey = `topQuestions-${course}-${num}-${period}`;
+    const cachedData = getCachedData<string[]>(cacheKey);
+    if (cachedData) return cachedData;
 
-export const getCourseStudentEngagementAPI = async (
-  course: string,
-  period: Timeframe
-): Promise<CourseStudentEngagement> => {
-  if (!accessToken) throw new Error("Access token is not set");
-  const response = await fetch(
-    `${API_BASE_URL}/ui/instructor/analytics/engagement?course=${course}&period=${period}`,
-    {
-      headers: {
-        Authorization: accessToken,
-      },
-    }
-  );
-  return response.json();
-};
+    const response = await fetch(
+      `${API_BASE_URL}/ui/instructor/analytics/top-questions?course=${course}&num=${num}&period=${period}`,
+      {
+        headers: {
+          Authorization: accessToken,
+        },
+        signal: questionsRequestManager.getSignal(),
+      }
+    );
+    const data = await response.json();
+    setCachedData(cacheKey, data);
+    return data;
+  },
+  300
+);
+
+const materialRequestManager = new RequestManager();
+export const getTopMaterialsByPeriodAPI = debounce(
+  async (
+    course: string,
+    num: number,
+    period: Timeframe
+  ): Promise<MaterialType[]> => {
+    if (!accessToken) throw new Error("Access token is not set");
+
+    const cacheKey = `topMaterials-${course}-${num}-${period}`;
+    const cachedData = getCachedData<MaterialType[]>(cacheKey);
+    if (cachedData) return cachedData;
+
+    const response = await fetch(
+      `${API_BASE_URL}/ui/instructor/analytics/top-materials?course=${course}&num=${num}&period=${period}`,
+      {
+        headers: {
+          Authorization: accessToken,
+        },
+        signal: materialRequestManager.getSignal(),
+      }
+    );
+    const data = await response.json();
+    setCachedData(cacheKey, data);
+    return data;
+  },
+  300
+);
+
+const engagementRequestManager = new RequestManager();
+export const getCourseStudentEngagementAPI = debounce(
+  async (
+    course: string,
+    period: Timeframe
+  ): Promise<CourseStudentEngagement> => {
+    if (!accessToken) throw new Error("Access token is not set");
+
+    const cacheKey = `engagement-${course}-${period}`;
+    const cachedData = getCachedData<CourseStudentEngagement>(cacheKey);
+    if (cachedData) return cachedData;
+
+    const response = await fetch(
+      `${API_BASE_URL}/ui/instructor/analytics/engagement?course=${course}&period=${period}`,
+      {
+        headers: {
+          Authorization: accessToken,
+        },
+        signal: engagementRequestManager.getSignal(),
+      }
+    );
+    const data = await response.json();
+    setCachedData(cacheKey, data);
+    return data;
+  },
+  300
+);
 
 export const getCourseConfigurationAPI = async (
   course: string
 ): Promise<CourseConfiguration> => {
   if (!accessToken) throw new Error("Access token is not set");
+
+  const cacheKey = `config-${course}`;
+  const cachedData = getCachedData<CourseConfiguration>(cacheKey);
+  if (cachedData) return cachedData;
+
   const response = await fetch(
     `${API_BASE_URL}/ui/instructor/config?course=${course}`,
     {
@@ -174,7 +225,9 @@ export const getCourseConfigurationAPI = async (
       },
     }
   );
-  return response.json();
+  const data = await response.json();
+  setCachedData(cacheKey, data);
+  return data;
 };
 
 export const updateCourseConfigurationAPI = async (
