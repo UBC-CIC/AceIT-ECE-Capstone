@@ -9,7 +9,7 @@ export const WelcomePrompt: React.FC<WelcomePromptProps> = ({
   onConversationSelect,
 }) => {
   return (
-    <div className="flex flex-col justify-center items-center px-24 w-full max-md:px-5 max-md:max-w-full space-y-5">
+    <div className="flex flex-col justify-center items-center px-24 w-full max-md:px-5 max-md:max-w-full space-y-5 pt-20">
       <img
         loading="lazy"
         src={SparkleIcon}
@@ -21,9 +21,6 @@ export const WelcomePrompt: React.FC<WelcomePromptProps> = ({
       </div>
       {!hidePastSessions && (
         <>
-          <div className="mt-5 text-sm font-bold text-center text-stone-950">
-            Resume Past Conversation
-          </div>
           <PreviousConversationList
             courseId={selectedCourse.id}
             onConversationSelect={onConversationSelect}

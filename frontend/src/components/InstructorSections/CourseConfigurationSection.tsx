@@ -180,7 +180,7 @@ export const CourseConfigurationSection: React.FC<
   }
 
   return (
-    <form onSubmit={handleSave}>
+    <form onSubmit={handleSave} className="h-full overflow-y-auto">
       <div className="mb-3 text-sm leading-normal text-slate-500 pt-3">
         <span className="font-semibold text-indigo-950">
           Enable Student Access

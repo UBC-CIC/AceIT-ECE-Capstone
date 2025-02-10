@@ -3,7 +3,7 @@ import loadingGif from "../../assets/loading.gif";
 
 export const LoadingMessage: React.FC = () => {
   return (
-    <div className="flex flex-col w-full text-sm text-indigo-950 max-md:max-w-full">
+    <div className="flex flex-col w-full text-sm text-indigo-950 max-md:max-w-full pb-4">
       <div className="self-start p-[2px] rounded-lg bg-gradient-to-r from-[#FF86E1] to-[#89EFFF]">
         <div className="p-2.5 rounded-lg bg-white">
           <img
