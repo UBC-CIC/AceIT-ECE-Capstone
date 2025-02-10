@@ -38,8 +38,8 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
     """
     Fetch syllabus body from Canvas API.
     """
-    url = f"{base_url}/{course_id}?include[]=syllabus_body"
-    # url = "https://15.157.251.49/api/v1/courses/4?include[]=syllabus_body"
+    url = f"{base_url}/api/v1/courses/{course_id}?include[]=syllabus_body"
+    # url = f"https://15.157.251.49/api/v1/courses/{course_id}?include[]=syllabus_body"
     headers = {"Authorization": f"Bearer {auth_token}"}
 
     response = requests.get(url, headers=headers, verify=False)
