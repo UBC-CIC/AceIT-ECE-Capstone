@@ -103,6 +103,7 @@ export interface ChatSectionProps {
   selectedCourse: CourseProps;
   useDarkStyle: boolean;
   hidePastSessions: boolean;
+  resetTrigger?: string; // Add this line
 }
 
 export interface CourseNavBarItemProps {

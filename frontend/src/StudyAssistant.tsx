@@ -55,34 +55,6 @@ export const StudyAssistant = () => {
     setSelectedCourse(course);
   };
 
-  useEffect(() => {
-    const handleGlobalKeyDown = (event: KeyboardEvent) => {
-      const chatSection = document.querySelector(".chat-section");
-      if (chatSection) {
-        const messageInput = document.getElementById(
-          "messageInput"
-        ) as HTMLInputElement;
-        if (
-          event.key === "Enter" &&
-          messageInput &&
-          messageInput.value.trim() !== ""
-        ) {
-          const form = messageInput.closest("form");
-          if (form) {
-            form.requestSubmit();
-          }
-        } else if (messageInput && event.key.length === 1) {
-          messageInput.focus();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleGlobalKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleGlobalKeyDown);
-    };
-  }, []);
-
   return (
     <div className="h-full flex flex-col">
       {userInfo ? (
@@ -93,7 +65,7 @@ export const StudyAssistant = () => {
             onLogout={() => logout()}
           />
 
-          <div className="flex-1 flex gap-4 mt-4">
+          <div className="flex-1 flex gap-4 mt-4 min-h-0">
             <SideBar
               courses={courses}
               selectedCourse={selectedCourse}
@@ -103,11 +75,13 @@ export const StudyAssistant = () => {
             {selectedCourse ? (
               <>
                 {selectedCourse.userCourseRole === "STUDENT" && (
-                  <div className="flex-1 flex flex-col">
+                  <div className="flex-1 flex flex-col min-h-0">
                     <ChatSection
+                      key={selectedCourse.id}
                       selectedCourse={selectedCourse}
                       hidePastSessions={false}
                       useDarkStyle={false}
+                      resetTrigger={selectedCourse.id}
                     />
                   </div>
                 )}

@@ -24,6 +24,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   selectedCourse,
   useDarkStyle,
   hidePastSessions,
+  resetTrigger,
 }) => {
   const [messageList, setMessageList] = useState<MessageProps[]>([]);
   const [suggestionList, setSuggestionList] = useState<string[]>(suggestions);
@@ -32,6 +33,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   const [conversationId, setConversationId] = useState<string | null>(null);
 
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -59,6 +61,30 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         setIsInitialLoading(false);
       });
   }, [selectedCourse]);
+
+  useEffect(() => {
+    // Reset all state to initial values
+    setMessageList([]);
+    setSuggestionList(suggestions);
+    setIsLoading(false);
+    setIsInitialLoading(true);
+    setConversationId(null);
+
+    // Start a new conversation
+    invokeMessageAPI("")
+      .then((messages) => {
+        setMessageList(messages);
+      })
+      .finally(() => {
+        setIsInitialLoading(false);
+      });
+  }, [selectedCourse.id, resetTrigger]); // Reset when course changes or resetTrigger changes
+
+  useEffect(() => {
+    if (!isInitialLoading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isInitialLoading]);
 
   const handleSuggestionClick = (suggestion: string) => {
     const messageInput = document.getElementById(
@@ -120,6 +146,16 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
     }
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      const form = (event.target as HTMLInputElement).form;
+      if (form) {
+        handleFormSubmit(new Event("submit") as any);
+      }
+    }
+  };
+
   const handleConversationSelect = async (
     conversation: ConversationSession
   ) => {
@@ -139,8 +175,8 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 min-h-0 overflow-y-auto">
+    <div className="h-full flex flex-col min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 bg-transparent">
         {isInitialLoading ? (
           <div className="flex justify-center items-center h-64">
             <ThreeDots
@@ -153,79 +189,79 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
           </div>
         ) : (
           <div className="flex flex-col h-full">
-            <div className="flex-1 min-h-0">
-              <div className="flex flex-col w-full max-w-full">
-                <div>
-                  <div className="flex flex-col justify-center items-center w-full max-w-full mt-5">
-                    <WelcomePrompt
-                      selectedCourse={selectedCourse}
-                      hidePastSessions={hidePastSessions}
-                      onConversationSelect={handleConversationSelect}
-                    />
-                  </div>
-                  <div className="mt-8" />
-                  {messageList.map((message, index) => (
-                    <div key={index} className="mb-4 last:mb-0">
-                      <Message {...message} useDarkStyle={useDarkStyle} />
-                    </div>
-                  ))}
-                  <div ref={messageEndRef} />
-                  {isLoading && <LoadingMessage />}
-                  {suggestionList != null && suggestionList.length > 0 && (
-                    <div className="flex flex-col mt-5 w-full text-sm max-w-full">
-                      <div className="font-bold text-slate-500 max-w-full">
-                        Suggestions on what to ask
-                      </div>
-                      <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-indigo-950 max-w-full">
-                        {suggestionList.map((suggestion, index) => (
-                          <SuggestionCard
-                            key={index}
-                            text={suggestion}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div className="flex flex-col justify-center items-center w-full mt-5">
+              <WelcomePrompt
+                selectedCourse={selectedCourse}
+                hidePastSessions={hidePastSessions}
+                onConversationSelect={handleConversationSelect}
+              />
             </div>
+            <div className="flex flex-col-reverse flex-1 mt-8">
+              {isLoading && <LoadingMessage />}
+              {[...messageList].reverse().map((message, index) => (
+                <div key={index} className="mb-4">
+                  <Message {...message} useDarkStyle={useDarkStyle} />
+                </div>
+              ))}
+            </div>
+            <div ref={messageEndRef} />
           </div>
         )}
       </div>
-      {isInitialLoading ? null : (
-        <div className="flex-none mt-5">
-          <form
-            className="flex flex-wrap justify-between p-2.5 w-full bg-white rounded-lg shadow-[0px_0px_40px_rgba(137,188,255,0.45)] max-md:max-w-full"
-            onSubmit={handleFormSubmit}
-          >
-            <label htmlFor="messageInput" className="sr-only">
-              Ask me anything about your class
-            </label>
-            <input
-              id="messageInput"
-              type="text"
-              className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
-              placeholder="Ask me anything about your class"
-              autoComplete="off"
-            />
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`flex overflow-hidden gap-2.5 justify-center items-end px-1.5 w-8 h-full ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+
+      {!isInitialLoading && (
+        <div className="flex-none bg-transparent">
+          {suggestionList != null && suggestionList.length > 0 && (
+            <div className="flex flex-col mb-4 w-full text-sm">
+              <div className="font-bold text-slate-500">
+                Suggestions on what to ask
+              </div>
+              <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-indigo-950">
+                {suggestionList.map((suggestion, index) => (
+                  <SuggestionCard
+                    key={index}
+                    text={suggestion}
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          <div>
+            <form
+              className="flex flex-wrap justify-between p-2.5 w-full bg-white rounded-lg shadow-[0px_0px_40px_rgba(137,188,255,0.45)]"
+              onSubmit={handleFormSubmit}
             >
-              <img
-                loading="lazy"
-                src={SendIcon}
-                alt="Send message"
-                className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
-                  isLoading ? "opacity-50" : ""
-                }`}
+              <label htmlFor="messageInput" className="sr-only">
+                Ask me anything about your class
+              </label>
+              <input
+                ref={inputRef}
+                id="messageInput"
+                type="text"
+                className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
+                placeholder="Ask me anything about your class"
+                autoComplete="off"
+                onKeyDown={handleKeyDown}
               />
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`flex overflow-hidden gap-2.5 justify-center items-end px-1.5 w-8 h-full ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                <img
+                  loading="lazy"
+                  src={SendIcon}
+                  alt="Send message"
+                  className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
+                    isLoading ? "opacity-50" : ""
+                  }`}
+                />
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>

@@ -27,6 +27,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
       case "Test Assistant":
         return (
           <ChatSection
+            key={`${selectedCourse.id}-${activeSection}`}
             selectedCourse={selectedCourse}
             hidePastSessions={true}
             useDarkStyle={true}
@@ -56,8 +57,8 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
           </div>
         </div>
       )}
-      <div className="flex-1 min-h-0 px-6 pb-6 overflow-hidden">
-        {renderContent()}
+      <div className="flex-1 min-h-0 px-6 pb-6 overflow-y-auto">
+        <div className="h-full">{renderContent()}</div>
       </div>
     </div>
   );

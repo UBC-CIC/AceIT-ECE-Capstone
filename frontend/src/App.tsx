@@ -5,6 +5,7 @@ import { StudyAssistant } from "./StudyAssistant.tsx";
 import { Toaster } from "react-hot-toast";
 import { handleAuthentication } from "./auth.ts";
 import { setAccessToken } from "./api.ts";
+import { SkeletonTheme } from "react-loading-skeleton";
 
 export const App = () => {
   const [accessToken, setAccessTokenState] = useState<string | null>(null);
@@ -28,12 +29,10 @@ export const App = () => {
       }}
     >
       <StrictMode>
-        <Toaster position="top-center" />
-        {accessToken !== null && (
-          <div className="flex-1 h-full overflow-hidden">
-            <StudyAssistant />
-          </div>
-        )}
+        <SkeletonTheme baseColor="#a6a3d1" highlightColor="#9e9adb">
+          <Toaster position="top-center" />
+          {accessToken !== null && <StudyAssistant />}
+        </SkeletonTheme>
       </StrictMode>
     </div>
   );
