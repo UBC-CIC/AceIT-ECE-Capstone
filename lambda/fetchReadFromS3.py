@@ -10,10 +10,12 @@ from bs4 import BeautifulSoup
 import psycopg2
 from datetime import datetime
 import psycopg2.extras
+import utils.get_canvas_secret
 from utils.get_rds_secret import get_secret
 from io import BytesIO
 from utils.create_course_vectors_tables import create_table_if_not_exists
-from bs4 import BeautifulSoup
+from utils.get_course_related_stuff import fetch_syllabus_from_canvas
+import utils
 
 s3_client = boto3.client("s3")
 bedrock = boto3.client("bedrock-runtime",
@@ -114,6 +116,22 @@ def lambda_handler(event, context):
             embeddings.append({file_key: document_embeddings})
     
     print("file metadata: ", files_metadata)
+
+    # add canvas syllabus
+    secret = utils.get_canvas_secret.get_secret()
+    credentials = json.loads(secret)
+    BASE_URL = credentials['baseURL']
+    TOKEN = credentials['adminAccessToken']
+    url = f"{BASE_URL}/{course_id}?include[]=syllabus_body"
+    syllabus_text = fetch_syllabus_from_canvas(TOKEN, BASE_URL, course_id)
+    if syllabus_text:
+        syllabus_chunks = text_splitter.split_text(syllabus_text)
+        embeddings = []
+        for chunk in syllabus_chunks:
+            embedding = generate_embeddings(chunk)
+            if embedding:
+                embeddings.append(embedding)
+                store_embeddings("Syllabus", embedding, course_id, DB_CONFIG, url, chunk)
 
     # 4. Return the results
     return {

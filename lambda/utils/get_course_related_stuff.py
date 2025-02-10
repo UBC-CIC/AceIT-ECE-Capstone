@@ -4,6 +4,7 @@ import uuid
 import datetime
 from .get_canvas_secret import get_secret
 import requests
+from bs4 import BeautifulSoup
 
 lambda_client = boto3.client('lambda')
 def call_course_activity_stream(auth_token, course_id):
@@ -32,3 +33,30 @@ def call_course_activity_stream(auth_token, course_id):
     except requests.exceptions.RequestException as req_err:
         print(f"Request error occurred: {req_err}")
         return None
+    
+def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
+    """
+    Fetch syllabus body from Canvas API.
+    """
+    url = f"{base_url}/{course_id}?include[]=syllabus_body"
+    # url = "https://15.157.251.49/api/v1/courses/4?include[]=syllabus_body"
+    headers = {"Authorization": f"Bearer {auth_token}"}
+
+    response = requests.get(url, headers=headers, verify=False)
+    if response.status_code == 200:
+        course_data = response.json()
+        syllabus_body = course_data.get("syllabus_body", "")
+
+        if syllabus_body:
+            # Convert HTML to plain text
+            print("syllabus body: ", syllabus_body)
+            soup = BeautifulSoup(syllabus_body, "html.parser")
+            print("soup: ", soup.get_text(separator="\n").strip())
+            return soup.get_text(separator="\n").strip()
+    
+    print(f"Failed to fetch syllabus: {response.status_code}, {response.text}")
+    return None
+
+# if __name__ == "__main__":
+#     a = fetch_syllabus_from_canvas("CXekV2e68mxaNx2vB2kWDhAwQ4vXHY63QFXDe6KyePrG7kQMZEaMQ3PxKkrFWfr6", 4)
+#     print(type(a))

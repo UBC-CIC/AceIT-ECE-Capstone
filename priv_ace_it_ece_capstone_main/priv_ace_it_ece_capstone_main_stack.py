@@ -353,7 +353,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="studentSendMsg.lambda_handler",
-            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
+            layers=[langchain_layer, pymupdf_layer, other_text_related_layer, boto3_layer, psycopg_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
