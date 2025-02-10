@@ -10,6 +10,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { sendMessageAPI, restorePastSessionAPI } from "../../api";
 import SendIcon from "../../assets/Send-Icon.svg";
+import { ThreeDots } from "react-loader-spinner";
 
 // TODO: Replace in the future with dynamic suggestions from the backend (generated via AI)
 const suggestions: string[] = [
@@ -27,6 +28,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   const [messageList, setMessageList] = useState<MessageProps[]>([]);
   const [suggestionList, setSuggestionList] = useState<string[]>(suggestions);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
 
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -46,8 +48,16 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       messageInput.value = "";
     }
 
+    setIsInitialLoading(true);
+
     // Invoke the message API to generate the conversationId and get the initial AI message prompt
-    invokeMessageAPI("");
+    invokeMessageAPI("")
+      .then((messages) => {
+        setMessageList(messages);
+      })
+      .finally(() => {
+        setIsInitialLoading(false);
+      });
   }, [selectedCourse]);
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -126,74 +136,87 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   return (
     <div className="h-full flex flex-col chat-section">
       <div className="flex-1 overflow-y-auto">
-        <div className="flex flex-col w-full max-w-full h-full">
-          <div className="mt-auto">
-            <div className="flex flex-col justify-center items-center w-full max-w-full mt-5">
-              <WelcomePrompt
-                selectedCourse={selectedCourse}
-                hidePastSessions={hidePastSessions}
-                onConversationSelect={handleConversationSelect}
-              />
-            </div>
-            <div style={{ marginTop: "150px" }}></div>
-            {messageList.map((message, index) => (
-              <div key={index} className="mb-4 last:mb-0">
-                <Message {...message} useDarkStyle={useDarkStyle} />
-              </div>
-            ))}
-            <div ref={messageEndRef} />
-            {isLoading && <LoadingMessage />}
-            {suggestionList != null && suggestionList.length > 0 && (
-              <div className="flex flex-col mt-5 w-full text-sm max-w-full">
-                <div className="font-bold text-slate-500 max-w-full">
-                  Suggestions on what to ask
-                </div>
-                <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-indigo-950 max-w-full">
-                  {suggestionList.map((suggestion, index) => (
-                    <SuggestionCard
-                      key={index}
-                      text={suggestion}
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+        {isInitialLoading ? (
+          <div className="flex justify-center items-center h-64">
+            <ThreeDots
+              height="50"
+              width="50"
+              radius="9"
+              color="#1e1b4b"
+              ariaLabel="loading-conversation"
+            />
           </div>
-        </div>
+        ) : (
+          <>
+            <div className="flex flex-col w-full max-w-full h-full">
+              <div className="mt-auto">
+                <div className="flex flex-col justify-center items-center w-full max-w-full mt-5">
+                  <WelcomePrompt
+                    selectedCourse={selectedCourse}
+                    hidePastSessions={hidePastSessions}
+                    onConversationSelect={handleConversationSelect}
+                  />
+                </div>
+                <div style={{ marginTop: "150px" }}></div>
+                {messageList.map((message, index) => (
+                  <div key={index} className="mb-4 last:mb-0">
+                    <Message {...message} useDarkStyle={useDarkStyle} />
+                  </div>
+                ))}
+                <div ref={messageEndRef} />
+                {isLoading && <LoadingMessage />}
+                {suggestionList != null && suggestionList.length > 0 && (
+                  <div className="flex flex-col mt-5 w-full text-sm max-w-full">
+                    <div className="font-bold text-slate-500 max-w-full">
+                      Suggestions on what to ask
+                    </div>
+                    <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-indigo-950 max-w-full">
+                      {suggestionList.map((suggestion, index) => (
+                        <SuggestionCard
+                          key={index}
+                          text={suggestion}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <form
+              className="flex flex-wrap justify-between p-2.5 mt-5 w-full bg-white rounded-lg shadow-[0px_0px_40px_rgba(137,188,255,0.45)] max-md:max-w-full"
+              onSubmit={handleFormSubmit}
+            >
+              <label htmlFor="messageInput" className="sr-only">
+                Ask me anything about your class
+              </label>
+              <input
+                id="messageInput"
+                type="text"
+                className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
+                placeholder="Ask me anything about your class"
+                autoComplete="off"
+              />
+              <button
+                type="submit"
+                disabled={isLoading}
+                className={`flex overflow-hidden gap-2.5 justify-center items-end px-1.5 w-8 h-full ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                <img
+                  loading="lazy"
+                  src={SendIcon}
+                  alt="Send message"
+                  className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
+                    isLoading ? "opacity-50" : ""
+                  }`}
+                />
+              </button>
+            </form>
+          </>
+        )}
       </div>
-
-      <form
-        className="flex flex-wrap justify-between p-2.5 mt-5 w-full bg-white rounded-lg shadow-[0px_0px_40px_rgba(137,188,255,0.45)] max-md:max-w-full"
-        onSubmit={handleFormSubmit}
-      >
-        <label htmlFor="messageInput" className="sr-only">
-          Ask me anything about your class
-        </label>
-        <input
-          id="messageInput"
-          type="text"
-          className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
-          placeholder="Ask me anything about your class"
-          autoComplete="off"
-        />
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`flex overflow-hidden gap-2.5 justify-center items-end px-1.5 w-8 h-full ${
-            isLoading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          <img
-            loading="lazy"
-            src={SendIcon}
-            alt="Send message"
-            className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
-              isLoading ? "opacity-50" : ""
-            }`}
-          />
-        </button>
-      </form>
     </div>
   );
 };

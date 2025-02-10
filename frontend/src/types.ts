@@ -26,7 +26,7 @@ export interface SuggestionProps {
 
 export interface MessageProps {
   time: string;
-  content: React.ReactNode;
+  content: string; // Now explicitly a string containing Markdown
   isUserMessage?: boolean;
   useDarkStyle?: boolean;
 }
@@ -41,11 +41,11 @@ export interface MessageReference {
 
 export interface ConversationMessage {
   message_id: string;
-  content: string;
-  msg_source: MessageSource | MessageSource[];
+  content: string; // Markdown formatted string
+  msg_source: MessageSource;
   course_id: string;
   msg_timestamp: string;
-  references: MessageReference[];
+  references?: MessageReference[];
   student_id?: string;
 }
 
@@ -111,14 +111,17 @@ export interface CourseNavBarItemProps {
   onClick?: () => void;
 }
 
+export type IncludedCourseContentType = keyof IncludedCourseContent;
+export type SupportedQuestionsType = keyof SupportedQuestions;
+
 export interface CourseContentItem {
   title: string;
-  type: IncludedCourseContent;
+  type: IncludedCourseContentType;
 }
 
 export interface SupportedQuestionItem {
   title: string;
-  type: SupportedQuestions;
+  type: SupportedQuestionsType;
 }
 
 export interface CheckboxItemProps {
@@ -127,28 +130,32 @@ export interface CheckboxItemProps {
   onChange: () => void;
 }
 
-export type SupportedQuestions =
-  | "RECOMMENDATIONS"
-  | "PRACTICE_PROBLEMS"
-  | "SOLUTION_REVIEW"
-  | "EXPLANATION";
+export interface IncludedCourseContent {
+  HOME: boolean;
+  ANNOUNCEMENTS: boolean;
+  SYLLABUS: boolean;
+  ASSIGNMENTS: boolean;
+  MODULES: boolean;
+  FILES: boolean;
+  QUIZZES: boolean;
+  DISCUSSIONS: boolean;
+  PAGES: boolean;
+}
 
-export type IncludedCourseContent =
-  | "HOME"
-  | "ANNOUNCEMENTS"
-  | "SYLLABUS"
-  | "ASSIGNMENTS"
-  | "MODULES"
-  | "FILES"
-  | "QUIZZES"
-  | "DISCUSSIONS"
-  | "PAGES";
+export interface SupportedQuestions {
+  RECOMMENDATIONS: boolean;
+  PRACTICE_PROBLEMS: boolean;
+  SOLUTION_REVIEW: boolean;
+  EXPLANATION: boolean;
+}
 
 export interface CourseConfiguration {
   studentAccessEnabled: boolean;
-  selectedIncludedCourseContent: IncludedCourseContent[];
-  selectedSupportedQuestions: SupportedQuestions[];
+  selectedIncludedCourseContent: IncludedCourseContent;
+  selectedSupportedQuestions: SupportedQuestions;
   customResponseFormat: string;
+  systemPrompt?: string;
+  materialLastUpdatedTime?: string;
 }
 
 export interface ToggleProps {

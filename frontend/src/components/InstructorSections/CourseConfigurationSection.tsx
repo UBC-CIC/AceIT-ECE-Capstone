@@ -8,13 +8,14 @@ import {
   SupportedQuestions,
   IncludedCourseContent,
   SupportedQuestionItem,
+  IncludedCourseContentType,
+  SupportedQuestionsType,
 } from "../../types";
 import toast from "react-hot-toast";
 import {
   getCourseConfigurationAPI,
   updateCourseConfigurationAPI,
 } from "../../api";
-import { areSetsEqual } from "../../utils";
 import { ThreeDots } from "react-loader-spinner";
 
 type CourseConfigurationSectionProps = {
@@ -28,12 +29,25 @@ export const CourseConfigurationSection: React.FC<
     React.useState<CourseConfiguration | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isEnabled, setIsEnabled] = React.useState(false);
-  const [selectedContent, setSelectedContent] = React.useState<
-    Set<IncludedCourseContent>
-  >(new Set());
-  const [selectedQuestions, setSelectedQuestions] = React.useState<
-    Set<SupportedQuestions>
-  >(new Set());
+  const [selectedContent, setSelectedContent] =
+    React.useState<IncludedCourseContent>({
+      HOME: false,
+      ANNOUNCEMENTS: false,
+      SYLLABUS: false,
+      ASSIGNMENTS: false,
+      MODULES: false,
+      FILES: false,
+      QUIZZES: false,
+      DISCUSSIONS: false,
+      PAGES: false,
+    });
+  const [selectedQuestions, setSelectedQuestions] =
+    React.useState<SupportedQuestions>({
+      RECOMMENDATIONS: false,
+      PRACTICE_PROBLEMS: false,
+      SOLUTION_REVIEW: false,
+      EXPLANATION: false,
+    });
   const [responseFormat, setResponseFormat] = React.useState("");
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -44,8 +58,8 @@ export const CourseConfigurationSection: React.FC<
         const config = await getCourseConfigurationAPI(selectedCourse.id);
         setInitialConfig(config);
         setIsEnabled(config.studentAccessEnabled);
-        setSelectedContent(new Set(config.selectedIncludedCourseContent));
-        setSelectedQuestions(new Set(config.selectedSupportedQuestions));
+        setSelectedContent(config.selectedIncludedCourseContent);
+        setSelectedQuestions(config.selectedSupportedQuestions);
         setResponseFormat(config.customResponseFormat);
       } catch (error) {
         console.error("Error fetching configuration:", error);
@@ -61,14 +75,10 @@ export const CourseConfigurationSection: React.FC<
     return (
       isEnabled !== initialConfig.studentAccessEnabled ||
       responseFormat !== initialConfig.customResponseFormat ||
-      !areSetsEqual(
-        selectedContent,
-        new Set(initialConfig.selectedIncludedCourseContent)
-      ) ||
-      !areSetsEqual(
-        selectedQuestions,
-        new Set(initialConfig.selectedSupportedQuestions)
-      )
+      JSON.stringify(selectedContent) !==
+        JSON.stringify(initialConfig.selectedIncludedCourseContent) ||
+      JSON.stringify(selectedQuestions) !==
+        JSON.stringify(initialConfig.selectedSupportedQuestions)
     );
   }, [
     isEnabled,
@@ -86,8 +96,8 @@ export const CourseConfigurationSection: React.FC<
     try {
       const newConfig: CourseConfiguration = {
         studentAccessEnabled: isEnabled,
-        selectedIncludedCourseContent: Array.from(selectedContent),
-        selectedSupportedQuestions: Array.from(selectedQuestions),
+        selectedIncludedCourseContent: selectedContent,
+        selectedSupportedQuestions: selectedQuestions,
         customResponseFormat: responseFormat,
       };
       await updateCourseConfigurationAPI(selectedCourse.id, newConfig);
@@ -101,26 +111,58 @@ export const CourseConfigurationSection: React.FC<
     }
   };
 
+  const handleContentChange = (type: IncludedCourseContentType) => {
+    setSelectedContent((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  };
+
+  const handleQuestionChange = (type: SupportedQuestionsType) => {
+    setSelectedQuestions((prev) => ({
+      ...prev,
+      [type]: !prev[type],
+    }));
+  };
+
+  const handleResponseFormatChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setResponseFormat(e.target.value);
+  };
+
   const courseContent: CourseContentItem[] = [
-    { title: "Home", type: "HOME" },
-    { title: "Announcements", type: "ANNOUNCEMENTS" },
-    { title: "Syllabus", type: "SYLLABUS" },
-    { title: "Assignments", type: "ASSIGNMENTS" },
-    { title: "Modules", type: "MODULES" },
-    { title: "Files", type: "FILES" },
-    { title: "Quizzes", type: "QUIZZES" },
-    { title: "Discussions", type: "DISCUSSIONS" },
-    { title: "Pages", type: "PAGES" },
+    { title: "Home", type: "HOME" as IncludedCourseContentType },
+    {
+      title: "Announcements",
+      type: "ANNOUNCEMENTS" as IncludedCourseContentType,
+    },
+    { title: "Syllabus", type: "SYLLABUS" as IncludedCourseContentType },
+    { title: "Assignments", type: "ASSIGNMENTS" as IncludedCourseContentType },
+    { title: "Modules", type: "MODULES" as IncludedCourseContentType },
+    { title: "Files", type: "FILES" as IncludedCourseContentType },
+    { title: "Quizzes", type: "QUIZZES" as IncludedCourseContentType },
+    { title: "Discussions", type: "DISCUSSIONS" as IncludedCourseContentType },
+    { title: "Pages", type: "PAGES" as IncludedCourseContentType },
   ];
 
   const supportedQuestions: SupportedQuestionItem[] = [
     {
       title: "Learning Recommendations (Tips and Suggested Materials)",
-      type: "RECOMMENDATIONS",
+      type: "RECOMMENDATIONS" as SupportedQuestionsType,
     },
-    { title: "Practice Problem Generation", type: "PRACTICE_PROBLEMS" },
-    { title: "Solution Review / Feedback", type: "SOLUTION_REVIEW" },
-    { title: "Problem Explanation", type: "EXPLANATION" },
+    {
+      title: "Practice Problem Generation",
+      type: "PRACTICE_PROBLEMS" as SupportedQuestionsType,
+    },
+    {
+      title: "Solution Review / Feedback",
+      type: "SOLUTION_REVIEW" as SupportedQuestionsType,
+    },
+    {
+      title: "Problem Explanation",
+      type: "EXPLANATION" as SupportedQuestionsType,
+    },
   ];
 
   if (isLoading) {
@@ -182,16 +224,8 @@ export const CourseConfigurationSection: React.FC<
             <CheckboxItem
               key={item.type}
               title={item.title}
-              checked={selectedContent.has(item.type)}
-              onChange={() => {
-                const newSelected = new Set(selectedContent);
-                if (selectedContent.has(item.type)) {
-                  newSelected.delete(item.type);
-                } else {
-                  newSelected.add(item.type);
-                }
-                setSelectedContent(newSelected);
-              }}
+              checked={selectedContent[item.type]}
+              onChange={() => handleContentChange(item.type)}
             />
           ))}
         </div>
@@ -214,18 +248,10 @@ export const CourseConfigurationSection: React.FC<
         <div className="flex flex-col gap-3 mt-3 max-sm:gap-2">
           {supportedQuestions.map((item) => (
             <CheckboxItem
-              key={item.title}
+              key={item.type}
               title={item.title}
-              checked={selectedQuestions.has(item.type)}
-              onChange={() => {
-                const newSelected = new Set(selectedQuestions);
-                if (selectedQuestions.has(item.type)) {
-                  newSelected.delete(item.type);
-                } else {
-                  newSelected.add(item.type);
-                }
-                setSelectedQuestions(newSelected);
-              }}
+              checked={selectedQuestions[item.type]}
+              onChange={() => handleQuestionChange(item.type)}
             />
           ))}
         </div>
@@ -252,7 +278,7 @@ export const CourseConfigurationSection: React.FC<
         id="responseFormat"
         type="text"
         value={responseFormat}
-        onChange={(e) => setResponseFormat(e.target.value)}
+        onChange={handleResponseFormatChange}
         placeholder="e.g. answer casually with lots of emojis with as much detail as possible"
         className="p-2.5 w-full text-sm rounded-lg border border-solid border-stone-950 border-opacity-30 text-indigo-950"
       />

@@ -1,4 +1,5 @@
 import * as React from "react";
+import ReactMarkdown from "react-markdown";
 import { MessageProps } from "../../types";
 
 export const Message: React.FC<MessageProps> = ({
@@ -21,7 +22,7 @@ export const Message: React.FC<MessageProps> = ({
           useDarkStyle ? "border-indigo-300" : "border-white"
         } border-solid bg-white bg-opacity-50 max-md:max-w-full`}
       >
-        {content}
+        <ReactMarkdown>{content}</ReactMarkdown>
       </div>
     </div>
   );
