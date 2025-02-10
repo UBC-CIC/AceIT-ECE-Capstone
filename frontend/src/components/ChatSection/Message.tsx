@@ -3,6 +3,18 @@ import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { MessageProps } from "../../types";
 
+const deduplicateReferences = (
+  references: Array<{ documentName: string; sourceUrl: string }>
+) => {
+  const seen = new Set<string>();
+  return references.filter((ref) => {
+    const key = `${ref.documentName}-${ref.sourceUrl}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
 export const Message: React.FC<MessageProps> = ({
   time,
   content,
@@ -19,6 +31,8 @@ export const Message: React.FC<MessageProps> = ({
   }, [content]);
 
   if (!isReady) return null;
+
+  const uniqueReferences = references ? deduplicateReferences(references) : [];
 
   return (
     <div className="flex flex-col w-full text-sm text-indigo-950 max-md:max-w-full">
@@ -39,13 +53,13 @@ export const Message: React.FC<MessageProps> = ({
         >
           {content}
         </ReactMarkdown>
-        {references && references.length > 0 && (
+        {uniqueReferences.length > 0 && (
           <>
-            <div className="border-b-2 border-[#030852] my-2" />
+            <div className="border-b-2 border-[#030852] my-2 opacity-[0.17]" />
             <div>
               <strong>Reference Materials</strong>
               <ul className="list-disc pl-5 mt-1">
-                {references.map((reference, index) => (
+                {uniqueReferences.map((reference, index) => (
                   <li key={index}>
                     <a
                       href={reference.sourceUrl}
