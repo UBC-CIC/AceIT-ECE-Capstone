@@ -52,7 +52,8 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
             print("syllabus body: ", syllabus_body)
             soup = BeautifulSoup(syllabus_body, "html.parser")
             print("soup: ", soup.get_text(separator="\n").strip())
-            return soup.get_text(separator="\n").strip()
+            str_syllabus = "syllabus: " + soup.get_text(separator="\n").strip() + "; syllabus link: " + url
+            return str_syllabus
     
     print(f"Failed to fetch syllabus: {response.status_code}, {response.text}")
     return None
