@@ -125,7 +125,6 @@ def lambda_handler(event, context):
     url = f"{BASE_URL}/{course_id}?include[]=syllabus_body"
     syllabus_text = fetch_syllabus_from_canvas(TOKEN, BASE_URL, course_id)
     if syllabus_text:
-        syllabus_text += "syllabus link: " + url
         syllabus_chunks = text_splitter.split_text(syllabus_text)
         embeddings = []
         for chunk in syllabus_chunks:
