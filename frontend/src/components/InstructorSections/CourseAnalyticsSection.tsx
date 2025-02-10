@@ -79,7 +79,7 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
   }, [selectedCourse]);
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex flex-col gap-4 w-full h-full overflow-y-auto">
       <EngagementCard
         questionsAsked={studentEngagementData?.questionsAsked ?? 0}
         studentSessions={studentEngagementData?.studentSessions ?? 0}

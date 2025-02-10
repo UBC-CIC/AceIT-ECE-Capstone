@@ -46,7 +46,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
         />
       </div>
       {activeSection == "Test Assistant" && (
-        <div className="flex-none pb-2 px-4 mb-2">
+        <div className="flex-none pb-2 px-4">
           <div className="bg-violet-100 border-l-4 border-indigo-950 p-4 rounded-sm">
             <p className="text-sm text-indigo-950">
               Note: Any changes to the "Included Course Content" made in the
@@ -56,7 +56,9 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
           </div>
         </div>
       )}
-      <div className="flex-1 min-h-0 px-6 pb-6">{renderContent()}</div>
+      <div className="flex-1 min-h-0 px-6 pb-6 overflow-hidden">
+        {renderContent()}
+      </div>
     </div>
   );
 };

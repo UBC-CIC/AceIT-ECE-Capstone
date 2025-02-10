@@ -89,6 +89,9 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   };
 
   const handleFormSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    // Ignore message submissions if currently loading
+    if (isInitialLoading || isLoading) return;
+
     event.preventDefault();
     const messageInput = document.getElementById(
       "messageInput"
@@ -151,8 +154,8 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         ) : (
           <div className="flex flex-col h-full">
             <div className="flex-1 min-h-0">
-              <div className="flex flex-col w-full max-w-full h-full">
-                <div className="mt-auto">
+              <div className="flex flex-col w-full max-w-full">
+                <div>
                   <div className="flex flex-col justify-center items-center w-full max-w-full mt-5">
                     <WelcomePrompt
                       selectedCourse={selectedCourse}
@@ -160,7 +163,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
                       onConversationSelect={handleConversationSelect}
                     />
                   </div>
-                  <div style={{ marginTop: "150px" }}></div>
+                  <div className="mt-8" />
                   {messageList.map((message, index) => (
                     <div key={index} className="mb-4 last:mb-0">
                       <Message {...message} useDarkStyle={useDarkStyle} />
@@ -190,37 +193,41 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
           </div>
         )}
       </div>
-      <form
-        className="flex-none flex flex-wrap justify-between p-2.5 mt-5 w-full bg-white rounded-lg shadow-[0px_0px_40px_rgba(137,188,255,0.45)] max-md:max-w-full"
-        onSubmit={handleFormSubmit}
-      >
-        <label htmlFor="messageInput" className="sr-only">
-          Ask me anything about your class
-        </label>
-        <input
-          id="messageInput"
-          type="text"
-          className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
-          placeholder="Ask me anything about your class"
-          autoComplete="off"
-        />
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`flex overflow-hidden gap-2.5 justify-center items-end px-1.5 w-8 h-full ${
-            isLoading ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          <img
-            loading="lazy"
-            src={SendIcon}
-            alt="Send message"
-            className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
-              isLoading ? "opacity-50" : ""
-            }`}
-          />
-        </button>
-      </form>
+      {isInitialLoading ? null : (
+        <div className="flex-none mt-5">
+          <form
+            className="flex flex-wrap justify-between p-2.5 w-full bg-white rounded-lg shadow-[0px_0px_40px_rgba(137,188,255,0.45)] max-md:max-w-full"
+            onSubmit={handleFormSubmit}
+          >
+            <label htmlFor="messageInput" className="sr-only">
+              Ask me anything about your class
+            </label>
+            <input
+              id="messageInput"
+              type="text"
+              className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
+              placeholder="Ask me anything about your class"
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`flex overflow-hidden gap-2.5 justify-center items-end px-1.5 w-8 h-full ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              <img
+                loading="lazy"
+                src={SendIcon}
+                alt="Send message"
+                className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
+                  isLoading ? "opacity-50" : ""
+                }`}
+              />
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
