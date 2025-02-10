@@ -84,7 +84,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
           minute: "2-digit",
         }),
         content: msg.content,
-        isUserMessage: msg.msg_source === "USER",
+        isUserMessage: msg.msg_source === "STUDENT",
       }));
   };
 
@@ -109,7 +109,9 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       setIsLoading(true);
       setSuggestionList([]);
 
-      const aiResponses = await invokeMessageAPI(userMessage.content);
+      const aiResponses = (await invokeMessageAPI(userMessage.content)).filter(
+        (msg) => msg.isUserMessage === false
+      );
       setMessageList((prevMessages) => [...prevMessages, ...aiResponses]);
       setIsLoading(false);
     }
@@ -128,7 +130,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
           minute: "2-digit",
         }),
         content: msg.content,
-        isUserMessage: msg.msg_source === "USER",
+        isUserMessage: msg.msg_source === "STUDENT",
       }));
     setMessageList(restoredMessages);
   };

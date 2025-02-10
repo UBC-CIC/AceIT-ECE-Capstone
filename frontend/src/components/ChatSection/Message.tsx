@@ -22,7 +22,13 @@ export const Message: React.FC<MessageProps> = ({
           useDarkStyle ? "border-indigo-300" : "border-white"
         } border-solid bg-white bg-opacity-50 max-md:max-w-full`}
       >
-        <ReactMarkdown>{content}</ReactMarkdown>
+        <ReactMarkdown
+          components={{
+            p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
+          }}
+        >
+          {content}
+        </ReactMarkdown>
       </div>
     </div>
   );

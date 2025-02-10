@@ -26,12 +26,12 @@ export interface SuggestionProps {
 
 export interface MessageProps {
   time: string;
-  content: string; // Now explicitly a string containing Markdown
+  content: string; // Markdown formatted string
   isUserMessage?: boolean;
   useDarkStyle?: boolean;
 }
 
-export type MessageSource = "USER" | "AI" | "SYSTEM";
+export type MessageSource = "STUDENT" | "AI" | "SYSTEM";
 
 export interface MessageReference {
   documentName: string;
