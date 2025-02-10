@@ -18,7 +18,7 @@ export const App = () => {
 
   return (
     <div
-      className="h-screen flex flex-col overflow-hidden px-6 py-5 w-auto bg-white"
+      className="h-screen flex flex-col px-6 py-5 w-auto bg-white"
       style={{
         background: `linear-gradient(to bottom right, 
           rgba(137, 188, 255, 1) 0%,
@@ -30,7 +30,7 @@ export const App = () => {
       <StrictMode>
         <Toaster position="top-center" />
         {accessToken !== null && (
-          <div className="h-full">
+          <div className="flex-1 h-full overflow-hidden">
             <StudyAssistant />
           </div>
         )}

@@ -38,15 +38,15 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
   };
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <div className="py-5 px-4">
+    <div className="flex flex-col h-full">
+      <div className="flex-none py-5 px-4">
         <CourseNavBar
           onSectionChange={setActiveSection}
           activeSection={activeSection}
         />
       </div>
       {activeSection == "Test Assistant" && (
-        <div className="pb-2 px-4 mb-2">
+        <div className="flex-none pb-2 px-4 mb-2">
           <div className="bg-violet-100 border-l-4 border-indigo-950 p-4 rounded-sm">
             <p className="text-sm text-indigo-950">
               Note: Any changes to the "Included Course Content" made in the
@@ -56,7 +56,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
           </div>
         </div>
       )}
-      <div className="flex-1 overflow-auto px-6 pb-6">{renderContent()}</div>
+      <div className="flex-1 min-h-0 px-6 pb-6">{renderContent()}</div>
     </div>
   );
 };
