@@ -29,6 +29,7 @@ export interface MessageProps {
   content: string; // Markdown formatted string
   isUserMessage?: boolean;
   useDarkStyle?: boolean;
+  references?: MessageReference[];
 }
 
 export type MessageSource = "STUDENT" | "AI" | "SYSTEM";

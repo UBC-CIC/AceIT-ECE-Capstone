@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { MessageProps } from "../../types";
 
@@ -7,8 +8,17 @@ export const Message: React.FC<MessageProps> = ({
   content,
   isUserMessage,
   useDarkStyle,
+  references,
 }) => {
+  const [isReady, setIsReady] = useState(false);
   const sender = isUserMessage ? "You" : "Ace It AI";
+
+  useEffect(() => {
+    setIsReady(false);
+    requestAnimationFrame(() => setIsReady(true));
+  }, [content]);
+
+  if (!isReady) return null;
 
   return (
     <div className="flex flex-col w-full text-sm text-indigo-950 max-md:max-w-full">
@@ -29,6 +39,28 @@ export const Message: React.FC<MessageProps> = ({
         >
           {content}
         </ReactMarkdown>
+        {references && references.length > 0 && (
+          <>
+            <div className="border-b-2 border-[#030852] my-2" />
+            <div>
+              <strong>Reference Materials</strong>
+              <ul className="list-disc pl-5 mt-1">
+                {references.map((reference, index) => (
+                  <li key={index}>
+                    <a
+                      href={reference.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {reference.documentName}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

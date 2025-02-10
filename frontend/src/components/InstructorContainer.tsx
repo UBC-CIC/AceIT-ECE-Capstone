@@ -31,6 +31,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
             selectedCourse={selectedCourse}
             hidePastSessions={true}
             useDarkStyle={true}
+            resetTrigger={activeSection}
           />
         );
       default:

@@ -111,6 +111,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         }),
         content: msg.content,
         isUserMessage: msg.msg_source === "STUDENT",
+        references: msg.references,
       }));
   };
 
@@ -131,6 +132,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         time: formattedTime,
         content: messageInput.value,
         isUserMessage: true,
+        references: undefined,
       };
       setMessageList([...messageList, userMessage]);
       messageInput.value = "";
@@ -170,6 +172,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         }),
         content: msg.content,
         isUserMessage: msg.msg_source === "STUDENT",
+        references: msg.references,
       }));
     setMessageList(restoredMessages);
   };
