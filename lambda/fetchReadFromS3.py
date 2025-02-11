@@ -122,7 +122,7 @@ def lambda_handler(event, context):
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
     TOKEN = credentials['adminAccessToken']
-    url = f"{BASE_URL}/{course_id}?include[]=syllabus_body"
+    url = f"{BASE_URL}/{course_id}/assignments/syllabus"
     syllabus_text = fetch_syllabus_from_canvas(TOKEN, BASE_URL, course_id)
     if syllabus_text:
         syllabus_chunks = text_splitter.split_text(syllabus_text)

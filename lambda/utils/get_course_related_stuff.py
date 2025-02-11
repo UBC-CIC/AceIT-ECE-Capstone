@@ -41,6 +41,7 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
     url = f"{base_url}/api/v1/courses/{course_id}?include[]=syllabus_body"
     # url = f"https://15.157.251.49/api/v1/courses/{course_id}?include[]=syllabus_body"
     headers = {"Authorization": f"Bearer {auth_token}"}
+    url_syllabus = f"{base_url}/{course_id}/assignments/syllabus"
 
     response = requests.get(url, headers=headers, verify=False)
     if response.status_code == 200:
@@ -52,7 +53,7 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
             print("syllabus body: ", syllabus_body)
             soup = BeautifulSoup(syllabus_body, "html.parser")
             print("soup: ", soup.get_text(separator="\n").strip())
-            str_syllabus = "syllabus: " + soup.get_text(separator="\n").strip() + "; syllabus link: " + url
+            str_syllabus = "syllabus: " + soup.get_text(separator="\n").strip() + "; syllabus link: " + url_syllabus
             return str_syllabus
     
     print(f"Failed to fetch syllabus: {response.status_code}, {response.text}")
