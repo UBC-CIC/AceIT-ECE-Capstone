@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AssignmentCardProps } from "../../../../types";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 
 export const AssignmentCard: React.FC<AssignmentCardProps> = ({
@@ -10,10 +10,13 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onClick,
   disabled = false,
 }) => {
-  // Convert UTC date string to local time and format
-  const formattedDate = formatDistanceToNow(toZonedTime(date, "UTC"), {
-    addSuffix: true,
-  });
+  // Convert UTC ISO string to local time and format
+  const formattedDate = formatDistanceToNow(
+    toZonedTime(parseISO(date), "UTC"),
+    {
+      addSuffix: true,
+    }
+  );
 
   const handleClick = () => {
     if (!disabled && onClick) {

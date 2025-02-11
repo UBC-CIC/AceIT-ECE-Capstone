@@ -1,6 +1,6 @@
 import * as React from "react";
 import { ButtonProps } from "../../types";
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, parseISO } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import BlueArrowIcon from "../../assets/Blue-Arrow-Icon.svg";
 
@@ -55,9 +55,12 @@ export const Button: React.FC<ButtonProps> = ({
             >
               <span className="line-clamp-2">{value.title}</span>
               <div className="text-xs font-bold">
-                {formatDistanceToNow(toZonedTime(value.subtitle, "UTC"), {
-                  addSuffix: true,
-                })}
+                {formatDistanceToNow(
+                  toZonedTime(parseISO(value.subtitle), "UTC"),
+                  {
+                    addSuffix: true,
+                  }
+                )}
               </div>
             </div>
           ))}
