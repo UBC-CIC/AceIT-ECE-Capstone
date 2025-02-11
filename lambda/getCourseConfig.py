@@ -23,7 +23,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -36,7 +36,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
@@ -48,7 +48,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "User ID not found"})
             }
@@ -61,7 +61,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Missing required parameter: course"})
             }
@@ -86,7 +86,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             # 'body': json.dumps("Returns the current course configuration.")
             # 'body': json.dumps({"db create": ret1, "db retrieve": ret2,})
@@ -99,7 +99,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({"error": "Unexpected error when invoking get course config function."})
         }

@@ -24,7 +24,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({"error": "Missing required fields: 'course' and 'query' are required"})
         }
@@ -51,7 +51,7 @@ def lambda_handler(event, context):
         'headers': {
             'Access-Control-Allow-Headers': '*',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'Access-Control-Allow-Methods': '*'
         },
         # 'body': json.dumps({"db": ret1, "get_vectors": ret2})
         'body': json.dumps(ret2)

@@ -22,7 +22,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({"error": "Failed to fetch courses from Canvas API"})
         }
@@ -43,7 +43,7 @@ def lambda_handler(event, context):
         'headers': {
             'Access-Control-Allow-Headers': '*',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'Access-Control-Allow-Methods': '*'
         },
         'body': json.dumps({"message": response_message})
     }

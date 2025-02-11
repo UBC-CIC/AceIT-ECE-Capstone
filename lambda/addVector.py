@@ -12,7 +12,7 @@ def lambda_handler(event, context):
         'headers': {
             'Access-Control-Allow-Headers': '*',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'Access-Control-Allow-Methods': '*'
         },
         'body': json.dumps("Updates the vector database for a given course by adding new course contents.")
     }

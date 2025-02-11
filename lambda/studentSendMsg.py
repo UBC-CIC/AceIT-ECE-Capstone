@@ -21,7 +21,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -34,7 +34,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
@@ -46,7 +46,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "User ID not found"})
             }
@@ -81,7 +81,7 @@ def lambda_handler(event, context):
                         'headers': {
                             'Access-Control-Allow-Headers': '*',
                             'Access-Control-Allow-Origin': '*',
-                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                            'Access-Control-Allow-Methods': '*'
                         },
                         "body": json.dumps({"error": "Conversation not found"})
                     }
@@ -93,7 +93,7 @@ def lambda_handler(event, context):
                         'headers': {
                             'Access-Control-Allow-Headers': '*',
                             'Access-Control-Allow-Origin': '*',
-                            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                            'Access-Control-Allow-Methods': '*'
                         },
                         "body": json.dumps({"error": "Conversation not found"})
                     }
@@ -157,7 +157,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({
                     "conversation_id": conversation_id,
@@ -220,7 +220,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({
                     "conversation_id": conversation_id,
@@ -233,7 +233,7 @@ def lambda_handler(event, context):
             'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
             "body": json.dumps({"error": f"Bad Request: {str(e)}"})
         }
@@ -243,7 +243,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": "Internal Server Error"}
 

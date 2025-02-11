@@ -20,7 +20,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -33,7 +33,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
@@ -45,7 +45,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "User ID not found"})
             }
@@ -61,7 +61,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Missing required parameter: need course id"})
             }
@@ -99,7 +99,7 @@ def lambda_handler(event, context):
             "headers": {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps(past_conversations)
         }
@@ -110,7 +110,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": "Internal Server Error"}
 

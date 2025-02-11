@@ -40,7 +40,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "'message' is required"})
             }
@@ -87,7 +87,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({
                 "response": llm_response,
@@ -101,7 +101,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({"error": f"An unexpected error occurred: {str(e)}"})
         }

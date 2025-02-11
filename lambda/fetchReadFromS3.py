@@ -39,7 +39,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({"error": "Missing required fields: 'course' is required"})
         }
@@ -70,7 +70,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({"error": "Error retrieving course configuration"})
         }
@@ -98,7 +98,7 @@ def lambda_handler(event, context):
             'headers': {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps({"message": "Bucket is empty or does not exist."})
         }
@@ -167,7 +167,7 @@ def lambda_handler(event, context):
         'headers': {
             'Access-Control-Allow-Headers': '*',
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'Access-Control-Allow-Methods': '*'
         },
         # "body": json.dumps({"pdf_results": results, "embeddings": embeddings, "db":retdb})
         "body": json.dumps(results)

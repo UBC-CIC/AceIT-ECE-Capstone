@@ -19,7 +19,7 @@ def lambda_handler(event, context):
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -53,7 +53,7 @@ def lambda_handler(event, context):
                 "headers": {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Missing required query parameters: course or period"})
             }
@@ -66,7 +66,7 @@ def lambda_handler(event, context):
                 "headers": {
                     'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Methods': '*'
                 },
                 "body": json.dumps({"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
             }
@@ -138,7 +138,7 @@ def lambda_handler(event, context):
             "headers": {
                 'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Methods': '*'
             },
             "body": json.dumps(engagement_stats)
         }
