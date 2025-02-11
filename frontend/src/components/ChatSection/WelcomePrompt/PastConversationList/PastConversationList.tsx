@@ -101,28 +101,30 @@ export const PreviousConversationList: React.FC<
             )}
           </div>
         ))}
-        <div className="flex-grow flex items-stretch">
-          <Button
-            text="Older Conversations"
-            isOutlined={true}
-            isDisabled={isInteractionDisabled}
-            dropdownValues={conversations.slice(3).map((conversation) => ({
-              title: conversation.summary,
-              subtitle: conversation.last_message_timestamp,
-            }))}
-            className="w-full flex-grow"
-            onClick={(selected) =>
-              selected &&
-              handleConversationSelect(
-                conversations.find(
-                  (conv) =>
-                    conv.summary === selected.title &&
-                    conv.last_message_timestamp === selected.subtitle
-                )!
-              )
-            }
-          />
-        </div>
+        {conversations.length > 3 && (
+          <div className="flex-grow flex items-stretch">
+            <Button
+              text="Older Conversations"
+              isOutlined={true}
+              isDisabled={isInteractionDisabled}
+              dropdownValues={conversations.slice(3).map((conversation) => ({
+                title: conversation.summary,
+                subtitle: conversation.last_message_timestamp,
+              }))}
+              className="w-full flex-grow"
+              onClick={(selected) =>
+                selected &&
+                handleConversationSelect(
+                  conversations.find(
+                    (conv) =>
+                      conv.summary === selected.title &&
+                      conv.last_message_timestamp === selected.subtitle
+                  )!
+                )
+              }
+            />
+          </div>
+        )}
       </div>
     </div>
   );

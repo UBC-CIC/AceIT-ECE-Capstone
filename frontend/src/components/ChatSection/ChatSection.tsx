@@ -35,10 +35,19 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   const messageEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (messageEndRef.current) {
+        messageEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }
+    }, 100);
+  };
+
   useEffect(() => {
-    if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    scrollToBottom();
   }, [messageList]);
 
   useEffect(() => {
@@ -122,6 +131,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       };
       setMessageList([...messageList, userMessage]);
       messageInput.value = "";
+      scrollToBottom(); // Add explicit scroll after user message
 
       setIsLoading(true);
       setSuggestionList([]);
@@ -131,6 +141,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       );
       setMessageList((prevMessages) => [...prevMessages, ...aiResponses]);
       setIsLoading(false);
+      scrollToBottom(); // Add explicit scroll after AI response
     }
   };
 
