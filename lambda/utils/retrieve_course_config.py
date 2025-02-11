@@ -48,7 +48,7 @@ def retrieve_course_config(DB_CONFIG, course_id):
 
             insert_query = """
             INSERT INTO course_configuration (course_id, student_access_enabled, selected_supported_questions, 
-                selected_included_course_content, custom_response_format, system_prompt, material_last_updated_time)
+                selected_included_course_content, custom_response_format)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(insert_query, (
@@ -56,9 +56,7 @@ def retrieve_course_config(DB_CONFIG, course_id):
                 default_config["student_access_enabled"],
                 default_config["selected_supported_questions"],
                 default_config["selected_included_course_content"],
-                default_config["custom_response_format"],
-                default_config["system_prompt"],
-                default_config["material_last_updated_time"]
+                default_config["custom_response_format"]
             ))
 
             connection.commit()
