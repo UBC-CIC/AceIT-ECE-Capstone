@@ -6,6 +6,7 @@ export const CourseItem: React.FC<CourseProps & { onClick?: () => void }> = ({
   name,
   isActive,
   isAvailable,
+  userCourseRole,
   onClick,
 }) => {
   console.log(name + ":" + isActive);
@@ -29,7 +30,10 @@ export const CourseItem: React.FC<CourseProps & { onClick?: () => void }> = ({
         }
       }}
     >
-      <div className="font-semibold">{courseCode}</div>
+      <div className="font-semibold">
+        {courseCode} •{" "}
+        {userCourseRole === "INSTRUCTOR" ? "Instructor" : "Student"}
+      </div>
       <div>{name}</div>
     </div>
   );
