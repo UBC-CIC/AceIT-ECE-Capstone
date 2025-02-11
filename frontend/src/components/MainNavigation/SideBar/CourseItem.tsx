@@ -9,7 +9,6 @@ export const CourseItem: React.FC<CourseProps & { onClick?: () => void }> = ({
   userCourseRole,
   onClick,
 }) => {
-  console.log(name + ":" + isActive);
   const baseClasses =
     "flex flex-col py-2.5 pr-2.5 pl-2.5 mt-3 w-full rounded-lg border border-white border-solid transition-all duration-200";
   const stateClasses = !isAvailable

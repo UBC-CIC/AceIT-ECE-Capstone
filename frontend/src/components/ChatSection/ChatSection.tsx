@@ -157,7 +157,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
     const restoredMessages = response.messages
       .filter((msg) => msg.msg_source !== "SYSTEM")
       .map((msg) => ({
-        time: utcToZonedTime(
+        time: toZonedTime(
           parseISO(msg.msg_timestamp),
           "UTC"
         ).toLocaleTimeString([], {
