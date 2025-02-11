@@ -84,10 +84,13 @@ def lambda_handler(event, context):
         unique_students = set()
         total_user_messages = 0
         message_ids = []
+        num_valid_conversations = 0
 
         for conversation in conversations:
             unique_students.add(conversation.get("student_id"))
             message_ids.extend(conversation.get("message_list", []))
+            if len(message_ids)>2:
+                num_valid_conversations+=1
 
         # Process messages in batches (DynamoDB limits batch_get_item to 100 items per request)
         def batch_get_messages(message_ids):
@@ -126,7 +129,7 @@ def lambda_handler(event, context):
         # Prepare the response
         engagement_stats = {
             "questionsAsked": total_user_messages,  # Total messages from all conversations
-            "studentSessions": len(conversations),  # Unique conversations
+            "studentSessions": num_valid_conversations,  # Unique conversations > 2
             "uniqueStudents": len(unique_students)  # Unique students engaged
         }
 
