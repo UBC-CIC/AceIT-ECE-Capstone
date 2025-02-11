@@ -3,7 +3,6 @@ import { AssignmentCard } from "./PastConversationListCard";
 import { Button } from "../../../Common/Button";
 import { getPastSessionsForCourseAPI } from "../../../../api";
 import { ThreeDots } from "react-loader-spinner";
-import { toast } from "react-hot-toast";
 import {
   PreviousConversationListProps,
   ConversationSession,
@@ -56,7 +55,6 @@ export const PreviousConversationList: React.FC<
     try {
       await onConversationSelect(conversation);
     } catch (error) {
-      toast.error("Failed to load conversation. Please try again.");
       console.error("Failed to load conversation:", error);
     } finally {
       setIsLoadingConversation(false);
@@ -84,7 +82,7 @@ export const PreviousConversationList: React.FC<
               disabled={isInteractionDisabled}
             />
             {selectedId === conversation.conversation_id && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
+              <div className="absolute inset-0 flex items-center justify-center bg-indigo-100 rounded-lg">
                 <ThreeDots
                   height="20"
                   width="20"

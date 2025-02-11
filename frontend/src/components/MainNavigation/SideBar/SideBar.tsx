@@ -14,12 +14,8 @@ export const SideBar: React.FC<SideBarProps> = ({
   selectedCourse,
   onCourseSelect,
 }) => {
-  const availableCourses = courses
-    .filter((course) => course.isAvailable)
-    .sort((a, b) => a.name.localeCompare(b.name));
-  const unavailableCourses = courses
-    .filter((course) => !course.isAvailable)
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const availableCourses = courses.filter((course) => course.isAvailable);
+  const unavailableCourses = courses.filter((course) => !course.isAvailable);
 
   return (
     <div className="flex flex-wrap gap-3 items-start px-4 py-5 h-full text-sm rounded-xl border-white border-solid bg-white bg-opacity-50 border-[3px] min-w-[290px] text-indigo-950 w-[290px]">

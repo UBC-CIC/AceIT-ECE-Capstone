@@ -42,27 +42,6 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   }, [messageList]);
 
   useEffect(() => {
-    setSuggestionList(suggestions);
-    const messageInput = document.getElementById(
-      "messageInput"
-    ) as HTMLInputElement;
-    if (messageInput) {
-      messageInput.value = "";
-    }
-
-    setIsInitialLoading(true);
-
-    // Invoke the message API to generate the conversationId and get the initial AI message prompt
-    invokeMessageAPI("")
-      .then((messages) => {
-        setMessageList(messages);
-      })
-      .finally(() => {
-        setIsInitialLoading(false);
-      });
-  }, [selectedCourse]);
-
-  useEffect(() => {
     // Reset all state to initial values
     setMessageList([]);
     setSuggestionList(suggestions);
@@ -70,7 +49,14 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
     setIsInitialLoading(true);
     setConversationId(null);
 
-    // Start a new conversation
+    const messageInput = document.getElementById(
+      "messageInput"
+    ) as HTMLInputElement;
+    if (messageInput) {
+      messageInput.value = "";
+    }
+
+    // Start a new conversation by invoking API to get AI welcome prompt
     invokeMessageAPI("")
       .then((messages) => {
         setMessageList(messages);

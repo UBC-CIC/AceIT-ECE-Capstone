@@ -49,6 +49,35 @@ export const Message: React.FC<MessageProps> = ({
         <ReactMarkdown
           components={{
             p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
+            ul: ({ children }) => (
+              <ul className="list-disc pl-5 mb-4">{children}</ul>
+            ),
+            ol: ({ children }) => (
+              <ol className="list-decimal pl-5 mb-4">{children}</ol>
+            ),
+            li: ({ children }) => <li className="mb-1">{children}</li>,
+            h1: ({ children }) => (
+              <h1 className="text-2xl font-bold mb-4">{children}</h1>
+            ),
+            h2: ({ children }) => (
+              <h2 className="text-xl font-bold mb-3">{children}</h2>
+            ),
+            h3: ({ children }) => (
+              <h3 className="text-lg font-bold mb-2">{children}</h3>
+            ),
+            strong: ({ children }) => (
+              <strong className="font-bold">{children}</strong>
+            ),
+            a: ({ children, href }) => (
+              <a
+                href={href}
+                className="text-blue-600 hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {children}
+              </a>
+            ),
           }}
         >
           {content}

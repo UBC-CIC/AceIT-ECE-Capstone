@@ -31,8 +31,12 @@ export const StudyAssistant = () => {
           fetchUserInfoAPI(),
         ]);
 
-        setCourses(courses);
-        setSelectedCourse(courses.length > 0 ? courses[0] : null);
+        const sortedCourses = courses.sort((a, b) =>
+          a.name.localeCompare(b.name)
+        );
+
+        setCourses(sortedCourses);
+        setSelectedCourse(sortedCourses.length > 0 ? sortedCourses[0] : null);
         setUserInfo(user);
 
         toast.dismiss();

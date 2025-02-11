@@ -51,7 +51,7 @@ def lambda_handler(event, context):
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
-                "body": json.dumps({"error": "Missing required parameter: conversationId"})
+                "body": json.dumps({"error": "Missing required query parameter: conversation_id"})
             }
         
         # Fetch conversation details

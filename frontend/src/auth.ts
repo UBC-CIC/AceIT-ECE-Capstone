@@ -92,6 +92,11 @@ const handleTokenRefresh = async (
   return true;
 };
 
+export const forceReAuthentication = () => {
+  clearTokens();
+  redirectToCanvas();
+};
+
 export const logout = () => {
   fetch(`${backendUrl}/ui/general/log-in`, {
     method: "POST",
@@ -99,13 +104,10 @@ export const logout = () => {
       Authorization: String(getAccessToken()),
       "Content-Type": "application/json",
     }),
+  }).finally(() => {
+    clearTokens();
+    window.location.reload();
   });
-
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  localStorage.removeItem("token_expiry");
-
-  window.location.reload();
 };
 
 export const handleAuthentication = async (
