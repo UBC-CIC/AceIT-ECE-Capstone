@@ -713,7 +713,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # POST /api/ui/general/log-in
         login_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(login_lambda, proxy=True),
+            apigateway.LambdaIntegration(login_lambda, proxy=True, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -751,7 +751,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # POST /api/ui/general/refresh-token
         refresh_token_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(refresh_token_lambda),
+            apigateway.LambdaIntegration(refresh_token_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -785,7 +785,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/student/sessions
         session_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(get_past_sessions_lambda),
+            apigateway.LambdaIntegration(get_past_sessions_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -813,7 +813,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/student/session/sessionId
         specific_session_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(restore_past_session_lambda),
+            apigateway.LambdaIntegration(restore_past_session_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -841,7 +841,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # POST /api/ui/general/log-out
         logout_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(logout_lambda),
+            apigateway.LambdaIntegration(logout_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -875,7 +875,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/general/user
         user_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(get_user_info_lambda),
+            apigateway.LambdaIntegration(get_user_info_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -909,7 +909,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/general/user/courses
         user_courses_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(get_user_courses_lambda),
+            apigateway.LambdaIntegration(get_user_courses_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -943,7 +943,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # PUT /api/ui/instructor/config
         instructor_config_resource.add_method(
             "PUT",
-            apigateway.LambdaIntegration(update_course_configuration_lambda),
+            apigateway.LambdaIntegration(update_course_configuration_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -966,7 +966,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/instructor/config?course={uuid}
         instructor_config_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(get_course_configuration_lambda),
+            apigateway.LambdaIntegration(get_course_configuration_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.querystring.course": True,
                 "method.request.header.Authorization": True,
@@ -995,7 +995,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/instructor/analytics/engagement
         student_engagement_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(student_engagement_lambda),
+            apigateway.LambdaIntegration(student_engagement_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.querystring.course": True,
                 "method.request.querystring.period": True,
@@ -1025,7 +1025,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/instructor/analytics/top-materials
         top_materials_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(top_materials_lambda),
+            apigateway.LambdaIntegration(top_materials_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.querystring.course": True,
                 "method.request.querystring.num": True,
@@ -1056,7 +1056,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/ui/instructor/analytics/top-questions
         top_questions_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(top_questions_lambda),
+            apigateway.LambdaIntegration(top_questions_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.querystring.course": True,
                 "method.request.querystring.num": True,
@@ -1087,7 +1087,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/llm/content/canvas
         canvas_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(fetchReadFromS3),
+            apigateway.LambdaIntegration(fetchReadFromS3, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1109,7 +1109,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/llm/analysis/data
         analysis_data_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(recent_course_data_analysis),
+            apigateway.LambdaIntegration(recent_course_data_analysis, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1159,7 +1159,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/llm/vector
         vector_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(get_vector_lambda),
+            apigateway.LambdaIntegration(get_vector_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1181,7 +1181,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # PUT /api/llm/vector
         vector_resource.add_method(
             "PUT",
-            apigateway.LambdaIntegration(add_vector_lambda),
+            apigateway.LambdaIntegration(add_vector_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1203,7 +1203,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # DELETE /api/llm/vector
         vector_resource.add_method(
             "DELETE",
-            apigateway.LambdaIntegration(delete_vector_lambda),
+            apigateway.LambdaIntegration(delete_vector_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1231,7 +1231,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # POST /api/llm/content/refresh
         refresh_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(refresh_content_lambda),
+            apigateway.LambdaIntegration(refresh_content_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1265,7 +1265,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # DELETE /api/llm/content
         content_resource.add_method(
             "DELETE",
-            apigateway.LambdaIntegration(delete_all_course_data_lambda),
+            apigateway.LambdaIntegration(delete_all_course_data_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1293,7 +1293,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/llm/content/refresh-existing-courses
         refresh_all_existing_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(refresh_all_existing_courses_lambda),
+            apigateway.LambdaIntegration(refresh_all_existing_courses_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1384,7 +1384,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # GET /api/llm/analysis/generate
         analysis_gen_resource.add_method(
             "GET",
-            apigateway.LambdaIntegration(generate_llm_analysis_lambda),
+            apigateway.LambdaIntegration(generate_llm_analysis_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
