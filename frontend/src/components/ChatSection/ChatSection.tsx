@@ -161,6 +161,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         references: msg.references,
       }));
     setMessageList(restoredMessages);
+    setSuggestionList([]);
   };
 
   return (
