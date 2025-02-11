@@ -1,6 +1,6 @@
 import * as React from "react";
 import { AssignmentCardProps } from "../../../../types";
-import { formatDistanceToNow, parseISO } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   summary,
@@ -9,7 +9,7 @@ export const AssignmentCard: React.FC<AssignmentCardProps> = ({
   onClick,
   disabled = false,
 }) => {
-  const formattedDate = formatDistanceToNow(new Date(parseISO(date)), {
+  const formattedDate = formatDistanceToNow(new Date(date + "Z"), {
     addSuffix: true,
   });
 
