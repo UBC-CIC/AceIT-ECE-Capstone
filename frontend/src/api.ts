@@ -166,13 +166,7 @@ export const getPastSessionsForCourseAPI = async (
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const sessions = await response.json();
-    return sessions.map((session: ConversationSession) => ({
-      ...session,
-      last_message_timestamp: new Date(
-        session.last_message_timestamp
-      ).toLocaleString(),
-    }));
+    return response.json();
   } catch (error) {
     handleApiError(error, "Failed to fetch past sessions. Please try again.");
     throw error;
