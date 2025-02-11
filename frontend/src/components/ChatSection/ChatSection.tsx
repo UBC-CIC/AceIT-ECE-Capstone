@@ -11,7 +11,6 @@ import { useState, useEffect, useRef } from "react";
 import { sendMessageAPI, restorePastSessionAPI } from "../../api";
 import SendIcon from "../../assets/Send-Icon.svg";
 import { ThreeDots } from "react-loader-spinner";
-import { toZonedTime } from "date-fns-tz";
 import { parseISO } from "date-fns";
 
 // TODO: Replace in the future with dynamic suggestions from the backend (generated via AI)
@@ -93,10 +92,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
     return response.messages
       .filter((msg) => msg.msg_source !== "SYSTEM")
       .map((msg) => ({
-        time: toZonedTime(
-          parseISO(msg.msg_timestamp),
-          "UTC"
-        ).toLocaleTimeString([], {
+        time: new Date(parseISO(msg.msg_timestamp)).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
@@ -157,10 +153,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
     const restoredMessages = response.messages
       .filter((msg) => msg.msg_source !== "SYSTEM")
       .map((msg) => ({
-        time: toZonedTime(
-          parseISO(msg.msg_timestamp),
-          "UTC"
-        ).toLocaleTimeString([], {
+        time: new Date(parseISO(msg.msg_timestamp)).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
         }),
