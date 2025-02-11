@@ -41,7 +41,7 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
     url = f"{base_url}/api/v1/courses/{course_id}?include[]=syllabus_body"
     # url = f"https://15.157.251.49/api/v1/courses/{course_id}?include[]=syllabus_body"
     headers = {"Authorization": f"Bearer {auth_token}"}
-    url_syllabus = f"{base_url}/{course_id}/assignments/syllabus"
+    url_syllabus = f"{base_url}/courses/{course_id}/assignments/syllabus"
 
     response = requests.get(url, headers=headers, verify=False)
     if response.status_code == 200:
