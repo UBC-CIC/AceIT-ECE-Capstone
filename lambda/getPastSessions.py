@@ -30,6 +30,11 @@ def lambda_handler(event, context):
         if not user_info:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
         # Extract Canvas user ID
@@ -37,6 +42,11 @@ def lambda_handler(event, context):
         if not student_id:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
                 "body": json.dumps({"error": "User ID not found"})
             }
         student_id = str(student_id)
@@ -87,7 +97,7 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
@@ -96,7 +106,13 @@ def lambda_handler(event, context):
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, "body": "Internal Server Error"}
+        return {"statusCode": 500, 
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": "Internal Server Error"}
 
 
 def generate_summary_input(message_ids_list):

@@ -30,6 +30,11 @@ def lambda_handler(event, context):
     if not user_info:
         return {
             "statusCode": 500,
+            'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
             "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
         }
     # Extract Canvas user ID
@@ -37,6 +42,11 @@ def lambda_handler(event, context):
     if not student_id:
         return {
             "statusCode": 500,
+            'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
             "body": json.dumps({"error": "User ID not found"})
         }
     student_id = str(student_id)
@@ -51,7 +61,7 @@ def lambda_handler(event, context):
         return {
             "statusCode": 400,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': '*'
             },
@@ -68,7 +78,7 @@ def lambda_handler(event, context):
         return {
             "statusCode": 400,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': '*'
             },
@@ -100,7 +110,7 @@ def lambda_handler(event, context):
     return {
         'statusCode': 200,
         'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': '*'
             },

@@ -30,6 +30,11 @@ def lambda_handler(event, context):
         if not user_info:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
         # Extract Canvas user ID
@@ -53,7 +58,7 @@ def lambda_handler(event, context):
             return {
                 "statusCode": 400,
                 'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
@@ -67,7 +72,7 @@ def lambda_handler(event, context):
             return {
                 "statusCode": 400,
                 'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
@@ -80,7 +85,7 @@ def lambda_handler(event, context):
             return {
                 "statusCode": 400,
                 'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Headers': '*',
                     'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
                 },
@@ -127,7 +132,7 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type',
+                'Access-Control-Allow-Headers': '*',
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             },
@@ -136,7 +141,13 @@ def lambda_handler(event, context):
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, "body": "Internal Server Error"}
+        return {"statusCode": 500, 
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                "body": "Internal Server Error"}
 
 
 def calculate_time_threshold(period):

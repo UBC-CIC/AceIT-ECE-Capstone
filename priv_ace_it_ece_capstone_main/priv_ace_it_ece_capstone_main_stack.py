@@ -806,7 +806,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         session_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
@@ -834,7 +834,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         specific_session_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
  
@@ -868,7 +868,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         logout_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["OPTIONS","POST"],
         )
 
@@ -902,7 +902,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         user_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
  
@@ -936,7 +936,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         user_courses_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
  
@@ -988,7 +988,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         instructor_config_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET", "PUT"],
         )
         
@@ -1018,7 +1018,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         student_engagement_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
@@ -1049,7 +1049,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         top_materials_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
@@ -1080,7 +1080,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         top_questions_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
@@ -1102,7 +1102,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         canvas_resource.add_cors_preflight(
             allow_origins=["*"],  # Replace "*" with your allowed origin if more restrictive
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],  # Allowed methods
         )
 
@@ -1124,14 +1124,14 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         analysis_data_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
         
         # POST /api/ui/student/send-message
         student_send_msg_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(student_send_msg_lambda),
+            apigateway.LambdaIntegration(student_send_msg_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1152,7 +1152,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         student_send_msg_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["POST"],
         )
  
@@ -1224,7 +1224,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         vector_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET", "POST", "DELETE"],
         )
  
@@ -1258,7 +1258,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         refresh_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["POST"],
         )
 
@@ -1286,7 +1286,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         content_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["DELETE"],
         )
  
@@ -1321,14 +1321,14 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         refresh_all_existing_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
         # POST /api/llm/chat/generate
         gen_chat_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(generate_llm_prompt_lambda),
+            apigateway.LambdaIntegration(generate_llm_prompt_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1349,14 +1349,14 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         gen_chat_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
         # GET /api/llm/completion
         llm_completion_resource.add_method(
             "POST",
-            apigateway.LambdaIntegration(invoke_llm_completion_lambda),
+            apigateway.LambdaIntegration(invoke_llm_completion_lambda, timeout=Duration.seconds(120)),
             request_parameters={
                 "method.request.header.Authorization": True,
             },
@@ -1377,7 +1377,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         llm_completion_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
@@ -1405,7 +1405,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         )
         analysis_gen_resource.add_cors_preflight(
             allow_origins=["*"],
-            allow_headers=["Authorization", "Content-Type"],
+            allow_headers=["*"],
             allow_methods=["GET"],
         )
 
