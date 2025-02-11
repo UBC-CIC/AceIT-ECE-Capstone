@@ -7,6 +7,7 @@ from utils.get_user_info import get_user_info
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 messages_table = dynamodb.Table('Messages')  # Replace with your table name
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
+dynamodb_client = boto3.client('dynamodb')  # Client needed for batch_get_item
 
 def lambda_handler(event, context):
     try:
@@ -79,29 +80,56 @@ def lambda_handler(event, context):
             }
         )
 
-        # Extract relevant data
         conversations = response.get("Items", [])
         unique_students = set()
         total_user_messages = 0
+        message_ids = []
+        num_valid_conversations = 0
 
         for conversation in conversations:
             unique_students.add(conversation.get("student_id"))
-            message_ids = conversation.get("message_list", [])
-            # Batch get messages from the Messages table
-            if message_ids:
-                keys = [{"message_id": msg_id} for msg_id in message_ids]
-                message_response = messages_table.batch_get_item(
-                    RequestItems={"Messages": {"Keys": keys}}
+            message_ids.extend(conversation.get("message_list", []))
+            if len(message_ids)>2:
+                num_valid_conversations+=1
+
+        # Process messages in batches (DynamoDB limits batch_get_item to 100 items per request)
+        def batch_get_messages(message_ids):
+            total_user_messages = 0
+            for i in range(0, len(message_ids), 100):  # Batch size: 100
+                batch_keys = [{"message_id": {"S": msg_id}} for msg_id in message_ids[i:i+100]]
+
+                response = dynamodb_client.batch_get_item(
+                    RequestItems={
+                        "Messages": {
+                            "Keys": batch_keys,
+                            "ProjectionExpression": "message_id, msg_source"
+                        }
+                    }
                 )
-                messages = message_response.get("Responses", {}).get("Messages", [])
+
+                messages = response.get("Responses", {}).get("Messages", [])
 
                 # Count only messages from USER
-                total_user_messages += sum(1 for msg in messages if msg.get("msg_source") == "USER")
+                total_user_messages += sum(1 for msg in messages if msg.get("msg_source", {}).get("S") == "STUDENT")
 
+                # Handle UnprocessedKeys (DynamoDB might not process all items in one batch)
+                unprocessed_keys = response.get("UnprocessedKeys", {}).get("Messages", {}).get("Keys", [])
+                while unprocessed_keys:
+                    retry_response = dynamodb_client.batch_get_item(
+                        RequestItems={"Messages": {"Keys": unprocessed_keys, "ProjectionExpression": "message_id, msg_source"}}
+                    )
+                    retry_messages = retry_response.get("Responses", {}).get("Messages", [])
+                    total_user_messages += sum(1 for msg in retry_messages if msg.get("msg_source", {}).get("S") == "STUDENT")
+                    unprocessed_keys = retry_response.get("UnprocessedKeys", {}).get("Messages", {}).get("Keys", [])
+
+            return total_user_messages
+
+        # Count only messages from USER
+        total_user_messages = batch_get_messages(message_ids)
         # Prepare the response
         engagement_stats = {
             "questionsAsked": total_user_messages,  # Total messages from all conversations
-            "studentSessions": len(conversations),  # Unique conversations
+            "studentSessions": num_valid_conversations,  # Unique conversations > 2
             "uniqueStudents": len(unique_students)  # Unique students engaged
         }
 

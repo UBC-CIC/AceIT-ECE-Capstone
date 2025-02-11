@@ -74,10 +74,10 @@ def lambda_handler(event, context):
             # Generate AI summary **only if**:
             # - No summary exists for this conversation yet
             # - There are more than 4 messages in the conversation
-            if summary == "Summary not available." and len(message_list) >= 4:
+            if summary == "Summary not available." and len(message_list) >= 3:
                 summary = call_llm(message_list)
                 update_summary_in_db(conversation["conversation_id"], summary)
-            if len(message_list > 2):
+            if len(message_list)>2:
                 past_conversations.append({
                     "conversation_id": conversation["conversation_id"],
                     "last_message_timestamp": conversation.get("last_updated"),
@@ -119,10 +119,10 @@ def generate_summary_input(message_ids_list):
     for message in messages:
         msg_source = message.get("msg_source")
         print("a msg_source: ", msg_source)
-        content = message.get("content")
-        if msg_source == "STUDENT":
+        content = message.get("content","")
+        if msg_source == "STUDENT" and content:
             conversation_hist += "STUDENT: " + content
-        elif msg_source != "SYSTEM": # AI
+        elif msg_source == "AI" and content: # AI
             conversation_hist += "ASSISTANT: " + content
 
     complete_msg = []
