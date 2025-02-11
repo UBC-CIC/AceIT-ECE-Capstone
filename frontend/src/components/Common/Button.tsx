@@ -8,10 +8,13 @@ export const Button: React.FC<ButtonProps> = ({
   text,
   className,
   onClick,
+  isDisabled,
 }) => {
   const [showDropdown, setShowDropdown] = React.useState(false);
 
   const handleButtonClick = () => {
+    if (isDisabled) return;
+
     if (dropdownValues && dropdownValues.length > 0) {
       setShowDropdown(!showDropdown);
     } else if (onClick) {
@@ -22,8 +25,11 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <div className={`relative w-full flex-grow`}>
       <button
-        className={`flex gap-2.5 justify-center items-center px-2.5 py-3 text-sm font-bold text-black rounded-lg border-2 border-solid border-indigo-950 h-full hover:bg-indigo-100 ${className}`}
+        className={`flex gap-2.5 justify-center items-center px-2.5 py-3 text-sm font-bold text-black rounded-lg border-2 border-solid border-indigo-950 h-full hover:bg-indigo-100 ${
+          isDisabled ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""
+        } ${className}`}
         onClick={handleButtonClick}
+        disabled={isDisabled}
       >
         <span className="self-stretch my-auto">{text}</span>
         {dropdownValues && dropdownValues.length > 0 && (
@@ -36,7 +42,7 @@ export const Button: React.FC<ButtonProps> = ({
         )}
       </button>
       {showDropdown && dropdownValues && dropdownValues.length > 0 && (
-        <div className="absolute top-full left-0 w-full bg-white border border-indigo-950 rounded-lg mt-1 z-10">
+        <div className="absolute top-full left-0 w-full bg-white border border-indigo-950 rounded-lg mt-1 z-10 max-h-96 overflow-y-auto">
           {dropdownValues.map((value, index) => (
             <div
               key={index}

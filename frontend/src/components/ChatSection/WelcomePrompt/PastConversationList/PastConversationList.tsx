@@ -3,10 +3,10 @@ import { AssignmentCard } from "./PastConversationListCard";
 import { Button } from "../../../Common/Button";
 import { getPastSessionsForCourseAPI } from "../../../../api";
 import { ThreeDots } from "react-loader-spinner";
+import { toast } from "react-hot-toast";
 import {
   PreviousConversationListProps,
   ConversationSession,
-  ButtonDropdown,
 } from "../../../../types";
 
 export const PreviousConversationList: React.FC<
@@ -16,6 +16,9 @@ export const PreviousConversationList: React.FC<
     ConversationSession[]
   >([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [isLoadingConversation, setIsLoadingConversation] =
+    React.useState(false);
 
   React.useEffect(() => {
     const fetchConversations = async () => {
@@ -45,18 +48,23 @@ export const PreviousConversationList: React.FC<
     );
   }
 
-  const handleDropdownSelect = (selected?: ButtonDropdown) => {
-    if (!selected) return;
-
-    const conversation = conversations.find(
-      (conv) =>
-        conv.summary === selected.title &&
-        conv.last_message_timestamp === selected.subtitle
-    );
-    if (conversation) {
-      onConversationSelect(conversation);
+  const handleConversationSelect = async (
+    conversation: ConversationSession
+  ) => {
+    setSelectedId(conversation.conversation_id);
+    setIsLoadingConversation(true);
+    try {
+      await onConversationSelect(conversation);
+    } catch (error) {
+      toast.error("Failed to load conversation. Please try again.");
+      console.error("Failed to load conversation:", error);
+    } finally {
+      setIsLoadingConversation(false);
+      setSelectedId(null);
     }
   };
+
+  const isInteractionDisabled = isLoadingConversation;
 
   return conversations === null || conversations.length === 0 ? null : (
     <div>
@@ -64,26 +72,50 @@ export const PreviousConversationList: React.FC<
         Resume Past Conversation
       </div>
       <div className="flex flex-wrap gap-5 justify-center items-stretch text-black">
-        {conversations.slice(0, 3).map((Conversation, index) => (
-          <AssignmentCard
-            key={index}
-            summary={Conversation.summary}
-            date={Conversation.last_message_timestamp}
-            className="flex-grow"
-            onClick={() => onConversationSelect(Conversation)}
-          />
+        {conversations.slice(0, 3).map((conversation, index) => (
+          <div key={index} className="flex-grow relative">
+            <AssignmentCard
+              summary={conversation.summary}
+              date={conversation.last_message_timestamp}
+              className="flex-grow"
+              onClick={() =>
+                !isInteractionDisabled && handleConversationSelect(conversation)
+              }
+              disabled={isInteractionDisabled}
+            />
+            {selectedId === conversation.conversation_id && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg">
+                <ThreeDots
+                  height="20"
+                  width="20"
+                  radius="9"
+                  color="#1e1b4b"
+                  ariaLabel="loading-conversation"
+                />
+              </div>
+            )}
+          </div>
         ))}
         <div className="flex-grow flex items-stretch">
           <Button
             text="Older Conversations"
             isOutlined={true}
-            isDisabled={false}
+            isDisabled={isInteractionDisabled}
             dropdownValues={conversations.slice(3).map((conversation) => ({
               title: conversation.summary,
               subtitle: conversation.last_message_timestamp,
             }))}
             className="w-full flex-grow"
-            onClick={handleDropdownSelect}
+            onClick={(selected) =>
+              selected &&
+              handleConversationSelect(
+                conversations.find(
+                  (conv) =>
+                    conv.summary === selected.title &&
+                    conv.last_message_timestamp === selected.subtitle
+                )!
+              )
+            }
           />
         </div>
       </div>

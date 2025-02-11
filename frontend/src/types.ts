@@ -73,11 +73,14 @@ export interface SuggestionCardProps {
 export interface AssignmentCardProps {
   summary: string;
   date: string;
+  className?: string;
+  onClick?: () => void;
+  disabled?: boolean;
 }
 
 export interface ButtonProps {
-  isOutlined: boolean;
-  isDisabled: boolean;
+  isOutlined?: boolean;
+  isDisabled?: boolean;
   dropdownValues?: ButtonDropdown[];
   text: string;
   onClick: (selectedDropdown?: ButtonDropdown) => void;

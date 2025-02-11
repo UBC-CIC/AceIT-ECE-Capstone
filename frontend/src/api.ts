@@ -40,23 +40,20 @@ export const fetchCoursesAPI = async (): Promise<CourseProps[]> => {
     },
   });
   const data = await response.json();
-  const courses = [
-    ...data.availableCoursesAsStudent.map((course: CourseAPIModelProps) => ({
-      ...course,
-      userCourseRole: "STUDENT",
-      isAvailable: true,
-    })),
-    ...data.availableCoursesAsInstructor.map((course: CourseAPIModelProps) => ({
-      ...course,
-      userCourseRole: "INSTRUCTOR",
-      isAvailable: true,
-    })),
-    ...data.unavailableCoursesAsStudent.map((course: CourseAPIModelProps) => ({
-      ...course,
-      userCourseRole: "STUDENT",
-      isAvailable: false,
-    })),
-  ];
+
+  // Create courses array maintaining original order from response
+  const courses: CourseProps[] = Object.entries(data).flatMap(
+    ([key, courses]) => {
+      const userRole = key.includes("AsStudent") ? "STUDENT" : "INSTRUCTOR";
+      const isAvailable = !key.includes("unavailable");
+
+      return (courses as CourseAPIModelProps[]).map((course) => ({
+        ...course,
+        userCourseRole: userRole,
+        isAvailable: isAvailable,
+      }));
+    }
+  );
 
   setCachedData(cacheKey, courses);
   return courses;
@@ -116,7 +113,7 @@ export const restorePastSessionAPI = async (
 ): Promise<{ conversation_id: string; messages: ConversationMessage[] }> => {
   if (!accessToken) throw new Error("Access token is not set");
   const response = await fetch(
-    `${API_BASE_URL}/ui/student/session?conversation=${conversation}`,
+    `${API_BASE_URL}/ui/student/session?conversationId=${conversation}`,
     {
       headers: {
         Authorization: accessToken,
