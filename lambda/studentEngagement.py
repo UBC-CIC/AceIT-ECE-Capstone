@@ -82,16 +82,25 @@ def lambda_handler(event, context):
         # Extract relevant data
         conversations = response.get("Items", [])
         unique_students = set()
-        total_messages = 0
+        total_user_messages = 0
 
         for conversation in conversations:
             unique_students.add(conversation.get("student_id"))
-            message_list = conversation.get("message_list", [])
-            total_messages += len(message_list)
+            message_ids = conversation.get("message_list", [])
+            # Batch get messages from the Messages table
+            if message_ids:
+                keys = [{"message_id": msg_id} for msg_id in message_ids]
+                message_response = messages_table.batch_get_item(
+                    RequestItems={"Messages": {"Keys": keys}}
+                )
+                messages = message_response.get("Responses", {}).get("Messages", [])
+
+                # Count only messages from USER
+                total_user_messages += sum(1 for msg in messages if msg.get("msg_source") == "USER")
 
         # Prepare the response
         engagement_stats = {
-            "questionsAsked": total_messages,  # Total messages from all conversations
+            "questionsAsked": total_user_messages,  # Total messages from all conversations
             "studentSessions": len(conversations),  # Unique conversations
             "uniqueStudents": len(unique_students)  # Unique students engaged
         }
