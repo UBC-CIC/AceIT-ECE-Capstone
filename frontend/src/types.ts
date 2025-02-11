@@ -70,7 +70,7 @@ export interface SuggestionCardProps {
   onClick: () => void;
 }
 
-export interface AssignmentCardProps {
+export interface PastConversationListCardProps {
   summary: string;
   date: string;
   className?: string;

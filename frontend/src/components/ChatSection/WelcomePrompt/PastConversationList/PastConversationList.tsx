@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AssignmentCard } from "./PastConversationListCard";
+import { PastConversationListCard } from "./PastConversationListCard";
 import { Button } from "../../../Common/Button";
 import { getPastSessionsForCourseAPI } from "../../../../api";
 import { ThreeDots } from "react-loader-spinner";
@@ -24,7 +24,14 @@ export const PreviousConversationList: React.FC<
       setIsLoading(true);
       try {
         const data = await getPastSessionsForCourseAPI(courseId);
-        setConversations(data);
+
+        const sortedData = data.sort(
+          (a, b) =>
+            new Date(b.last_message_timestamp).getTime() -
+            new Date(a.last_message_timestamp).getTime()
+        );
+
+        setConversations(sortedData);
       } finally {
         setIsLoading(false);
       }
@@ -72,7 +79,7 @@ export const PreviousConversationList: React.FC<
       <div className="flex flex-wrap gap-5 justify-center items-stretch text-black">
         {conversations.slice(0, 3).map((conversation, index) => (
           <div key={index} className="flex-grow relative">
-            <AssignmentCard
+            <PastConversationListCard
               summary={conversation.summary}
               date={conversation.last_message_timestamp}
               className="flex-grow"
