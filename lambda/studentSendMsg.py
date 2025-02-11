@@ -20,8 +20,9 @@ def lambda_handler(event, context):
                 "statusCode": 400,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -33,8 +34,9 @@ def lambda_handler(event, context):
                 "statusCode": 500,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
@@ -45,8 +47,9 @@ def lambda_handler(event, context):
                 "statusCode": 500,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "User ID not found"})
             }
@@ -80,8 +83,9 @@ def lambda_handler(event, context):
                         "statusCode": 404,
                         'headers': {
                             'Access-Control-Allow-Headers': '*',
-                            'Access-Control-Allow-Origin': '*',
-                            'Access-Control-Allow-Methods': '*'
+                            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                            'Access-Control-Allow-Methods': '*',
+                            'Access-Control-Allow-Credentials': 'true'
                         },
                         "body": json.dumps({"error": "Conversation not found"})
                     }
@@ -92,8 +96,9 @@ def lambda_handler(event, context):
                         "statusCode": 404,
                         'headers': {
                             'Access-Control-Allow-Headers': '*',
-                            'Access-Control-Allow-Origin': '*',
-                            'Access-Control-Allow-Methods': '*'
+                            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                            'Access-Control-Allow-Methods': '*',
+                            'Access-Control-Allow-Credentials': 'true'
                         },
                         "body": json.dumps({"error": "Conversation not found"})
                     }
@@ -156,8 +161,9 @@ def lambda_handler(event, context):
                 "statusCode": 200,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({
                     "conversation_id": conversation_id,
@@ -219,8 +225,9 @@ def lambda_handler(event, context):
                 "statusCode": 200,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({
                     "conversation_id": conversation_id,
@@ -231,10 +238,11 @@ def lambda_handler(event, context):
         return {
             "statusCode": 400,
             'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
-                },
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
+            },
             "body": json.dumps({"error": f"Bad Request: {str(e)}"})
         }
     except Exception as e:
@@ -242,8 +250,9 @@ def lambda_handler(event, context):
         return {"statusCode": 500, 
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": "Internal Server Error"}
 

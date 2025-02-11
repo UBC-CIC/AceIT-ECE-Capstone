@@ -19,8 +19,9 @@ def lambda_handler(event, context):
             "statusCode": 400,
             'headers': {
                 'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': '*'
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"error": "Missing required Authorization token"})
         }
@@ -31,10 +32,11 @@ def lambda_handler(event, context):
         return {
             "statusCode": 500,
             'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
-                },
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
+            },
             "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
         }
     # Extract Canvas user ID
@@ -43,10 +45,11 @@ def lambda_handler(event, context):
         return {
             "statusCode": 500,
             'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
-                },
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
+            },
             "body": json.dumps({"error": "User ID not found"})
         }
     student_id = str(student_id)
@@ -62,8 +65,9 @@ def lambda_handler(event, context):
             "statusCode": 400,
             'headers': {
                 'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': '*'
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"error": "Invalid JSON in request body"})
         }
@@ -79,8 +83,9 @@ def lambda_handler(event, context):
             "statusCode": 400,
             'headers': {
                 'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': '*'
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"error": f"Missing required fields: {', '.join(missing_fields)}"})
         }
@@ -110,10 +115,11 @@ def lambda_handler(event, context):
     return {
         'statusCode': 200,
         'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': '*'
-            },
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+            'Access-Control-Allow-Methods': '*',
+            'Access-Control-Allow-Credentials': 'true'
+        },
         # 'body': json.dumps("Returns the current (updated) course configuration.")
         'body': json.dumps({"db create": ret1, "db retrieve": ret2,})
     }

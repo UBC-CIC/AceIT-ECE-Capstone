@@ -21,10 +21,11 @@ def lambda_handler(event, context):
         if not conversation_id:
             return {
                 "statusCode": 400,
-                "headers": {
+                'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required field: conversation_id"})
             }
@@ -36,8 +37,9 @@ def lambda_handler(event, context):
                 "statusCode": 404,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Conversation not found"})
             }
@@ -83,10 +85,11 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "headers": {
+            'headers': {
                 'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': '*'
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"prompt": mistral_messages})
         }
@@ -96,7 +99,8 @@ def lambda_handler(event, context):
         return {"statusCode": 500, 
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": "Internal Server Error"}

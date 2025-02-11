@@ -17,8 +17,9 @@ def lambda_handler(event, context):
                 "statusCode": 400,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -50,10 +51,11 @@ def lambda_handler(event, context):
         if not course_id or not num or not period:
             return {
                 "statusCode": 400,
-                "headers": {
+                'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required query parameters: course, num, or period"})
             }
@@ -64,10 +66,11 @@ def lambda_handler(event, context):
         except ValueError:
             return {
                 "statusCode": 400,
-                "headers": {
+                'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Invalid value for num, must be an integer"})
             }
@@ -77,10 +80,11 @@ def lambda_handler(event, context):
         if time_threshold is None:
             return {
                 "statusCode": 400,
-                "headers": {
+                'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': '*'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
             }
@@ -120,10 +124,11 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "headers": {
+            'headers': {
                 'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': '*'
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps(top_materials_list)
         }
