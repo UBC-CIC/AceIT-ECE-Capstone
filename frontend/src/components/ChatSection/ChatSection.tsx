@@ -159,7 +159,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
     conversation: ConversationSession
   ) => {
     const response = await restorePastSessionAPI(conversation.conversation_id);
-    setConversationId(response.conversation_id);
+    setConversationId(conversation.conversation_id);
     const restoredMessages = response.messages
       .filter((msg) => msg.msg_source !== "SYSTEM")
       .map((msg) => ({
