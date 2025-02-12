@@ -9,6 +9,8 @@ from utils.create_course_config_table import create_table_if_not_exists
 from utils.get_rds_secret import get_secret
 from utils.get_user_info import get_user_info
 
+lambda_client = boto3.client("lambda")
+
 def lambda_handler(event, context):
     
     # Extract and validate headers
@@ -168,6 +170,9 @@ def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_
         connection.commit()
         cursor.close()
         connection.close()
+
+        invoke_update_system_prompt(system_prompt, course_id)
+        print("invoked update prompt!")
         return "Course configuration updated successfully"
     except Exception as e:
         print(f"Error: {e}")
@@ -230,3 +235,21 @@ Ensure your responses are always accurate, engaging, and inform students when yo
 """
     print(system_prompt.strip())
     return system_prompt.strip()
+
+
+def invoke_update_system_prompt(system_prompt, course_id):
+    payload = {
+        "body": json.dumps({"course": course_id, "system_prompt":system_prompt}) 
+    }
+    try:
+        lambda_client.invoke(
+            FunctionName="UpdateConversationPromptLambda",  # Replace with actual function name
+            # InvocationType="RequestResponse",  # Use 'Event' for async calls
+            InvocationType="Event",
+            Payload=json.dumps(payload)
+        )
+        print(f"Successfully invoked UpdateConversationPrompt for course {course_id}")
+        return
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return

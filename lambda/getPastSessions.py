@@ -148,7 +148,7 @@ def generate_summary_input(message_ids_list):
             conversation_hist += "ASSISTANT: " + content
 
     complete_msg = []
-    complete_msg.append({"role": "system", "content": "Please summarize the given conversation history within 5 words. Respond only the 1-5 word summary, and nothing else."})
+    complete_msg.append({"role": "system", "content": "Summarize given conversation history to 5 words. Respond only the 1-5 word summary, and nothing else. Conversation history: "})
     complete_msg.append({"role": "user", "content" : conversation_hist})
     body=json.dumps({
             'messages': complete_msg

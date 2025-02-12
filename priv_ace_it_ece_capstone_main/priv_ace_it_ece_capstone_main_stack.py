@@ -254,6 +254,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            memory_size=1024,  # Increase from 128MB to 512MB/1024MB/1536MB as needed
         )
 
         recent_course_data_analysis = _lambda.Function(
@@ -337,6 +338,22 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="updateCourseConfig.lambda_handler",
+            layers=[boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
+            timeout=Duration.minutes(15),
+        )
+
+        update_conversation_prompts_lambda = _lambda.Function(
+            self,
+            "UpdateConversationPromptLambda",
+            function_name="UpdateConversationPromptLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            code=_lambda.Code.from_asset("lambda"),
+            handler="updateConversationPrompts.lambda_handler",
             layers=[boto3_layer, psycopg_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
@@ -663,6 +680,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(login_lambda.role)
         shared_policy_for_lambda.attach_to_role(logout_lambda.role)
         shared_policy_for_lambda.attach_to_role(refresh_token_lambda.role)
+        shared_policy_for_lambda.attach_to_role(update_conversation_prompts_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -703,6 +721,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         student_send_msg_resource = student_resource.add_resource("send-message")
         instructor_resource = ui_resource.add_resource("instructor")
         instructor_config_resource = instructor_resource.add_resource("config")
+        update_system_prompt_resource = instructor_config_resource.add_resource("update-prompt")
         analytics_resource = instructor_resource.add_resource("analytics")
         top_questions_resource = analytics_resource.add_resource("top-questions")
         top_materials_resource = analytics_resource.add_resource("top-materials")
@@ -1059,6 +1078,40 @@ class PrivAceItEceCapstoneMainStack(Stack):
             allow_origins=["*"],
             allow_headers=["*"],
             allow_methods=["GET", "PUT"],
+        )
+
+        # POST /api/ui/instructor/config/update-prompt
+        update_system_prompt_resource.add_method(
+            "POST",
+            apigateway.LambdaIntegration(update_conversation_prompts_lambda, timeout=Duration.seconds(120)),
+            request_parameters={
+                "method.request.querystring.course": True,
+            },
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                ),
+                apigateway.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
+        )
+        update_system_prompt_resource.add_cors_preflight(
+            allow_origins=["*"],
+            allow_headers=["*"],
+            allow_methods=["POST"],
         )
         
         # GET /api/ui/instructor/analytics/engagement
