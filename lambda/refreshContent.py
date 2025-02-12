@@ -28,6 +28,7 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Course ID is required"})
         }
+    # TODO：filter content based on instructor configuration
     files = get_files(course_id)
     print("files: ", files)
     if files is None:

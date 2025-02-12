@@ -68,7 +68,7 @@ def lambda_handler(event, context):
                 "name": course["name"]
             }
             # check course availability in db
-            available = get_availability(course["uuid"])
+            available = get_availability(course["id"])
             # add into its corresponding list
             if available:
                 availableStudentList.append(cur_course)
