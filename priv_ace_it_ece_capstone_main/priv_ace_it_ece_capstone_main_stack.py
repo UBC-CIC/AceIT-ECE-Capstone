@@ -676,7 +676,13 @@ class PrivAceItEceCapstoneMainStack(Stack):
             self,
             "CourseAPI",
             rest_api_name="CourseAPI",
-            description="API to handle course-related data"
+            description="API to handle course-related data",
+            default_cors_preflight_options={
+                "allow_origins": ["https://d2rs0jk5lfd7j4.cloudfront.net"],
+                "allow_methods": ["OPTIONS", "GET", "POST"],
+                "allow_headers": ["Content-Type", "Authorization", "jwt"],
+                "allow_credentials": True
+            }
         )
 
         # build resources
@@ -760,21 +766,30 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         refresh_token_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -794,15 +809,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         session_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -822,15 +843,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         specific_session_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -850,21 +877,30 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         logout_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -884,21 +920,30 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         user_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -918,21 +963,30 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         user_courses_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -952,15 +1006,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
 
         # GET /api/ui/instructor/config?course={uuid}
@@ -976,15 +1036,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         instructor_config_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1006,15 +1072,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         student_engagement_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1037,15 +1109,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         top_materials_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1068,15 +1146,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         top_questions_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1140,15 +1224,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         student_send_msg_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1168,15 +1258,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         # PUT /api/llm/vector
         vector_resource.add_method(
@@ -1190,15 +1286,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         # DELETE /api/llm/vector
         vector_resource.add_method(
@@ -1212,15 +1314,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         vector_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1240,21 +1348,30 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         refresh_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1274,15 +1391,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         content_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1302,21 +1425,30 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
             
         )
         refresh_all_existing_resource.add_cors_preflight(
@@ -1337,15 +1469,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         gen_chat_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1365,15 +1503,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         llm_completion_resource.add_cors_preflight(
             allow_origins=["*"],
@@ -1393,15 +1537,21 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     status_code="200",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
                 ),
                 apigateway.MethodResponse(
                     status_code="400",
                     response_parameters={
                         "method.response.header.Access-Control-Allow-Origin": True,
-                    },
-                ),
-            ],
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
         )
         analysis_gen_resource.add_cors_preflight(
             allow_origins=["*"],
