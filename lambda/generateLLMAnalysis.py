@@ -18,10 +18,11 @@ def lambda_handler(event, context):
         if not messages:
             return {
                 "statusCode": 400,
-                "headers": {
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required field: messages"})
             }
@@ -38,14 +39,22 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"prompt": mistral_messages})
         }
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, "body": "Internal Server Error"}
+        return {"statusCode": 500, 
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
+                "body": "Internal Server Error"}

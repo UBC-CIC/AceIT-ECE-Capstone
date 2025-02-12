@@ -16,6 +16,7 @@ from io import BytesIO
 from utils.create_course_vectors_tables import create_table_if_not_exists
 from utils.get_course_related_stuff import fetch_syllabus_from_canvas
 import utils
+from utils.retrieve_course_config import retrieve_course_config
 
 s3_client = boto3.client("s3")
 bedrock = boto3.client("bedrock-runtime",
@@ -36,9 +37,10 @@ def lambda_handler(event, context):
         return {
             "statusCode": 400,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,GET'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"error": "Missing required fields: 'course' is required"})
         }
@@ -57,6 +59,33 @@ def lambda_handler(event, context):
     }
 
     ret = create_table_if_not_exists(DB_CONFIG, course_id)
+
+    ## first check course config settings
+    course_config = retrieve_course_config(DB_CONFIG, course_id)
+    print("course config: ", course_config)
+
+    if isinstance(course_config, str):  # If there's an error message
+        print("Error:", course_config)
+        return {
+            "statusCode": 500,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
+            },
+            "body": json.dumps({"error": "Error retrieving course configuration"})
+        }
+    # Access fields in the dictionary
+    files_enabled = course_config["selectedIncludedCourseContent"].get("FILES", False)
+    syllabus_enabled = course_config["selectedIncludedCourseContent"].get("SYLLABUS", False)
+    home_enabled = course_config["selectedIncludedCourseContent"].get("HOME", False)
+    announcement_enabled = course_config["selectedIncludedCourseContent"].get("ANNOUNCEMENTS", False)
+    assignment_enabled = course_config["selectedIncludedCourseContent"].get("ASSIGNMENTS", False)
+    quizzes_enabled = course_config["selectedIncludedCourseContent"].get("QUIZZES", False)
+    discussion_enabled = course_config["selectedIncludedCourseContent"].get("DISCUSSIONS", False)
+    pages_enabled = course_config["selectedIncludedCourseContent"].get("PAGES", False)
+    modules_enabled = course_config["selectedIncludedCourseContent"].get("MODULES", False)
     
     prefix = f"{course_id}/"  # Assuming course_id is used as a folder structure
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
@@ -69,14 +98,15 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"message": "Bucket is empty or does not exist."})
         }
 
-    if "Contents" in response:
+    if "Contents" in response and files_enabled:
         for obj in response["Contents"]:
             file_key = obj["Key"]
 
@@ -118,28 +148,30 @@ def lambda_handler(event, context):
     print("file metadata: ", files_metadata)
 
     # add canvas syllabus
-    secret = utils.get_canvas_secret.get_secret()
-    credentials = json.loads(secret)
-    BASE_URL = credentials['baseURL']
-    TOKEN = credentials['adminAccessToken']
-    url = f"{BASE_URL}/courses/{course_id}/assignments/syllabus"
-    syllabus_text = fetch_syllabus_from_canvas(TOKEN, BASE_URL, course_id)
-    if syllabus_text:
-        syllabus_chunks = text_splitter.split_text(syllabus_text)
-        embeddings = []
-        for chunk in syllabus_chunks:
-            embedding = generate_embeddings(chunk)
-            if embedding:
-                embeddings.append(embedding)
-                store_embeddings("Syllabus", embedding, course_id, DB_CONFIG, url, chunk)
+    if syllabus_enabled:
+        secret = utils.get_canvas_secret.get_secret()
+        credentials = json.loads(secret)
+        BASE_URL = credentials['baseURL']
+        TOKEN = credentials['adminAccessToken']
+        url = f"{BASE_URL}/courses/{course_id}/assignments/syllabus"
+        syllabus_text = fetch_syllabus_from_canvas(TOKEN, BASE_URL, course_id)
+        if syllabus_text:
+            syllabus_chunks = text_splitter.split_text(syllabus_text)
+            embeddings = []
+            for chunk in syllabus_chunks:
+                embedding = generate_embeddings(chunk)
+                if embedding:
+                    embeddings.append(embedding)
+                    store_embeddings("Syllabus", embedding, course_id, DB_CONFIG, url, chunk)
 
     # 4. Return the results
     return {
         "statusCode": 200,
         'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+            'Access-Control-Allow-Methods': '*',
+            'Access-Control-Allow-Credentials': 'true'
         },
         # "body": json.dumps({"pdf_results": results, "embeddings": embeddings, "db":retdb})
         "body": json.dumps(results)

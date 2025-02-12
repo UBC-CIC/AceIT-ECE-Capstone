@@ -19,8 +19,9 @@ def lambda_handler(event, context):
                 "statusCode": 400,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -30,6 +31,12 @@ def lambda_handler(event, context):
         if not user_info:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
         # Extract Canvas user ID
@@ -37,6 +44,12 @@ def lambda_handler(event, context):
         if not student_id:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
                 "body": json.dumps({"error": "User ID not found"})
             }
         student_id = str(student_id)
@@ -50,8 +63,9 @@ def lambda_handler(event, context):
                 "statusCode": 400,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required parameter: need course id"})
             }
@@ -86,17 +100,25 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps(past_conversations)
         }
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, "body": "Internal Server Error"}
+        return {"statusCode": 500, 
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
+                "body": "Internal Server Error"}
 
 
 def generate_summary_input(message_ids_list):

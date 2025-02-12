@@ -10,9 +10,10 @@ def lambda_handler(event, context):
         return {
             "statusCode": 400,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"error": "Header is missing"})
         }
@@ -21,9 +22,10 @@ def lambda_handler(event, context):
         return {
             "statusCode": 400,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"error": "Authorization token is required"})
         }
@@ -33,9 +35,10 @@ def lambda_handler(event, context):
         return {
             "statusCode": 500,
             'headers': {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps({"error": "Failed to fetch user info from Canvas API"})
         }
@@ -49,9 +52,10 @@ def lambda_handler(event, context):
     return {
         'statusCode': 200,
         'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'Access-Control-Allow-Headers': '*',
+            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+            'Access-Control-Allow-Methods': '*',
+            'Access-Control-Allow-Credentials': 'true'
         },
         'body': json.dumps(response)
     }

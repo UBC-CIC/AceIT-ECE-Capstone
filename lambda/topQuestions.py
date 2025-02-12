@@ -19,8 +19,9 @@ def lambda_handler(event, context):
                 "statusCode": 400,
                 'headers': {
                     'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required Authorization token"})
             }
@@ -30,6 +31,12 @@ def lambda_handler(event, context):
         if not user_info:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
                 "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
             }
         # Extract Canvas user ID
@@ -53,9 +60,10 @@ def lambda_handler(event, context):
             return {
                 "statusCode": 400,
                 'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Missing required query parameters: course, num, or period"})
             }
@@ -67,9 +75,10 @@ def lambda_handler(event, context):
             return {
                 "statusCode": 400,
                 'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Invalid value for num, must be an integer"})
             }
@@ -80,9 +89,10 @@ def lambda_handler(event, context):
             return {
                 "statusCode": 400,
                 'headers': {
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
                 },
                 "body": json.dumps({"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
             }
@@ -126,17 +136,25 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "headers": {
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
             },
             "body": json.dumps(faq_list)
         }
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, "body": "Internal Server Error"}
+        return {"statusCode": 500, 
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
+                "body": "Internal Server Error"}
 
 
 def calculate_time_threshold(period):
