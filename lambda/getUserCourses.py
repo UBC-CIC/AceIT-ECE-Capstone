@@ -169,11 +169,11 @@ def get_availability(course_id):
         FROM course_configuration
         WHERE course_id = %s
         """
-        cursor.execute(query, (str(course_id),))  # Convert UUID to string
+        cursor.execute(query, (str(course_id),))  # Convert ID to string
         row = cursor.fetchone()
 
         if not row:
-            return "Course configuration not found"
+            return False
 
         # Close database connection
         cursor.close()
@@ -182,4 +182,4 @@ def get_availability(course_id):
         return row[0] 
     except Exception as e:
         print(f"Error: {e}")
-        return "Cannot connect to db"
+        return False
