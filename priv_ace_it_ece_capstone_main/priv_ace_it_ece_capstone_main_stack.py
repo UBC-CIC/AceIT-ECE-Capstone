@@ -677,9 +677,12 @@ class PrivAceItEceCapstoneMainStack(Stack):
             "CourseAPI",
             rest_api_name="CourseAPI",
             description="API to handle course-related data",
+            endpoint_configuration={
+                "types": [apigateway.EndpointType.REGIONAL]  # Ensures timeout increase works
+            },
             default_cors_preflight_options={
                 "allow_origins": ["https://d2rs0jk5lfd7j4.cloudfront.net"],
-                "allow_methods": ["OPTIONS", "GET", "POST"],
+                "allow_methods": ["OPTIONS", "GET", "POST", "PUT", "DELETE"],
                 "allow_headers": ["Content-Type", "Authorization", "jwt"],
                 "allow_credentials": True
             }
@@ -748,12 +751,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
             ],
         )
 
-        login_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["OPTIONS", "POST"],  # Ensure OPTIONS is allowed
-        )
-
         # POST /api/ui/general/refresh-token
         refresh_token_resource.add_method(
             "POST",
@@ -791,11 +788,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        refresh_token_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["OPTIONS", "POST"],
-        )
 
         # GET /api/ui/student/sessions
         session_resource.add_method(
@@ -825,11 +817,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        session_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
-        )
 
         # GET /api/ui/student/session/sessionId
         specific_session_resource.add_method(
@@ -858,11 +845,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     }
                 )
             ]
-        )
-        specific_session_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
         )
  
         # POST /api/ui/general/log-out
@@ -902,11 +884,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        logout_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["OPTIONS","POST"],
-        )
 
         # GET /api/ui/general/user
         user_resource.add_method(
@@ -945,11 +922,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        user_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
-        )
  
         # GET /api/ui/general/user/courses
         user_courses_resource.add_method(
@@ -987,11 +959,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     }
                 )
             ]
-        )
-        user_courses_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
         )
  
         # PUT /api/ui/instructor/config
@@ -1052,11 +1019,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        instructor_config_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET", "PUT"],
-        )
         
         # GET /api/ui/instructor/analytics/engagement
         student_engagement_resource.add_method(
@@ -1087,11 +1049,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     }
                 )
             ]
-        )
-        student_engagement_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
         )
 
         # GET /api/ui/instructor/analytics/top-materials
@@ -1125,11 +1082,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        top_materials_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
-        )
 
         # GET /api/ui/instructor/analytics/top-questions
         top_questions_resource.add_method(
@@ -1162,11 +1114,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        top_questions_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
-        )
 
         # GET /api/llm/content/canvas
         canvas_resource.add_method(
@@ -1184,11 +1131,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ],
         )
-        canvas_resource.add_cors_preflight(
-            allow_origins=["*"],  # Replace "*" with your allowed origin if more restrictive
-            allow_headers=["*"],
-            allow_methods=["GET"],  # Allowed methods
-        )
 
         # GET /api/llm/analysis/data
         analysis_data_resource.add_method(
@@ -1205,11 +1147,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     },
                 )
             ],
-        )
-        analysis_data_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
         )
         
         # POST /api/ui/student/send-message
@@ -1239,11 +1176,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     }
                 )
             ]
-        )
-        student_send_msg_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["POST"],
         )
  
         # GET /api/llm/vector
@@ -1330,11 +1262,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        vector_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET", "POST", "DELETE"],
-        )
  
         # POST /api/llm/content/refresh
         refresh_resource.add_method(
@@ -1373,11 +1300,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        refresh_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["POST"],
-        )
 
         # DELETE /api/llm/content
         content_resource.add_method(
@@ -1406,11 +1328,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     }
                 )
             ]
-        )
-        content_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["DELETE"],
         )
  
         # GET /api/llm/content/refresh-existing-courses
@@ -1451,11 +1368,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
             ]
             
         )
-        refresh_all_existing_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
-        )
 
         # POST /api/llm/chat/generate
         gen_chat_resource.add_method(
@@ -1484,11 +1396,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     }
                 )
             ]
-        )
-        gen_chat_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
         )
 
         # GET /api/llm/completion
@@ -1519,11 +1426,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 )
             ]
         )
-        llm_completion_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
-        )
 
         # GET /api/llm/analysis/generate
         analysis_gen_resource.add_method(
@@ -1552,11 +1454,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     }
                 )
             ]
-        )
-        analysis_gen_resource.add_cors_preflight(
-            allow_origins=["*"],
-            allow_headers=["*"],
-            allow_methods=["GET"],
         )
 
 
