@@ -196,6 +196,18 @@ class PrivAceItEceCapstoneMainStack(Stack):
             )
         )
 
+        # Create the User Table
+        users_table = dynamodb.Table(
+            self, "UserTable",
+            table_name="Users",  # Custom name for the table
+            partition_key=dynamodb.Attribute(
+                name="userId",
+                type=dynamodb.AttributeType.NUMBER
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            removal_policy=RemovalPolicy.DESTROY  # Change to RETAIN for production
+        )
+
         # Set up layers for lambda functions
         pymupdf_layer = _lambda.LayerVersion(
             self, 
@@ -395,6 +407,22 @@ class PrivAceItEceCapstoneMainStack(Stack):
             timeout=Duration.minutes(15),
         )
 
+        update_user_language_lambda = _lambda.Function(
+            self,
+            "UpdateUserLanguageLambda",
+            function_name="UpdateUserLanguageLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            code=_lambda.Code.from_asset("lambda"),
+            handler="updateUserLanguage.lambda_handler",
+            layers=[langchain_layer, boto3_layer, requests_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
+            timeout=Duration.minutes(15),
+        )
+
         get_user_courses_lambda = _lambda.Function(
             self,
             "GetUserCoursesLambda",
@@ -585,6 +613,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            memory_size=1024,
         )
 
         generate_llm_analysis_lambda = _lambda.Function(
@@ -681,6 +710,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(logout_lambda.role)
         shared_policy_for_lambda.attach_to_role(refresh_token_lambda.role)
         shared_policy_for_lambda.attach_to_role(update_conversation_prompts_lambda.role)
+        shared_policy_for_lambda.attach_to_role(update_user_language_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -714,6 +744,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         refresh_token_resource = general_resource.add_resource("refresh-token")
         logout_resource = general_resource.add_resource("log-out")
         user_resource = general_resource.add_resource("user")
+        user_language_resource = user_resource.add_resource("language")
         user_courses_resource = user_resource.add_resource("courses")
         student_resource = ui_resource.add_resource("student")
         session_resource = student_resource.add_resource("sessions")
@@ -971,6 +1002,49 @@ class PrivAceItEceCapstoneMainStack(Stack):
             allow_origins=["*"],
             allow_headers=["*"],
             allow_methods=["GET"],
+        )
+
+        # PUT /api/ui/general/user/language
+        user_language_resource.add_method(
+            "PUT",
+            apigateway.LambdaIntegration(update_user_language_lambda, timeout=Duration.seconds(120)),
+            request_parameters={
+                "method.request.header.Authorization": True,
+            },
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                ),
+                apigateway.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                ),
+                apigateway.MethodResponse(
+                    status_code="500",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
+        )
+        user_language_resource.add_cors_preflight(
+            allow_origins=["*"],
+            allow_headers=["*"],
+            allow_methods=["PUT"],
         )
  
         # GET /api/ui/general/user/courses

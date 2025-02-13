@@ -1,9 +1,11 @@
 import json
 import utils
 import requests
-
+import boto3
 import utils.get_canvas_secret
 
+dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+users_table = dynamodb.Table("Users")
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     if not headers:
