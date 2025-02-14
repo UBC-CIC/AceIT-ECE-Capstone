@@ -77,7 +77,8 @@ def lambda_handler(event, context):
             ExpressionAttributeValues={":pl": preferred_language},
             ReturnValues="UPDATED_NEW"
         )
-        print("update response from dynamoDB: ", response)
+        updated_lang = response.get("Attributes", {}).get("preferred_language", "")
+        print("update language to: ", updated_lang, "for user ", user_id)
 
         return {
             "statusCode": 200,
@@ -87,7 +88,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': '*',
                 'Access-Control-Allow-Credentials': 'true'
             },
-            "body": json.dumps(response)
+            "body": json.dumps(f"Updated language to: {updated_lang} for user {user_id}")
         }
 
     except Exception as e:

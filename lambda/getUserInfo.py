@@ -44,11 +44,22 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Failed to fetch user info from Canvas API"})
         }
+    
+    user_name = user["name"]
+    user_id = user["id"]
+    response = users_table.get_item(Key={"userId": user_id})
+    preferred_lang = ""
+    if "Item" in response:
+        # User does not exist, create a new one with preferred_language=""
+        preferred_lang = response["Item"].get("preferred_language", "")
+    else:
+        users_table.put_item(Item={"userId": user_id, "preferred_language": ""})
 
     # construct response
     response = {
-        "userName": user["name"],
-        "userId": user["id"]
+        "userName": user_name,
+        "userId": user_id,
+        "preferred_language": preferred_lang
     }
 
     return {
