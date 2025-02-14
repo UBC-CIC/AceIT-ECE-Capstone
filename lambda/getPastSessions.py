@@ -1,4 +1,5 @@
 import json
+import re
 import boto3
 from utils.get_user_info import get_user_info
 
@@ -83,13 +84,16 @@ def lambda_handler(event, context):
         past_conversations = []
 
         for conversation in conversations:
-            summary = conversation.get('summary', "Summary not available.")
+            summary = conversation.get('summary', "Summary not available")
             message_list = conversation.get('message_list', [])
             # Generate AI summary **only if**:
             # - No summary exists for this conversation yet
             # - There are more than 4 messages in the conversation
-            if summary == "Summary not available." and len(message_list) >= 3:
+            updated_sum = "Summary not available"
+            if ("summary not available" in summary.lower()) and len(message_list) >= 3:
                 summary = call_llm(message_list)
+                print("Summary: ", summary)
+                updated_sum = summary
                 update_summary_in_db(conversation["conversation_id"], summary)
             if len(message_list)>2:
                 past_conversations.append({
@@ -140,47 +144,53 @@ def generate_summary_input(message_ids_list):
 
     for message in messages:
         msg_source = message.get("msg_source")
-        print("a msg_source: ", msg_source)
-        content = message.get("content","")
+        content = message.get("content", "")
         if msg_source == "STUDENT" and content:
-            conversation_hist += "STUDENT: " + content
-        elif msg_source == "AI" and content: # AI
-            conversation_hist += "ASSISTANT: " + content
+            conversation_hist += "STUDENT: " + content + "\n"
+        elif msg_source == "AI" and content:
+            conversation_hist += "ASSISTANT: " + content + "\n"
 
-    complete_msg = []
-    complete_msg.append({"role": "system", "content": "Summarize given conversation history to 5 words. Respond only the 1-5 word summary, and nothing else. Conversation history: "})
-    complete_msg.append({"role": "user", "content" : conversation_hist})
-    body=json.dumps({
-            'messages': complete_msg
-         })
+    formatted_prompt = f"""
+        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        Summarize the given conversation history in 5 words or less. Respond with ONLY the 1-5 words summary, and nothing else. No introduction, no formatting, no extra words.
+        <|eot_id|>
+        <|start_header_id|>user<|end_header_id|>
+        Conversation history: {conversation_hist}
+        <|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>
+    """
 
-    print("Input text: ", body)
+    # complete_msg = []
+    # complete_msg.append({"role": "system", "content": "Summarize given conversation history to 5 words. "})
+    # complete_msg.append({"role": "user", "content" : conversation_hist})
+    # body=json.dumps({
+    #         'messages': complete_msg
+    #      })
     
-    return body
+    return formatted_prompt
 
 def call_llm(message_ids_list):
     """Invokes the LLM for summary."""
     input_text = generate_summary_input(message_ids_list)
-    model_id = "mistral.mistral-large-2407-v1:0"  # Make sure this is the correct model ID for generation
+    model_id = "arn:aws:bedrock:us-west-2:842676002045:inference-profile/us.meta.llama3-3-70b-instruct-v1:0"  # Make sure this is the correct model ID for generation
 
     try:
         response = bedrock.invoke_model(
             modelId=model_id,
-            body=input_text
+            body=json.dumps({"prompt": input_text, "max_gen_len": 16, "temperature": 0.5, "top_p": 0.9})
         )
-        print("LLM response: ", response)
 
-        # Read the StreamingBody and decode it to a string
         response_body = response['body'].read().decode('utf-8')
-
-        # Parse the JSON response
+        if not response_body.strip():
+            print("LLM response is empty!")
+            return "Summary not available."
         response_json = json.loads(response_body)
-        print("Parsed response: ", response_json)
+        generated_summary = response_json.get("generation", "Summary not available.")
+        generated_summary = re.sub(r"^(Summary:|summary:|ai:|AI:|Course Overview:)\s*", "", generated_summary).strip()
+        generated_summary = re.sub(r"[*#_]", "", generated_summary).strip()
 
-        # Extract the assistant's message content
-        assistant_message = response_json['choices'][0]['message']['content']
-    
-        return assistant_message
+        print("Generated summary: ", generated_summary)
+        return generated_summary
     
     except Exception as e:
         print(f"Error generating summary: {e}")
