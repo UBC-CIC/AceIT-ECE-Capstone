@@ -6,7 +6,12 @@ import { InstructorSection } from "./components/InstructorContainer";
 import { CourseProps, UserProps } from "./types";
 import { toast } from "react-hot-toast";
 import { logout } from "./auth";
-import { fetchCoursesAPI, fetchUserInfoAPI, isAccessTokenSet } from "./api";
+import {
+  fetchCoursesAPI,
+  fetchUserInfoAPI,
+  isAccessTokenSet,
+  updateUserLanguageAPI,
+} from "./api";
 
 export const StudyAssistant = () => {
   const [courses, setCourses] = useState<CourseProps[]>([]);
@@ -59,14 +64,31 @@ export const StudyAssistant = () => {
     setSelectedCourse(course);
   };
 
+  const handleLanguageChange = async (language: string) => {
+    try {
+      await updateUserLanguageAPI(language);
+
+      if (!userInfo) return;
+
+      // Update the language preference in the local state
+      const newUserInfo = userInfo;
+      userInfo.preferred_language = language;
+      setUserInfo(newUserInfo);
+      toast.success("Language preference updated successfully");
+    } catch (error) {
+      console.error("Failed to update language preference:", error);
+    }
+  };
+
   return (
     <div className="h-full flex flex-col">
       {userInfo ? (
         <>
           <Header
-            userName={userInfo.userName}
             currentCourse={selectedCourse}
             onLogout={() => logout()}
+            onLanguageChange={handleLanguageChange}
+            userInfo={userInfo}
           />
 
           <div className="flex-1 flex gap-4 mt-4 min-h-0">
@@ -86,6 +108,7 @@ export const StudyAssistant = () => {
                       hidePastSessions={false}
                       useDarkStyle={false}
                       resetTrigger={selectedCourse.id}
+                      preferredLanguage={userInfo.preferred_language}
                     />
                   </div>
                 )}

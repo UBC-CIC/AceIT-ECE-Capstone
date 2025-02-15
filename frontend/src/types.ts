@@ -16,6 +16,7 @@ export interface CourseProps {
 export interface UserProps {
   userId: string;
   userName: string;
+  preferred_language: string;
 }
 
 export type UserRole = "STUDENT" | "INSTRUCTOR";
@@ -51,9 +52,10 @@ export interface ConversationMessage {
 }
 
 export interface HeaderProps {
-  userName: string;
   currentCourse: CourseProps | null;
   onLogout: () => void;
+  onLanguageChange: (language: string) => void;
+  userInfo: UserProps | null;
 }
 
 export interface ChatInputProps {
@@ -107,7 +109,8 @@ export interface ChatSectionProps {
   selectedCourse: CourseProps;
   useDarkStyle: boolean;
   hidePastSessions: boolean;
-  resetTrigger?: string; // Add this line
+  resetTrigger?: string;
+  preferredLanguage?: string;
 }
 
 export interface CourseNavBarItemProps {
@@ -231,3 +234,86 @@ export interface ConversationSession {
   last_message_timestamp: string;
   summary: string;
 }
+
+export interface LanguageOption {
+  code: string;
+  displayName: string;
+}
+
+export const SUPPORTED_LANGUAGES: LanguageOption[] = [
+  { code: "af", displayName: "Afrikaans" },
+  { code: "sq", displayName: "Albanian" },
+  { code: "am", displayName: "Amharic" },
+  { code: "ar", displayName: "Arabic" },
+  { code: "hy", displayName: "Armenian" },
+  { code: "az", displayName: "Azerbaijani" },
+  { code: "bn", displayName: "Bengali" },
+  { code: "bs", displayName: "Bosnian" },
+  { code: "bg", displayName: "Bulgarian" },
+  { code: "ca", displayName: "Catalan" },
+  { code: "zh", displayName: "Chinese (Simplified)" },
+  { code: "zh-TW", displayName: "Chinese (Traditional)" },
+  { code: "hr", displayName: "Croatian" },
+  { code: "cs", displayName: "Czech" },
+  { code: "da", displayName: "Danish" },
+  { code: "fa-AF", displayName: "Dari" },
+  { code: "nl", displayName: "Dutch" },
+  { code: "en", displayName: "English" },
+  { code: "et", displayName: "Estonian" },
+  { code: "fa", displayName: "Farsi (Persian)" },
+  { code: "tl", displayName: "Filipino, Tagalog" },
+  { code: "fi", displayName: "Finnish" },
+  { code: "fr", displayName: "French" },
+  { code: "fr-CA", displayName: "French (Canada)" },
+  { code: "ka", displayName: "Georgian" },
+  { code: "de", displayName: "German" },
+  { code: "el", displayName: "Greek" },
+  { code: "gu", displayName: "Gujarati" },
+  { code: "ht", displayName: "Haitian Creole" },
+  { code: "ha", displayName: "Hausa" },
+  { code: "he", displayName: "Hebrew" },
+  { code: "hi", displayName: "Hindi" },
+  { code: "hu", displayName: "Hungarian" },
+  { code: "is", displayName: "Icelandic" },
+  { code: "id", displayName: "Indonesian" },
+  { code: "ga", displayName: "Irish" },
+  { code: "it", displayName: "Italian" },
+  { code: "ja", displayName: "Japanese" },
+  { code: "kn", displayName: "Kannada" },
+  { code: "kk", displayName: "Kazakh" },
+  { code: "ko", displayName: "Korean" },
+  { code: "lv", displayName: "Latvian" },
+  { code: "lt", displayName: "Lithuanian" },
+  { code: "mk", displayName: "Macedonian" },
+  { code: "ms", displayName: "Malay" },
+  { code: "ml", displayName: "Malayalam" },
+  { code: "mt", displayName: "Maltese" },
+  { code: "mr", displayName: "Marathi" },
+  { code: "mn", displayName: "Mongolian" },
+  { code: "no", displayName: "Norwegian (Bokmål)" },
+  { code: "ps", displayName: "Pashto" },
+  { code: "pl", displayName: "Polish" },
+  { code: "pt", displayName: "Portuguese (Brazil)" },
+  { code: "pt-PT", displayName: "Portuguese (Portugal)" },
+  { code: "pa", displayName: "Punjabi" },
+  { code: "ro", displayName: "Romanian" },
+  { code: "ru", displayName: "Russian" },
+  { code: "sr", displayName: "Serbian" },
+  { code: "si", displayName: "Sinhala" },
+  { code: "sk", displayName: "Slovak" },
+  { code: "sl", displayName: "Slovenian" },
+  { code: "so", displayName: "Somali" },
+  { code: "es", displayName: "Spanish" },
+  { code: "es-MX", displayName: "Spanish (Mexico)" },
+  { code: "sw", displayName: "Swahili" },
+  { code: "sv", displayName: "Swedish" },
+  { code: "ta", displayName: "Tamil" },
+  { code: "te", displayName: "Telugu" },
+  { code: "th", displayName: "Thai" },
+  { code: "tr", displayName: "Turkish" },
+  { code: "uk", displayName: "Ukrainian" },
+  { code: "ur", displayName: "Urdu" },
+  { code: "uz", displayName: "Uzbek" },
+  { code: "vi", displayName: "Vietnamese" },
+  { code: "cy", displayName: "Welsh" },
+];

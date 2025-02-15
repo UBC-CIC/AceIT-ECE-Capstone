@@ -25,6 +25,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   useDarkStyle,
   hidePastSessions,
   resetTrigger,
+  preferredLanguage,
 }) => {
   const [messageList, setMessageList] = useState<MessageProps[]>([]);
   const [suggestionList, setSuggestionList] = useState<string[]>(suggestions);
@@ -94,7 +95,8 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
     const response = await sendMessageAPI(
       selectedCourse.id,
       message,
-      conversationId || undefined
+      conversationId || undefined,
+      preferredLanguage
     );
     setConversationId(response.conversation_id);
     return response.messages

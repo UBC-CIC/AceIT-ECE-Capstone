@@ -1,12 +1,33 @@
 import * as React from "react";
-import { HeaderProps } from "../../types";
+import { useState, useEffect } from "react";
+import { HeaderProps, SUPPORTED_LANGUAGES } from "../../types";
 import UBCLogoWhite from "../../assets/UBC-logo-white.png";
 
 export const Header: React.FC<HeaderProps> = ({
-  userName,
   currentCourse,
   onLogout,
+  onLanguageChange,
+  userInfo,
 }) => {
+  const [isLanguagePopupOpen, setIsLanguagePopupOpen] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    userInfo?.preferred_language || ""
+  );
+
+  useEffect(() => {
+    if (userInfo?.preferred_language) {
+      setSelectedLanguage(userInfo.preferred_language);
+    }
+  }, [userInfo?.preferred_language]);
+
+  const hasLanguageChanged = userInfo?.preferred_language !== selectedLanguage;
+
+  const handleLanguageConfirm = () => {
+    if (!hasLanguageChanged) return;
+    onLanguageChange(selectedLanguage);
+    setIsLanguagePopupOpen(false);
+  };
+
   return (
     <div className="flex flex-wrap gap-4 items-stretch w-full text-white max-md:max-w-full">
       <div className="flex flex-wrap gap-3.5 items-center self-auto py-3.5 pr-3 pl-4 rounded-xl border-white border-solid bg-indigo-950 border-[3px] w-[290px]">
@@ -34,7 +55,77 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
           <div className="flex gap-2.5 items-center h-full text-base leading-none text-right">
-            <div className="self-stretch my-auto">{userName}</div>
+            <div className="self-stretch my-auto">{userInfo?.userName}</div>
+            <div className="self-stretch my-auto">•</div>
+            <div className="relative group z-[100]">
+              <button
+                onClick={() => setIsLanguagePopupOpen(true)}
+                className="relative flex items-center px-2 py-1 hover:text-gray-200 transition-colors duration-200 cursor-pointer"
+              >
+                <span className="sr-only">Change Language</span>
+                🌐
+                <span className="absolute hidden group-hover:block bg-gray-900 text-white text-xs px-2 py-1 rounded -translate-x-1/2 left-1/2 -top-8 whitespace-nowrap min-w-max">
+                  Change Response Language
+                </span>
+              </button>
+              {isLanguagePopupOpen && (
+                <div
+                  className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center"
+                  onClick={() => setIsLanguagePopupOpen(false)}
+                >
+                  <div
+                    className="w-[480px] bg-white rounded-lg shadow-lg z-50 text-gray-800"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="p-6">
+                      <div className="text-left">
+                        <h2 className="text-xl font-bold text-gray-900 mb-1">
+                          Change Preferred Response Language
+                        </h2>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Select your preferred language for the AI Study
+                          Assistant responses. Note that the user interface will
+                          remain in English as it is the only currently
+                          supported language.
+                        </p>
+                      </div>
+                      <select
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className="w-full p-2 border rounded mb-4 text-sm"
+                      >
+                        {SUPPORTED_LANGUAGES.map((lang) => (
+                          <option key={lang.code} value={lang.code}>
+                            {lang.displayName}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsLanguagePopupOpen(false)}
+                          className="px-6 py-3 text-sm font-bold text-black rounded-lg bg-gray-100 hover:bg-gray-200"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleLanguageConfirm}
+                          disabled={!hasLanguageChanged}
+                          className={`px-6 py-3 text-sm font-bold text-white rounded-lg ${
+                            hasLanguageChanged
+                              ? "bg-indigo-950 hover:bg-indigo-900"
+                              : "bg-indigo-950 opacity-50 cursor-not-allowed"
+                          }`}
+                        >
+                          Confirm
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
             <div className="self-stretch my-auto">•</div>
             <button
               onClick={onLogout}

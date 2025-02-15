@@ -119,9 +119,15 @@ export const fetchUserInfoAPI = async (): Promise<UserProps> => {
 export const sendMessageAPI = async (
   course: string,
   message: string,
-  conversationId?: string
+  conversationId?: string,
+  language?: string
 ): Promise<{ conversation_id: string; messages: ConversationMessage[] }> => {
   if (!accessToken) throw new Error("Access token is not set");
+
+  // Remove language parameter if set to english to prevent translation
+  if ((language && language === "") || language === "en") {
+    language = undefined;
+  }
 
   try {
     const response = await fetch(`${API_BASE_URL}/ui/student/send-message`, {
@@ -134,6 +140,7 @@ export const sendMessageAPI = async (
         course,
         message,
         conversation_id: conversationId,
+        language,
       }),
     });
 
@@ -370,6 +377,35 @@ export const updateCourseConfigurationAPI = async (
     handleApiError(
       error,
       "Failed to update course configuration. Please try again."
+    );
+    throw error;
+  }
+};
+
+export const updateUserLanguageAPI = async (
+  preferredLanguage: string
+): Promise<void> => {
+  if (!accessToken) throw new Error("Access token is not set");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/ui/general/user/language`, {
+      method: "PUT",
+      headers: {
+        Authorization: accessToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        preferred_language: preferredLanguage,
+      }),
+    });
+    handleUnauthorized(response);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+  } catch (error) {
+    handleApiError(
+      error,
+      "Failed to update language preference. Please try again."
     );
     throw error;
   }
