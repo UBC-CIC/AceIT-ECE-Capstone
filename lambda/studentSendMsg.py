@@ -191,16 +191,7 @@ def lambda_handler(event, context):
             }
             print("new message: ", new_message)
 
-            # Insert the message into the Messages table
-            try:
-                messages_table.put_item(Item=new_message)
-                print(f"Message inserted successfully: {new_message}")
-            except Exception as e:
-                print(f"Failed to insert message: {e}")
-
-            # Update the Conversations table
-            update_conversation(conversation_id, course_id, student_id, message_id, timestamp)
-
+            
             # Create an AI response (mocked here, replace with real AI logic)
             ai_message_id = str(uuid.uuid4())
             ai_response_dict = generate_ai_response(message_content, past_conversation, course_id, student_language_pref)
@@ -214,6 +205,17 @@ def lambda_handler(event, context):
                 "references": ai_response_sources,
                 "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
+
+            # Insert the message into the Messages table
+            try:
+                messages_table.put_item(Item=new_message)
+                print(f"Message inserted successfully: {new_message}")
+            except Exception as e:
+                print(f"Failed to insert message: {e}")
+
+            # Update the Conversations table
+            update_conversation(conversation_id, course_id, student_id, message_id, timestamp)
+
 
             # Insert AI response into the Messages table
             messages_table.put_item(Item=ai_message)

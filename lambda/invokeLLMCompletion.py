@@ -175,25 +175,30 @@ Content: {doc.get('documentContent', 'No Content')}"""
         ]
     )
 
+    # Start with previous conversation history
+    composed_prompt = context_data.strip()
     # Find the last occurrence of <|eot_id|> in the message
-    last_eot_index = message.rfind("<|eot_id|>")
+    last_eot_index = context_data.rfind("<|eot_id|>")
 
     if last_eot_index != -1:
-        # Insert document info before the last <|eot_id|>
-        modified_message = (
-            message[:last_eot_index] +
-            f"\nRelevant Documents:\n{documents_text}\n" +
-            message[last_eot_index:] +
-            "<|start_header_id|>assistant<|end_header_id|>"
+        # Insert relevant documents before the last <|eot_id|>
+        modified_context = (
+            context_data[:last_eot_index] +
+            f"\nRelevant Documents:\n {documents_text}\n" +
+            context_data[last_eot_index:]
         )
     else:
-        # If <|eot_id|> not found, append at the end
-        modified_message = (
-            message +
-            f"\nRelevant Documents:\n{documents_text}\n<|start_header_id|>assistant<|end_header_id|>"
-        )
+        # If <|eot_id|> is not found, just append the documents at the end
+        modified_context = context_data + f"\nRelevant Documents:\n{documents_text}\n"
 
-    return modified_message
+    # Append the new user query
+    final_prompt = (
+        modified_context.strip() +
+        f"\n<|start_header_id|>user<|end_header_id|>\n{message}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>"
+    )
+
+    print("final prompt:", final_prompt)   
+    return final_prompt
 
 def call_llm(input_text):
     """Invokes the LLM for completion."""
@@ -202,7 +207,7 @@ def call_llm(input_text):
     try:
         response = bedrock.invoke_model(
             modelId=model_id,
-            body=json.dumps({"prompt": input_text, "max_gen_len": 512, "temperature": 0.5, "top_p": 0.9})
+            body=json.dumps({"prompt": input_text, "max_gen_len": 1024, "temperature": 0.5, "top_p": 0.9})
             # contentType="application/json",
             # accept="application/json"
         )
