@@ -95,11 +95,13 @@ def lambda_handler(event, context):
                 print("Summary: ", summary)
                 updated_sum = summary
                 update_summary_in_db(conversation["conversation_id"], summary)
+            else:
+                updated_sum = summary
             if len(message_list)>2:
                 past_conversations.append({
                     "conversation_id": conversation["conversation_id"],
                     "last_message_timestamp": conversation.get("last_updated"),
-                    "summary": conversation.get("summary", "Summary not available.")
+                    "summary": updated_sum
                 })
 
         return {
