@@ -1,6 +1,7 @@
 import json
 import boto3
 from datetime import datetime, timedelta
+import re
 from utils.get_user_info import get_user_info
 
 # Initialize DynamoDB client
@@ -109,22 +110,26 @@ def lambda_handler(event, context):
 
         # Count the frequency of each question
         messages = response.get("Items", [])
-        system_prompt = f"You are an AI that extracts the most frequently asked questions from student discussion messages. Analyze and group similar questions together, then return a Valid JSON array containing only top {str(num)} most frequently asked questions, like this: ['The most frequent Question', '2nd Most frequent Question', ..., 'Top nth most frequent Question']. Do NOT include any explanations, descriptions, or extra text. Questions are separated by semicolons (;). Do not include any explanation or additional text. If no questions are given, return an empty array. The given questions are separated by semi-colons:"
+        questions = ""
+        # system_prompt = f"You are an AI that extracts the most frequently asked questions from student discussion messages. Analyze and group similar questions together, then return a Valid JSON array containing only top {str(num)} most frequently asked questions, like this: ['The most frequent Question', '2nd Most frequent Question', ..., 'Top nth most frequent Question']. Do NOT include any explanations, descriptions, or extra text. Questions are separated by semicolons (;). Do not include any explanation or additional text. If no questions are given, return an empty array. The given questions are separated by semi-colons:"
         for msg in messages:
             content = msg.get("content", "").strip().lower()
             if content:
-                system_prompt += (content + ";")
-        print("system prompt: ", system_prompt)
-
-        mistral_messages = []
-        mistral_messages.append({"role": "system", "content": system_prompt})
-
-        compelete_input_txt=json.dumps({
-            'messages': mistral_messages
-        })
+                questions += (content + ";")
+        formatted_prompt = f"""
+        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        You are an AI that extracts the most frequently asked questions from student discussion messages. Analyze and group similar questions together, then return a Valid JSON array containing only top {str(num)} most frequently asked questions, like this: ['The most frequent Question', '2nd Most frequent Question', ..., 'Top nth most frequent Question']. Do NOT include any explanations, descriptions, or extra text. Questions are separated by semicolons (;). If no questions are given, return an empty array. The given questions are separated by semi-colons:
+        <|eot_id|>
+        <|start_header_id|>user<|end_header_id|>
+        Questions: {questions}
+        <|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>
+        """
+        print("system prompt: ", formatted_prompt)
 
         # Call the LLM API to generate a response
-        llm_response = call_llm(compelete_input_txt)
+        llm_response = call_llm(formatted_prompt)
+        print("llm response: ", llm_response)
 
         try:
             faq_list = json.loads(llm_response)  # Convert JSON string to Python list
@@ -174,27 +179,26 @@ def calculate_time_threshold(period):
 
 def call_llm(input_text):
     """Invokes the LLM for completion."""
-    model_id = "mistral.mistral-large-2407-v1:0"  # Make sure this is the correct model ID for generation
+    model_id = "arn:aws:bedrock:us-west-2:842676002045:inference-profile/us.meta.llama3-3-70b-instruct-v1:0"  # Make sure this is the correct model ID for generation
 
     try:
         response = bedrock.invoke_model(
             modelId=model_id,
-            body=input_text,
+            body=json.dumps({"prompt": input_text, "max_gen_len": 150, "temperature": 0.5, "top_p": 0.9})
         )
         print("LLM response: ", response)
 
-        # Read the StreamingBody and decode it to a string
         response_body = response['body'].read().decode('utf-8')
-
-        # Parse the JSON response
+        if not response_body.strip():
+            print("LLM response is empty!")
+            return "Summary not available."
         response_json = json.loads(response_body)
-        print("Parsed response: ", response_json)
+        generated_response = response_json.get("generation", "Summary not available")
+        generated_response = re.sub(r"^(ai:|AI:)\s*", "", generated_response).strip()
+        
+        # generated_response = re.sub(r"[*#_]", "", generated_response).strip()
 
-        # Extract the assistant's message content
-        assistant_message = response_json['choices'][0]['message']['content']
-        assistant_message = assistant_message.strip("```json").strip("```").strip()
-    
-        return assistant_message
+        return generated_response
     
     except Exception as e:
         print(f"Error generating answer: {e}")

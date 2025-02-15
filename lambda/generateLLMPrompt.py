@@ -59,17 +59,20 @@ def lambda_handler(event, context):
         print("Messages: ", messages)
 
         # Build the conversation message chain
-        mistral_messages = []
+        # mistral_messages = []
         ai_sources = set()
+        llama_msg = "<|begin_of_text|>"
 
         for message in messages:
             msg_source = message.get("msg_source")
             print("a msg_source: ", msg_source)
             content = message.get("content")
             if msg_source == "STUDENT":
-                mistral_messages.append({"role": "user", "content": content})
+                # mistral_messages.append({"role": "user", "content": content})
+                llama_msg += f"<|start_header_id|>user<|end_header_id|>{content}<|eot_id|>"
             elif msg_source == "SYSTEM":
-                mistral_messages.append({"role": "system", "content": content})
+                # mistral_messages.append({"role": "system", "content": content})
+                llama_msg += f"<|start_header_id|>system<|end_header_id|>{content}<|eot_id|>"
             else: # AI
                 complete_content = content + ";\n Reference materials: "
                 references = message.get("references")
@@ -79,9 +82,10 @@ def lambda_handler(event, context):
                             ai_sources.add(source['documentContent'])
                             complete_content += source['documentContent'] + ";\n"
                             # ai_sources_content += source['documentContent'] + ";\n"
-                mistral_messages.append({"role": "assistant", "content": complete_content})
+                # mistral_messages.append({"role": "assistant", "content": complete_content})
+                llama_msg += f"<|start_header_id|>assistant<|end_header_id|>{complete_content}<|eot_id|>"
             
-        print("Conversation chain now:", mistral_messages)
+        print("Conversation chain now:", llama_msg)
 
         return {
             "statusCode": 200,
@@ -91,7 +95,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': '*',
                 'Access-Control-Allow-Credentials': 'true'
             },
-            "body": json.dumps({"prompt": mistral_messages})
+            "body": json.dumps({"prompt": llama_msg})
         }
 
     except Exception as e:

@@ -6,6 +6,9 @@ from .get_canvas_secret import get_secret
 import requests
 from bs4 import BeautifulSoup
 
+def clean_html(text):
+    return BeautifulSoup(text, "html.parser").get_text(separator=" ").strip()
+
 lambda_client = boto3.client('lambda')
 def call_course_activity_stream(auth_token, course_id):
     secret = get_secret()
@@ -21,10 +24,10 @@ def call_course_activity_stream(auth_token, course_id):
         # Lambda function to extract and format the data
         response = response.json()
         format_data = lambda entries: "\n".join(
-            [f"Type: {entry['type']}\nTitle: {entry['title']}\nMessage: {entry['message']}\n" for entry in entries]
+            [f"Type: {entry['type']}\nTitle: {entry['title']}\nMessage: {clean_html(entry['message'])}\n" for entry in entries]
         )
         result = format_data(response)
-        print("Result ", result)
+        print("format Result: ", result)
         print("result type", type(result))
         return result
     except requests.exceptions.HTTPError as http_err:

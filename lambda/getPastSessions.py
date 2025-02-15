@@ -185,7 +185,7 @@ def call_llm(message_ids_list):
             print("LLM response is empty!")
             return "Summary not available."
         response_json = json.loads(response_body)
-        generated_summary = response_json.get("generation", "Summary not available.")
+        generated_summary = response_json.get("generation", "Summary not available")
         generated_summary = re.sub(r"^(Summary:|summary:|ai:|AI:|Course Overview:)\s*", "", generated_summary).strip()
         generated_summary = re.sub(r"[*#_]", "", generated_summary).strip()
 

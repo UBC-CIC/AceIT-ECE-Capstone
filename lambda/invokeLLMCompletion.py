@@ -2,7 +2,9 @@ import json
 import boto3
 import psycopg2
 from psycopg2.extras import Json
+import re
 from utils.get_rds_secret import get_secret
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 SUPPORTED_LANGUAGES = {
     "en": "English",
@@ -132,7 +134,6 @@ def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
-        # sanitized_course_id = course_id.replace("-", "_")
         # Query the vector database with explicit casting
         query_vectors_sql = f"""
         SELECT document_name, sourceURL, document_content, embeddings <-> %s::vector AS similarity
@@ -165,46 +166,58 @@ def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
 
 def compose_input(message, context_data, relevant_docs):
     """Combines the message, context, and sources for the LLM."""
-    complete_msg = []
-    if context_data:
-        for past_conv in context_data:
-            complete_msg.append(past_conv)
-    context = "\n".join([f"Document: {doc['documentName']}\n{doc['documentContent']}" for doc in relevant_docs])
-    prompt = f"Given the following documents, Answer the query. Documents:\n{context}\nQuery: {message}\n"
-    complete_msg.append({
-        'role': 'user', 
-                'content': prompt,
-    })
-    body=json.dumps({
-            'messages': complete_msg
-         })
+    documents_text = "\n".join(
+        [
+            f"""Document: {doc.get('documentName', 'Unknown')}
+URL: {doc.get('sourceUrl', 'No URL')}
+Content: {doc.get('documentContent', 'No Content')}"""
+            for doc in relevant_docs if doc
+        ]
+    )
 
-    return body
+    # Find the last occurrence of <|eot_id|> in the message
+    last_eot_index = message.rfind("<|eot_id|>")
+
+    if last_eot_index != -1:
+        # Insert document info before the last <|eot_id|>
+        modified_message = (
+            message[:last_eot_index] +
+            f"\nRelevant Documents:\n{documents_text}\n" +
+            message[last_eot_index:] +
+            "<|start_header_id|>assistant<|end_header_id|>"
+        )
+    else:
+        # If <|eot_id|> not found, append at the end
+        modified_message = (
+            message +
+            f"\nRelevant Documents:\n{documents_text}\n<|start_header_id|>assistant<|end_header_id|>"
+        )
+
+    return modified_message
 
 def call_llm(input_text):
     """Invokes the LLM for completion."""
-    model_id = "mistral.mistral-large-2407-v1:0"  # Make sure this is the correct model ID for generation
+    model_id = "arn:aws:bedrock:us-west-2:842676002045:inference-profile/us.meta.llama3-3-70b-instruct-v1:0"  # Make sure this is the correct model ID for generation
 
     try:
         response = bedrock.invoke_model(
             modelId=model_id,
-            body=input_text,
+            body=json.dumps({"prompt": input_text, "max_gen_len": 512, "temperature": 0.5, "top_p": 0.9})
             # contentType="application/json",
             # accept="application/json"
         )
         print("LLM response: ", response)
 
-        # Read the StreamingBody and decode it to a string
         response_body = response['body'].read().decode('utf-8')
-
-        # Parse the JSON response
+        if not response_body.strip():
+            print("LLM response is empty!")
+            return "Summary not available."
         response_json = json.loads(response_body)
-        print("Parsed response: ", response_json)
+        generated_response = response_json.get("generation", "Summary not available.")
+        generated_response = re.sub(r"^(ai:|AI:)\s*", "", generated_response).strip()
+        print("generated response: ", generated_response)
 
-        # Extract the assistant's message content
-        assistant_message = response_json['choices'][0]['message']['content']
-    
-        return assistant_message
+        return generated_response
     
     except Exception as e:
         print(f"Error generating answer: {e}")

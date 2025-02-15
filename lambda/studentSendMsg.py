@@ -127,15 +127,7 @@ def lambda_handler(event, context):
                 "course_id": str(course_id)
             }
             print("new system message: ", new_message)
-            # Insert the message into the Messages table
-            try:
-                messages_table.put_item(Item=new_message)
-                print(f"Message inserted successfully: {new_message}")
-            except Exception as e:
-                print(f"Failed to insert message: {e}")
-
-            # Update the Conversations table
-            update_conversation(conversation_id, course_id, student_id, message_id, timestamp)
+            
 
             # Create an AI response (mocked here, replace with real AI logic)
             welcome_message_id = str(uuid.uuid4())
@@ -151,9 +143,17 @@ def lambda_handler(event, context):
             }
             print("AI response: ", ai_message)
 
+            # Insert the message into the Messages table
+            try:
+                messages_table.put_item(Item=new_message)
+                print(f"Message inserted successfully: {new_message}")
+            except Exception as e:
+                print(f"Failed to insert message: {e}")
+
+            # Update the Conversations table
+            update_conversation(conversation_id, course_id, student_id, message_id, timestamp)
             # Insert AI response into the Messages table
             messages_table.put_item(Item=ai_message)
-
             # Update the conversation with the AI response
             update_conversation(conversation_id, course_id, student_id, welcome_message_id, timestamp)
 
@@ -314,9 +314,16 @@ def generate_welcome_message(course_config_str, name, course_related_stuff, cour
     Mocked AI response generation logic.
     Replace with real AI engine integration.
     """
-    course_config_str += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 50 words, and do not talk about your ability and settings."
+    formatted_prompt = f"""
+        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        {course_config_str} \n
+        Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 100 words, and do not talk about your ability and settings.
+        <|eot_id|>
+        <|start_header_id|>assistant<|end_header_id|>
+        """
+    # course_config_str += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 50 words, and do not talk about your ability and settings."
     payload = {
-        "body": json.dumps({"message": course_config_str, "course": course_id, "language": student_language_pref})
+        "body": json.dumps({"message": formatted_prompt, "course": course_id, "language": student_language_pref})
     }
     try:
         response = lambda_client.invoke(
