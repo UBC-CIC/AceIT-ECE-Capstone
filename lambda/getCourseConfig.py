@@ -6,12 +6,10 @@ from datetime import datetime
 import uuid
 import psycopg2.extras
 from utils.create_course_config_table import create_table_if_not_exists
-from utils.get_rds_secret import get_secret
+from utils.get_rds_secret import get_cached_secret
 from utils.get_user_info import get_user_info
 from utils.retrieve_course_config import retrieve_course_config
 import re
-
-s3_client = boto3.client('s3')
 
 def lambda_handler(event, context):
     try:
@@ -69,21 +67,8 @@ def lambda_handler(event, context):
                 },
                 "body": json.dumps({"error": "Missing required parameter: course"})
             }
-        
-        secret = get_secret()
-        credentials = json.loads(secret)
-        username = credentials['username']
-        password = credentials['password']
-        # Database connection parameters
-        DB_CONFIG = {
-            "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
-            "port": 5432,
-            "dbname": "postgres",
-            "user": username,
-            "password": password,
-        }
-        ret1 = create_table_if_not_exists(DB_CONFIG)
-        ret2 = retrieve_course_config(DB_CONFIG, course_id)
+        course_config = retrieve_course_config(str(course_id))
+        print(course_config)
 
         return {
             'statusCode': 200,
@@ -93,9 +78,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': '*',
                 'Access-Control-Allow-Credentials': 'true'
             },
-            # 'body': json.dumps("Returns the current course configuration.")
-            # 'body': json.dumps({"db create": ret1, "db retrieve": ret2,})
-            'body': json.dumps(ret2)
+            'body': json.dumps(course_config)
         }
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")

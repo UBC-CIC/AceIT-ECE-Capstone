@@ -61,7 +61,7 @@ def lambda_handler(event, context):
     ret = create_table_if_not_exists(DB_CONFIG, course_id)
 
     ## first check course config settings
-    course_config = retrieve_course_config(DB_CONFIG, course_id)
+    course_config = retrieve_course_config(course_id)
     print("course config: ", course_config)
 
     if isinstance(course_config, str):  # If there's an error message

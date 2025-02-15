@@ -6,11 +6,18 @@ from datetime import datetime
 import uuid
 import psycopg2.extras
 
+# Caching secrets and DB connection
+SECRET_CACHE = None
+
+def get_cached_secret():
+    global SECRET_CACHE
+    if SECRET_CACHE is None:
+        SECRET_CACHE = get_secret()  # Call only once
+    return json.loads(SECRET_CACHE)
+
 def get_secret():
     secret_name = "MyRdsSecret"
     region_name = "us-west-2"
-
-    # Create a Secrets Manager client
     session = boto3.session.Session()
     client = session.client(
         service_name='secretsmanager',

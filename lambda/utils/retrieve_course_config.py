@@ -3,12 +3,33 @@ import os
 import boto3
 import psycopg2
 import psycopg2.extras
+from .get_rds_secret import get_cached_secret
 
+# Cache for database connection
+DB_CONNECTION = None
 
-def retrieve_course_config(DB_CONFIG, course_id):
+def get_db_connection():
+    """Establishes or retrieves a cached database connection."""
+    global DB_CONNECTION
+    if DB_CONNECTION is None or DB_CONNECTION.closed:
+        credentials = get_cached_secret()
+        DB_CONFIG = {
+            "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
+            "port": 5432,
+            "dbname": "postgres",
+            "user": credentials['username'],
+            "password": credentials['password'],
+        }
+        print("Connecting to database")
+        DB_CONNECTION = psycopg2.connect(**DB_CONFIG)
+    return DB_CONNECTION
+
+def retrieve_course_config(course_id):
     try:
         # Connect to the PostgreSQL database
-        connection = psycopg2.connect(**DB_CONFIG)
+        print("DB_CONNECTION: ", DB_CONNECTION)
+        connection = get_db_connection()  # Get cached DB connection
+        print("Connected to database")
         cursor = connection.cursor()
 
         # Query the course configuration
