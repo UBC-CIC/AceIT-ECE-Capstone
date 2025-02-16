@@ -9,6 +9,21 @@ lambda_client = boto3.client('lambda')
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 messages_table = dynamodb.Table('Messages')  # Replace with your table name
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
+translate_client = boto3.client("translate", region_name="us-west-2")
+
+SUPPORTED_LANGUAGES = {
+    "en": "English",
+    "fr-CA": "French",
+    "zh": "Chinese (Simplified)",
+    "ja": "Japanese",
+    "pa": "Punjabi",
+    "es": "Spanish",
+    "ar": "Arabic",
+    "tl": "Tagalog",
+    "de": "German",
+    "it": "Italian",
+    "pt": "Portuguese"
+}
 
 def lambda_handler(event, context):
     try:
@@ -157,6 +172,16 @@ def lambda_handler(event, context):
             # Update the conversation with the AI response
             update_conversation(conversation_id, course_id, student_id, welcome_message_id, timestamp)
 
+            translated_documents = translate_document_names(welcome_response_sources, student_language_pref)
+            ai_message = {
+                "course_id": str(course_id),
+                "message_id": welcome_message_id,
+                "content": welcome_response_content,
+                "msg_source": "AI",
+                "references": translated_documents,
+                "msg_timestamp": datetime.datetime.utcnow().isoformat(),
+            }
+
             return {
                 "statusCode": 200,
                 'headers': {
@@ -205,6 +230,7 @@ def lambda_handler(event, context):
                 "references": ai_response_sources,
                 "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
+            # print("ai_message: ", ai_message)
 
             # Insert the message into the Messages table
             try:
@@ -222,6 +248,19 @@ def lambda_handler(event, context):
 
             # Update the conversation with the AI response
             update_conversation(conversation_id, course_id, student_id, ai_message_id, timestamp)
+
+            translated_documents = translate_document_names(ai_response_sources, student_language_pref)
+            ai_message = {
+                "course_id": course_id,
+                "message_id": ai_message_id,
+                "content": ai_response_content,
+                "msg_source": "AI",
+                "references": translated_documents,
+                "msg_timestamp": datetime.datetime.utcnow().isoformat(),
+            }
+
+            # print("ai_message_after translation: ", ai_message)
+
 
             return {
                 "statusCode": 200,
@@ -394,3 +433,37 @@ def call_generate_llm_prompt(conversation_id, course_id):
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
         return None
+    
+
+def translate_document_names(documents, target_language):
+    """
+    Translates only the document names while keeping other fields unchanged.
+    """
+    translated_docs = []
+
+    for doc in documents:
+        translated_name = translate_text(doc["documentName"], target_language)
+        translated_docs.append({
+            "documentName": translated_name,  # Translated name
+            "sourceUrl": doc["sourceUrl"],  # Unchanged
+            "documentContent": doc["documentContent"]  # Unchanged
+        })
+
+    return translated_docs
+
+def translate_text(text, target_language):
+    """Translates text to the student's preferred language using Amazon Translate."""
+    if target_language not in SUPPORTED_LANGUAGES:
+        print(f"Language '{target_language}' not supported. Defaulting to English.")
+        return text  # Return original if the language is unsupported
+
+    try:
+        response = translate_client.translate_text(
+            Text=text,
+            SourceLanguageCode="auto",  # Auto-detect source language
+            TargetLanguageCode=target_language
+        )
+        return response["TranslatedText"]
+    except Exception as e:
+        print(f"Error translating text: {e}")
+        return text  # Return original text if translation fails

@@ -83,6 +83,7 @@ def lambda_handler(event, context):
         # Translate the response if needed
         if student_language_pref and student_language_pref != "":
             translated_response = translate_text(llm_response, student_language_pref)
+
             llm_response = translated_response
 
         return {
