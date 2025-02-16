@@ -11,20 +11,6 @@ messages_table = dynamodb.Table('Messages')  # Replace with your table name
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
 translate_client = boto3.client("translate", region_name="us-west-2")
 
-SUPPORTED_LANGUAGES = {
-    "en": "English",
-    "fr-CA": "French",
-    "zh": "Chinese (Simplified)",
-    "ja": "Japanese",
-    "pa": "Punjabi",
-    "es": "Spanish",
-    "ar": "Arabic",
-    "tl": "Tagalog",
-    "de": "German",
-    "it": "Italian",
-    "pt": "Portuguese"
-}
-
 def lambda_handler(event, context):
     try:
         # authenticate first
@@ -453,10 +439,6 @@ def translate_document_names(documents, target_language):
 
 def translate_text(text, target_language):
     """Translates text to the student's preferred language using Amazon Translate."""
-    if target_language not in SUPPORTED_LANGUAGES:
-        print(f"Language '{target_language}' not supported. Defaulting to English.")
-        return text  # Return original if the language is unsupported
-
     try:
         response = translate_client.translate_text(
             Text=text,

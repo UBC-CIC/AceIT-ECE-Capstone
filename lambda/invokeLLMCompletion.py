@@ -6,20 +6,6 @@ import re
 from utils.get_rds_secret import get_secret
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-SUPPORTED_LANGUAGES = {
-    "en": "English",
-    "fr-CA": "French",
-    "zh": "Chinese (Simplified)",
-    "ja": "Japanese",
-    "pa": "Punjabi",
-    "es": "Spanish",
-    "ar": "Arabic",
-    "tl": "Tagalog",
-    "de": "German",
-    "it": "Italian",
-    "pt": "Portuguese"
-}
-
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', 'us-west-2') 
 translate_client = boto3.client("translate", region_name="us-west-2")
@@ -232,10 +218,6 @@ def call_llm(input_text):
 
 def translate_text(text, target_language):
     """Translates text to the student's preferred language using Amazon Translate."""
-    if target_language not in SUPPORTED_LANGUAGES:
-        print(f"Language '{target_language}' not supported. Defaulting to English.")
-        return text  # Return original if the language is unsupported
-
     try:
         response = translate_client.translate_text(
             Text=text,
