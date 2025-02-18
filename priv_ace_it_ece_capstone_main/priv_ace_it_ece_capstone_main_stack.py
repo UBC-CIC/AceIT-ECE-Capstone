@@ -632,6 +632,23 @@ class PrivAceItEceCapstoneMainStack(Stack):
             timeout=Duration.minutes(15),
         )
 
+        generate_suggestions_lambda = _lambda.Function(
+            self,
+            "GenerateSuggestionsLambda",
+            function_name="GenerateSuggestionsLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            code=_lambda.Code.from_asset("lambda"),
+            handler="generateSuggestions.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer, other_text_related_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
+            timeout=Duration.minutes(15),
+            memory_size=256,
+        )
+
         get_past_sessions_lambda = _lambda.Function(
             self,
             "GetPastSessionsLambda",
@@ -711,6 +728,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(refresh_token_lambda.role)
         shared_policy_for_lambda.attach_to_role(update_conversation_prompts_lambda.role)
         shared_policy_for_lambda.attach_to_role(update_user_language_lambda.role)
+        shared_policy_for_lambda.attach_to_role(generate_suggestions_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -758,6 +776,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         top_materials_resource = analytics_resource.add_resource("top-materials")
         student_engagement_resource = analytics_resource.add_resource("engagement")
         llm_resource = api_resource.add_resource("llm")
+        suggestions_resource = llm_resource.add_resource("suggestions")
         vector_resource = llm_resource.add_resource("vector")
         content_resource = llm_resource.add_resource("content")
         refresh_resource = content_resource.add_resource("refresh")
@@ -1650,6 +1669,39 @@ class PrivAceItEceCapstoneMainStack(Stack):
             ]
         )
         llm_completion_resource.add_cors_preflight(
+            allow_origins=["*"],
+            allow_headers=["*"],
+            allow_methods=["GET"],
+        )
+
+        suggestions_resource.add_method(
+            "GET",
+            apigateway.LambdaIntegration(generate_suggestions_lambda, timeout=Duration.seconds(120)),
+            request_parameters={
+                "method.request.header.Authorization": True,
+            },
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                ),
+                apigateway.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
+        )
+        suggestions_resource.add_cors_preflight(
             allow_origins=["*"],
             allow_headers=["*"],
             allow_methods=["GET"],
