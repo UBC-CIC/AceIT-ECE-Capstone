@@ -110,7 +110,9 @@ def lambda_handler(event, context):
         
         for message in messages:
             if message.get("msg_source") == "AI":
-                references = message.get("references")
+                references = message.get("references_en")
+                if references is None:
+                    references = message.get("references")
                 if references and isinstance(references, list):
                     for source in references:
                         doc_url = source.get("sourceUrl")
