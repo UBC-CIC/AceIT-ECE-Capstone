@@ -9,6 +9,7 @@ import base64
 import utils
 import utils.get_canvas_secret
 import utils.get_rds_secret
+from utils.retrieve_course_config import retrieve_course_config
 
 s3_client = boto3.client('s3')
 lambda_client = boto3.client("lambda")
@@ -32,7 +33,11 @@ def lambda_handler(event, context):
 
     # Invoke refreshCourse for each course
     for course in courses:
-        if course["workflow_state"] == "available":
+        # fetch course config and check if auto update is on
+        course_config = retrieve_course_config(course)
+        print("course config: ", course_config)
+        auto_update_on = course_config.get("autoUpdateOn", False)
+        if course["workflow_state"] == "available" and auto_update_on:
             invoke_refresh_course(course["id"])
             print(course["id"])
             refreshed_courses.append(course["id"])
