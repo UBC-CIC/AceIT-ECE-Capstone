@@ -1,66 +1,23 @@
 import { Header } from "./components/MainNavigation/Header/Header";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { SideBar } from "./components/MainNavigation/SideBar/SideBar";
 import { ChatSection } from "./components/ChatSection/ChatSection";
 import { InstructorSection } from "./components/InstructorContainer";
 import { CourseProps, UserProps, StudyAssistantProps } from "./types";
 import { toast } from "react-hot-toast";
 import { logout } from "./auth";
-import {
-  fetchCoursesAPI,
-  fetchUserInfoAPI,
-  isAccessTokenSet,
-  updateUserLanguageAPI,
-} from "./api";
+import { updateUserLanguageAPI } from "./api";
 
-// ...existing code...
-
-export const StudyAssistant = ({ onLocaleChange }: StudyAssistantProps) => {
-  const [courses, setCourses] = useState<CourseProps[]>([]);
+export const StudyAssistant = ({
+  onLocaleChange,
+  initialUserInfo,
+  initialCourses,
+}: StudyAssistantProps) => {
+  const [courses] = useState<CourseProps[]>(initialCourses);
   const [selectedCourse, setSelectedCourse] = useState<CourseProps | null>(
-    null
+    initialCourses.length > 0 ? initialCourses[0] : null
   );
-  const [userInfo, setUserInfo] = useState<UserProps | null>(null);
-  const hasFetchedData = useRef(false);
-
-  useEffect(() => {
-    if (hasFetchedData.current || !isAccessTokenSet()) return;
-    hasFetchedData.current = true;
-
-    const fetchData = async () => {
-      toast.loading("Loading your info from Canvas...", {
-        id: "loading",
-      });
-
-      try {
-        const [courses, user] = await Promise.all([
-          fetchCoursesAPI(),
-          fetchUserInfoAPI(),
-        ]);
-
-        const sortedCourses = courses.sort((a, b) =>
-          a.name.localeCompare(b.name)
-        );
-
-        setCourses(sortedCourses);
-        setSelectedCourse(sortedCourses.length > 0 ? sortedCourses[0] : null);
-        setUserInfo(user);
-
-        toast.dismiss();
-      } catch (error) {
-        toast.error(
-          "Failed to load your info from Canvas, please try again later",
-          {
-            id: "loading",
-            duration: 100000,
-          }
-        );
-        console.error("Failed to load data: " + error);
-      }
-    };
-
-    fetchData();
-  }, []);
+  const [userInfo, setUserInfo] = useState<UserProps>(initialUserInfo);
 
   const handleCourseSelect = (course: CourseProps) => {
     setSelectedCourse(course);

@@ -4,9 +4,10 @@ import "./index.css";
 import { StudyAssistant } from "./StudyAssistant.tsx";
 import { Toaster } from "react-hot-toast";
 import { handleAuthentication } from "./auth.ts";
-import { setAccessToken } from "./api.ts";
+import { setAccessToken, fetchCoursesAPI, fetchUserInfoAPI } from "./api.ts";
 import { SkeletonTheme } from "react-loading-skeleton";
 import { IntlProvider } from "react-intl";
+import { UserProps, CourseProps } from "./types";
 
 // Import all translation files
 import enMessages from "./translations/en.json";
@@ -32,14 +33,35 @@ const messages: { [key: string]: any } = {
 };
 
 export const App = () => {
-  const [accessToken, setAccessTokenState] = useState<string | null>(null);
-  const [locale, setLocale] = useState("en"); // Default to English
+  const [accessToken, setAccessTokenState] = useState<string>();
+  const [locale, setLocale] = useState("en");
+  const [userInfo, setUserInfo] = useState<UserProps>();
+  const [courses, setCourses] = useState<CourseProps[]>();
 
   useEffect(() => {
-    handleAuthentication((token) => {
-      setAccessToken(token);
-      setAccessTokenState(token);
-    });
+    const initializeApp = async () => {
+      try {
+        // Perform authentication
+        await handleAuthentication((token) => {
+          setAccessToken(token);
+          setAccessTokenState(token);
+        });
+
+        // Fetch user info and courses
+        const [user, fetchedCourses] = await Promise.all([
+          fetchUserInfoAPI(),
+          fetchCoursesAPI(),
+        ]);
+
+        setUserInfo(user);
+        setLocale(user.preferred_language);
+        setCourses(fetchedCourses.sort((a, b) => a.name.localeCompare(b.name)));
+      } catch (error) {
+        console.error("Failed to initialize app:", error);
+      }
+    };
+
+    initializeApp();
   }, []);
 
   return (
@@ -61,8 +83,12 @@ export const App = () => {
         <StrictMode>
           <SkeletonTheme baseColor="#a6a3d1" highlightColor="#9e9adb">
             <Toaster position="top-center" />
-            {accessToken !== null && (
-              <StudyAssistant onLocaleChange={setLocale} />
+            {accessToken !== null && userInfo && courses && (
+              <StudyAssistant
+                onLocaleChange={setLocale}
+                initialUserInfo={userInfo}
+                initialCourses={courses}
+              />
             )}
           </SkeletonTheme>
         </StrictMode>
