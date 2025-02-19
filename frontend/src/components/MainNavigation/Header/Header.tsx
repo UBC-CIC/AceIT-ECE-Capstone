@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { HeaderProps } from "../../../types";
 import { FormattedMessage } from "react-intl";
-import UBCLogoWhite from "../../assets/UBC-logo-white.png";
+import UBCLogoWhite from "../../../assets/UBC-logo-white.png";
 import { LanguagePopup } from "./LanguagePopup";
 
 export const Header: React.FC<HeaderProps> = ({
