@@ -1,5 +1,7 @@
 import json
 import uuid
+import time
+import jwt
 import boto3
 import psycopg2
 import psycopg2.extras
@@ -95,12 +97,21 @@ def get_server_level_access_token():
 
     url = f"{BASE_URL}/login/oauth2/token"
 
+    client_assertion = get_client_assertion(CLIENT_ID, CLIENT_SECRET, url)
+
     data = {
-            "client_id": f"{CLIENT_ID}",
-            "client_secret": f"{CLIENT_SECRET}",
+            "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+            "client_assertion": f"{client_assertion}",
             "grant_type": "client_credentials",
+            "scope": " ".join([
+                                "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
+                                "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
+                                "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
+                                "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+                                "https://canvas.instructure.com/auth/courses.readonly"
+                            ])
             }
-    headers = {"Content-Type": "application/json"}
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
     try:
         response = requests.post(url, data=data, headers=headers, verify=False)
         response.raise_for_status()
@@ -111,6 +122,23 @@ def get_server_level_access_token():
     except requests.exceptions.RequestException as req_err:
         print(f"Request error occurred: {req_err}")
         return None
+  
+def get_client_assertion(client_id, client_sercret, url):
+    header = {
+        "alg": "HS256",
+        "typ": "JWT"
+    }
+
+    payload = {
+        "iss": f"{client_id}",
+        "sub": f"{client_id}",
+        "aud": f"{url}",
+        "iat": int(time.time()),
+        "exp": int(time.time()) + 600, # 10 mins expiration
+        "jti": str(uuid.uuid4())
+    }
+
+    return jwt.encode(payload, client_sercret, algorithm="HS256", header = header);
 
 def invoke_refresh_course(course_id):
     payload = {

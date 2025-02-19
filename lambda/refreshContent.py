@@ -7,6 +7,7 @@ import requests  # to make HTTP requests
 import utils
 import utils.get_canvas_secret
 import utils.get_rds_secret
+import utils.retrieve_course_config
 
 s3_client = boto3.client('s3')
 bucket_name = 'bucket-for-course-documents'
@@ -29,6 +30,7 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Course ID is required"})
         }
     # TODO：filter content based on instructor configuration
+    course_config = utils.retrieve_course_config(course_id)
     files = get_files(course_id)
     print("files: ", files)
     if files is None:
