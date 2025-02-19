@@ -76,7 +76,7 @@ def lambda_handler(event, context):
     
     required_fields = [
         "course", "studentAccessEnabled", "selectedSupportedQuestions", 
-        "selectedIncludedCourseContent", "customResponseFormat", "autoUpdateOn"
+        "selectedIncludedCourseContent", "customResponseFormat"
     ]
     
     missing_fields = [field for field in required_fields if field not in body]
@@ -96,7 +96,7 @@ def lambda_handler(event, context):
     student_access_enabled = body["studentAccessEnabled"]
     selected_supported_questions = body["selectedSupportedQuestions"]
     selected_included_course_content = body["selectedIncludedCourseContent"]
-    auto_update_on = body["autoUpdateOn"]
+    auto_update_on = body.get("autoUpdateOn")
     custom_response_format = body.get("customResponseFormat", "Provide clear and helpful responses.")  # Nullable field
 
     secret = get_secret()
@@ -128,55 +128,59 @@ def lambda_handler(event, context):
     }
 
 def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_supported_questions, 
-                                selected_included_course_content, custom_response_format, auto_update_on):
+                         selected_included_course_content, custom_response_format, auto_update_on=None):
     system_prompt = create_system_prompt(selected_supported_questions, custom_response_format)
+    
     try:
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
-        print("connect success")
+        print("Connected to DB successfully")
         cursor = connection.cursor()
 
-        # Query the course configuration
+        # Base query for inserting a new course config or updating existing ones
         query = """
         INSERT INTO course_configuration (course_id, student_access_enabled, selected_supported_questions, 
                                           selected_included_course_content, custom_response_format,
-                                          system_prompt, auto_update_on)
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                                          system_prompt {auto_update_column})
+        VALUES (%s, %s, %s, %s, %s, %s {auto_update_value})
         ON CONFLICT (course_id)
         DO UPDATE SET
             student_access_enabled = EXCLUDED.student_access_enabled,
             selected_supported_questions = EXCLUDED.selected_supported_questions,
             selected_included_course_content = EXCLUDED.selected_included_course_content,
             custom_response_format = EXCLUDED.custom_response_format,
-            system_prompt = EXCLUDED.system_prompt,
-            auto_update_on = EXCLUDED.auto_update_on
+            system_prompt = EXCLUDED.system_prompt
+            {auto_update_update}
         """
-        cursor.execute(query, (str(course_id), 
-            student_access_enabled, 
-            json.dumps(selected_supported_questions), 
-            json.dumps(selected_included_course_content), 
-            custom_response_format, system_prompt, auto_update_on))
-        # query = """DROP TABLE IF EXISTS course_configuration CASCADE;"""
-        # cursor.execute(query)
-        # create_course_config_query = """
-        # CREATE TABLE IF NOT EXISTS course_configuration (
-        #     course_id TEXT PRIMARY KEY,                         -- Unique ID for the course
-        #     student_access_enabled BOOLEAN NOT NULL,             -- Whether student access is enabled
-        #     selected_supported_questions JSONB NOT NULL,         -- Supported questions as JSON -- controlled from system msg
-        #     selected_included_course_content JSONB NOT NULL,     -- Included content as JSON -- controlled from s3 buckets download
-        #     custom_response_format TEXT,                          -- Instruction for LLM -- controlled from system msg
-        #     system_prompt TEXT,                                  -- Auto-generated system prompt for the assistant
-        #     material_last_updated_time TIMESTAMP DEFAULT '1970-01-01 00:00:00'
-        # );
-        # """
-        # cursor.execute(create_course_config_query)
+
+        # Dynamically adjust query and parameters based on whether auto_update_on is provided
+        query_params = [str(course_id), student_access_enabled, json.dumps(selected_supported_questions),
+                        json.dumps(selected_included_course_content), custom_response_format, system_prompt]
+
+        if auto_update_on is not None:  # Only update auto_update_on if it's provided
+            query = query.format(
+                auto_update_column=", auto_update_on",
+                auto_update_value=", %s",
+                auto_update_update=", auto_update_on = EXCLUDED.auto_update_on"
+            )
+            query_params.append(auto_update_on)
+        else:  # Exclude auto_update_on from the update if it's missing
+            query = query.format(
+                auto_update_column="",
+                auto_update_value="",
+                auto_update_update=""
+            )
+
+        cursor.execute(query, query_params)
         connection.commit()
         cursor.close()
         connection.close()
 
+        # Invoke prompt update
         invoke_update_system_prompt(system_prompt, course_id)
-        print("invoked update prompt!")
+        print("Invoked update prompt!")
         return "Course configuration updated successfully"
+
     except Exception as e:
         print(f"Error: {e}")
         return "Cannot connect to db"
