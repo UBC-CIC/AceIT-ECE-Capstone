@@ -35,7 +35,8 @@ def retrieve_course_config(course_id):
         # Query the course configuration
         query = """
         SELECT student_access_enabled, selected_supported_questions, 
-               selected_included_course_content, custom_response_format, system_prompt, material_last_updated_time
+               selected_included_course_content, custom_response_format, system_prompt,
+               material_last_updated_time, auto_update_on
         FROM course_configuration
         WHERE course_id = %s
         """
@@ -64,7 +65,7 @@ def retrieve_course_config(course_id):
                     "DISCUSSIONS": False,
                     "PAGES": False
                 }),
-                "custom_response_format": "",
+                "custom_response_format": ""
                 }
 
             insert_query = """
@@ -88,8 +89,9 @@ def retrieve_course_config(course_id):
                 "selectedSupportedQuestions": json.loads(default_config["selected_supported_questions"]),
                 "selectedIncludedCourseContent": json.loads(default_config["selected_included_course_content"]),
                 "customResponseFormat": default_config["custom_response_format"],
-                "systemPrompt": default_config["system_prompt"],
-                "materialLastUpdatedTime": default_config["material_last_updated_time"].isoformat()
+                "systemPrompt": "",
+                "materialLastUpdatedTime": '1970-01-01 00:00:00',
+                "autoUpdateOn": False
             }
         else: 
             response_body = {
@@ -98,7 +100,8 @@ def retrieve_course_config(course_id):
                 "selectedIncludedCourseContent": row[2],
                 "customResponseFormat": row[3],
                 "systemPrompt": row[4],
-                "materialLastUpdatedTime": row[5].isoformat()
+                "materialLastUpdatedTime": row[5].isoformat(),
+                "autoUpdateOn": row[6]
             }
 
         # Close database connection

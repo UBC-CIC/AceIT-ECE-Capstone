@@ -76,7 +76,7 @@ def lambda_handler(event, context):
     
     required_fields = [
         "course", "studentAccessEnabled", "selectedSupportedQuestions", 
-        "selectedIncludedCourseContent", "customResponseFormat"
+        "selectedIncludedCourseContent", "customResponseFormat", "autoUpdateOn"
     ]
     
     missing_fields = [field for field in required_fields if field not in body]
@@ -96,6 +96,7 @@ def lambda_handler(event, context):
     student_access_enabled = body["studentAccessEnabled"]
     selected_supported_questions = body["selectedSupportedQuestions"]
     selected_included_course_content = body["selectedIncludedCourseContent"]
+    auto_update_on = body["autoUpdateOn"]
     custom_response_format = body.get("customResponseFormat", "Provide clear and helpful responses.")  # Nullable field
 
     secret = get_secret()
@@ -112,7 +113,7 @@ def lambda_handler(event, context):
     }
     ret1 = create_table_if_not_exists(DB_CONFIG)
     ret2 = update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_supported_questions, 
-                                selected_included_course_content, custom_response_format)
+                                selected_included_course_content, custom_response_format, auto_update_on)
 
     return {
         'statusCode': 200,
@@ -127,7 +128,7 @@ def lambda_handler(event, context):
     }
 
 def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_supported_questions, 
-                                selected_included_course_content, custom_response_format):
+                                selected_included_course_content, custom_response_format, auto_update_on):
     system_prompt = create_system_prompt(selected_supported_questions, custom_response_format)
     try:
         # Connect to the PostgreSQL database
@@ -138,21 +139,23 @@ def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_
         # Query the course configuration
         query = """
         INSERT INTO course_configuration (course_id, student_access_enabled, selected_supported_questions, 
-                                          selected_included_course_content, custom_response_format, system_prompt)
-        VALUES (%s, %s, %s, %s, %s, %s)
+                                          selected_included_course_content, custom_response_format,
+                                          system_prompt, auto_update_on)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         ON CONFLICT (course_id)
         DO UPDATE SET
             student_access_enabled = EXCLUDED.student_access_enabled,
             selected_supported_questions = EXCLUDED.selected_supported_questions,
             selected_included_course_content = EXCLUDED.selected_included_course_content,
             custom_response_format = EXCLUDED.custom_response_format,
-            system_prompt = EXCLUDED.system_prompt
+            system_prompt = EXCLUDED.system_prompt,
+            auto_update_on = EXCLUDED.auto_update_on
         """
         cursor.execute(query, (str(course_id), 
             student_access_enabled, 
             json.dumps(selected_supported_questions), 
             json.dumps(selected_included_course_content), 
-            custom_response_format, system_prompt))
+            custom_response_format, system_prompt, auto_update_on))
         # query = """DROP TABLE IF EXISTS course_configuration CASCADE;"""
         # cursor.execute(query)
         # create_course_config_query = """
