@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Toggle } from "../Common/Toggle";
 import { CheckboxItem } from "../Common/CheckboxItem";
+import { FormattedMessage, useIntl } from "react-intl";
 import {
   CourseConfiguration,
   CourseContentItem,
@@ -25,6 +26,7 @@ type CourseConfigurationSectionProps = {
 export const CourseConfigurationSection: React.FC<
   CourseConfigurationSectionProps
 > = ({ selectedCourse }) => {
+  const intl = useIntl();
   const [initialConfig, setInitialConfig] =
     React.useState<CourseConfiguration | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -183,12 +185,11 @@ export const CourseConfigurationSection: React.FC<
     <form onSubmit={handleSave} className="h-full overflow-y-auto">
       <div className="mb-3 text-sm leading-normal text-slate-500 pt-3">
         <span className="font-semibold text-indigo-950">
-          Enable Student Access
+          <FormattedMessage id="configuration.enableAccess" />
         </span>
         <br />
         <span>
-          If toggled on, Students will be able to access the AI Study Assistant
-          for this course.
+          <FormattedMessage id="configuration.enableAccessDescription" />
         </span>
       </div>
 
@@ -203,20 +204,16 @@ export const CourseConfigurationSection: React.FC<
       <div className="mb-8">
         <div className="mb-3 text-sm leading-normal text-slate-500">
           <span className="font-semibold text-indigo-950">
-            Included Course Content
+            <FormattedMessage id="configuration.includedContent" />
           </span>
           <br />
           <span>
-            Select which sections of Canvas to include in the AI Study
-            Assistant's knowledge base. Changes to which content is included in
-            the knowledge base will take effect after a few minutes. Content
-            changes made in Canvas later will automatically be reflected in the
-            knowledge base within 24 hours.{" "}
+            <FormattedMessage id="configuration.includedContentDescription" />{" "}
+            <span className="underline">
+              <FormattedMessage id="configuration.visibleOnly" />
+            </span>{" "}
+            <FormattedMessage id="configuration.visibleOnlyEnd" />
           </span>
-          <span className="underline">
-            Only content which is visible to Students in Canvas (e.g. published)
-          </span>
-          <span> will be included in the knowledge base.</span>
         </div>
 
         <div className="flex flex-col gap-3 mt-3 max-sm:gap-2">
@@ -236,12 +233,11 @@ export const CourseConfigurationSection: React.FC<
       <div className="mb-8">
         <div className="mb-3 text-sm leading-normal text-slate-500">
           <span className="font-semibold text-indigo-950">
-            Supported Questions
+            <FormattedMessage id="configuration.supportedQuestions" />
           </span>
           <br />
           <span>
-            Select which types of questions the AI Study Assistant will be able
-            to answer for students.
+            <FormattedMessage id="configuration.supportedQuestionsDescription" />
           </span>
         </div>
 
@@ -261,25 +257,25 @@ export const CourseConfigurationSection: React.FC<
 
       <div className="mb-3 text-sm leading-normal text-slate-500">
         <span className="font-semibold text-indigo-950">
-          Custom Response Format / Tone (Optional)
+          <FormattedMessage id="configuration.customFormat" />
         </span>
         <br />
         <span>
-          Provide instructions about how you would like the AI Study Assistant
-          to respond (e.g. "answer casually with lots of emojis with as much
-          detail as possible").
+          <FormattedMessage id="configuration.customFormatDescription" />
         </span>
       </div>
 
       <label htmlFor="responseFormat" className="sr-only">
-        Response Format
+        <FormattedMessage id="configuration.customFormat" />
       </label>
       <input
         id="responseFormat"
         type="text"
         value={responseFormat}
         onChange={handleResponseFormatChange}
-        placeholder="e.g. answer casually with lots of emojis with as much detail as possible"
+        placeholder={intl.formatMessage({
+          id: "configuration.responseFormatPlaceholder",
+        })}
         className="p-2.5 w-full text-sm rounded-lg border border-solid border-stone-950 border-opacity-30 text-indigo-950"
       />
 
@@ -292,7 +288,7 @@ export const CourseConfigurationSection: React.FC<
             : "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
         } border-[none] max-sm:w-full`}
       >
-        Save Configuration
+        <FormattedMessage id="configuration.saveButton" />
       </button>
     </form>
   );

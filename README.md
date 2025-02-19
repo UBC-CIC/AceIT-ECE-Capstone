@@ -19,7 +19,7 @@ All users are able to:
 
 1. Log-in using their Canvas authentication credentials
 2. See all of their courses in Canvas, separated between "Available Courses" (where the user is an Instructor or the Instructor has enabled Student access) and "Unavailable Courses" (where the Instructor has not enabled Student Access)
-3. Change their preferred AI Study Assistant response language
+3. Change their preferred language for Ace It (both AI responses and user interface)
 
 With the Student role, users are able to:
 

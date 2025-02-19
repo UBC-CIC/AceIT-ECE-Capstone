@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { ListStatisticCardProps } from "../../types";
 import { timeframeToDisplay, displayToTimeframe } from "../../utils";
 import Skeleton from "react-loading-skeleton";
@@ -13,7 +14,22 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
 }) => {
   const [showAll, setShowAll] = React.useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const displayTimeframes = ["This Week", "This Month", "This Year"];
+  const intl = useIntl();
+
+  const displayTimeframes = [
+    {
+      display: intl.formatMessage({ id: "analytics.timeframe.week" }),
+      value: "week",
+    },
+    {
+      display: intl.formatMessage({ id: "analytics.timeframe.month" }),
+      value: "month",
+    },
+    {
+      display: intl.formatMessage({ id: "analytics.timeframe.year" }),
+      value: "year",
+    },
+  ];
 
   const displayedItems = showAll ? items : items.slice(0, 5);
   const hasMoreItems = items.length > 5;
@@ -39,14 +55,14 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
             <div className="absolute top-full right-0 mt-1 bg-white text-slate-700 rounded-md shadow-lg z-10">
               {displayTimeframes.map((display) => (
                 <button
-                  key={display}
+                  key={display.value}
                   className="block w-full px-4 py-2 text-left hover:bg-slate-100"
                   onClick={() => {
-                    onPeriodChange(displayToTimeframe(display));
+                    onPeriodChange(displayToTimeframe(display.value));
                     setIsDropdownOpen(false);
                   }}
                 >
-                  {display}
+                  {display.display}
                 </button>
               ))}
             </div>
@@ -80,7 +96,9 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
                 className="mt-2.5 font-semibold text-blue-700 max-md:max-w-full text-left"
                 onClick={() => setShowAll(!showAll)}
               >
-                {showAll ? "Show Less" : "Show More"}
+                <FormattedMessage
+                  id={showAll ? "analytics.showLess" : "analytics.showMore"}
+                />
               </button>
             )}
           </>

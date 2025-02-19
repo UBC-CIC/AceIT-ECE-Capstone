@@ -1,4 +1,5 @@
 import React from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { CourseItem } from "./CourseItem";
 import { CourseProps } from "../../../types";
 import InfoIcon from "../../../assets/Info-Icon.png";
@@ -14,6 +15,7 @@ export const SideBar: React.FC<SideBarProps> = ({
   selectedCourse,
   onCourseSelect,
 }) => {
+  const intl = useIntl();
   const availableCourses = courses.filter((course) => course.isAvailable);
   const unavailableCourses = courses.filter((course) => !course.isAvailable);
 
@@ -22,7 +24,9 @@ export const SideBar: React.FC<SideBarProps> = ({
       <div className="flex flex-col flex-1 shrink w-full basis-0 min-w-[240px]">
         {selectedCourse && availableCourses.length > 0 && (
           <>
-            <div className="font-bold">Available Courses</div>
+            <div className="font-bold">
+              <FormattedMessage id="sidebar.availableCourses" />
+            </div>
             {availableCourses.map((course, index) => (
               <CourseItem
                 key={index}
@@ -37,7 +41,7 @@ export const SideBar: React.FC<SideBarProps> = ({
           <>
             <div className="flex gap-1.5 items-center mt-3 max-w-full font-bold w-[180px] relative group">
               <div className="self-stretch my-auto w-[160px]">
-                Unavailable Courses
+                <FormattedMessage id="sidebar.unavailableCourses" />
               </div>
               <img
                 loading="lazy"
@@ -46,8 +50,7 @@ export const SideBar: React.FC<SideBarProps> = ({
                 className="object-contain shrink-0 self-stretch my-auto w-4 aspect-square"
               />
               <div className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2 w-64">
-                If a course is "Unavailable", it means that the course
-                Instructors have not enabled the AI Assistant.
+                <FormattedMessage id="sidebar.unavailableTooltip" />
               </div>
             </div>
             {unavailableCourses.map((course, index) => (

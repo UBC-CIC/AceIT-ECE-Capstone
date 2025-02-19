@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FormattedMessage } from "react-intl";
 import loadingGif from "../../assets/loading.gif";
 
 export const LoadingMessage: React.FC = () => {
@@ -11,7 +12,7 @@ export const LoadingMessage: React.FC = () => {
             alt="Loading"
             className="inline-block w-6 h-6 mr-2"
           />
-          Checking Course Materials
+          <FormattedMessage id="loading.checkingMaterials" />
         </div>
       </div>
     </div>

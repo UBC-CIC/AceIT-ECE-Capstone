@@ -2,7 +2,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { StudyAssistant } from "./StudyAssistant.tsx";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 import { handleAuthentication } from "./auth.ts";
 import { setAccessToken, fetchCoursesAPI, fetchUserInfoAPI } from "./api.ts";
 import { SkeletonTheme } from "react-loading-skeleton";
@@ -48,6 +48,7 @@ export const App = () => {
         });
 
         // Fetch user info and courses
+        toast.loading("Loading your info from Canvas...");
         const [user, fetchedCourses] = await Promise.all([
           fetchUserInfoAPI(),
           fetchCoursesAPI(),
@@ -57,7 +58,12 @@ export const App = () => {
         setLocale(user.preferred_language);
         setCourses(fetchedCourses.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (error) {
+        toast.error(
+          "Failed to get your info from Canvas. Please refresh and try again later."
+        );
         console.error("Failed to initialize app:", error);
+      } finally {
+        toast.dismiss();
       }
     };
 

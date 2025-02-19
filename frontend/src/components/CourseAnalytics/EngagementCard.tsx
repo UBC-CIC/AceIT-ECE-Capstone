@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { MetricsCardProps, EngagementCardProps } from "../../types";
 import { timeframeToDisplay, displayToTimeframe } from "../../utils";
 import Skeleton from "react-loading-skeleton";
@@ -44,14 +45,28 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
   onPeriodChange,
   loading,
 }) => {
+  const intl = useIntl();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const displayTimeframes = ["This Week", "This Month", "This Year"];
+  const displayTimeframes = [
+    {
+      display: intl.formatMessage({ id: "analytics.timeframe.week" }),
+      value: "week",
+    },
+    {
+      display: intl.formatMessage({ id: "analytics.timeframe.month" }),
+      value: "month",
+    },
+    {
+      display: intl.formatMessage({ id: "analytics.timeframe.year" }),
+      value: "year",
+    },
+  ];
 
   return (
     <div className="flex flex-col bg-violet-100 rounded-lg border border-solid border-stone-950 border-opacity-10 w-full">
       <div className="flex justify-between items-center px-6 py-4">
         <div className="text-sm font-semibold text-indigo-950">
-          Student Engagement
+          <FormattedMessage id="analytics.studentEngagement" />
         </div>
         <div className="relative">
           <button
@@ -70,14 +85,14 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
             <div className="absolute top-full right-0 mt-1 bg-white text-slate-700 rounded-md shadow-lg z-10">
               {displayTimeframes.map((display) => (
                 <button
-                  key={display}
+                  key={display.value}
                   className="block w-full px-4 py-2 text-left hover:bg-slate-100"
                   onClick={() => {
-                    onPeriodChange(displayToTimeframe(display));
+                    onPeriodChange(displayToTimeframe(display.value));
                     setIsDropdownOpen(false);
                   }}
                 >
-                  {display}
+                  {display.display}
                 </button>
               ))}
             </div>
@@ -87,19 +102,19 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
 
       <div className="flex flex-wrap justify-evenly gap-4 p-6">
         <MetricsCard
-          title="Questions Asked"
+          title={intl.formatMessage({ id: "analytics.questionsAsked" })}
           value={questionsAsked}
           iconSrc={QuestionIcon}
           loading={loading}
         />
         <MetricsCard
-          title="Student Sessions"
+          title={intl.formatMessage({ id: "analytics.studentSessions" })}
           value={studentSessions}
           iconSrc={MessageIcon}
           loading={loading}
         />
         <MetricsCard
-          title="Students Using Ace It"
+          title={intl.formatMessage({ id: "analytics.studentsUsingAceIt" })}
           value={studentsUsingAceIt}
           iconSrc={PersonIcon}
           loading={loading}
