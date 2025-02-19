@@ -254,6 +254,8 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
 
 export interface StudyAssistantProps {
   onLocaleChange: (locale: string) => void;
+  initialUserInfo: UserProps;
+  initialCourses: CourseProps[];
 }
 
 export interface LanguagePopupProps {
