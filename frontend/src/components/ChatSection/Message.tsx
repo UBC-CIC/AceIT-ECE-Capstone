@@ -2,6 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { MessageProps } from "../../types";
+import { FormattedMessage } from "react-intl";
 
 const deduplicateReferences = (
   references: Array<{ documentName: string; sourceUrl: string }>
@@ -23,7 +24,11 @@ export const Message: React.FC<MessageProps> = ({
   references,
 }) => {
   const [isReady, setIsReady] = useState(false);
-  const sender = isUserMessage ? "You" : "Ace It AI";
+  const sender = isUserMessage ? (
+    <FormattedMessage id="message.you" defaultMessage="You" />
+  ) : (
+    <FormattedMessage id="message.aiName" defaultMessage="Ace It AI" />
+  );
 
   useEffect(() => {
     setIsReady(false);
@@ -86,7 +91,12 @@ export const Message: React.FC<MessageProps> = ({
           <>
             <div className="border-b-2 border-[#030852] my-2 opacity-[0.17]" />
             <div>
-              <strong>Reference Materials</strong>
+              <strong>
+                <FormattedMessage
+                  id="message.referenceTitle"
+                  defaultMessage="Reference Materials"
+                />
+              </strong>
               <ul className="list-disc pl-5 mt-1">
                 {uniqueReferences.map((reference, index) => (
                   <li key={index}>

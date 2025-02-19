@@ -83,10 +83,9 @@ export const Header: React.FC<HeaderProps> = ({
                           Change Preferred Response Language
                         </h2>
                         <p className="text-sm text-gray-600 mb-4">
-                          Select your preferred language for the AI Study
-                          Assistant responses. Note that the user interface will
-                          remain in English as it is the only currently
-                          supported language.
+                          Select your preferred language for Ace It. This will
+                          impact both the language of the AI responses and user
+                          interface.
                         </p>
                       </div>
                       <select

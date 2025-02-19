@@ -98,7 +98,7 @@ TODO
 
 #### Frontend Code Configuration
 
-TODO (e.g. APIs and styling)
+TODO (e.g. APIs and styling / branding)
 
 #### Backend Code Configuration
 

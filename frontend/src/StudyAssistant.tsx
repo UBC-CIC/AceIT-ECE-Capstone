@@ -13,7 +13,11 @@ import {
   updateUserLanguageAPI,
 } from "./api";
 
-export const StudyAssistant = () => {
+interface StudyAssistantProps {
+  onLocaleChange: (locale: string) => void;
+}
+
+export const StudyAssistant = ({ onLocaleChange }: StudyAssistantProps) => {
   const [courses, setCourses] = useState<CourseProps[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<CourseProps | null>(
     null
@@ -74,6 +78,7 @@ export const StudyAssistant = () => {
       const newUserInfo = userInfo;
       userInfo.preferred_language = language;
       setUserInfo(newUserInfo);
+      onLocaleChange(language);
       toast.success("Language preference updated successfully");
     } catch (error) {
       console.error("Failed to update language preference:", error);
