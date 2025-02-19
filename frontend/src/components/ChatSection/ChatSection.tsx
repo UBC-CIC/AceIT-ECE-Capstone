@@ -8,17 +8,13 @@ import {
   ConversationSession,
 } from "../../types";
 import { useState, useEffect, useRef } from "react";
-import { sendMessageAPI, restorePastSessionAPI } from "../../api";
+import {
+  sendMessageAPI,
+  restorePastSessionAPI,
+  getSuggestionsAPI,
+} from "../../api";
 import SendIcon from "../../assets/Send-Icon.svg";
 import { ThreeDots } from "react-loader-spinner";
-
-// TODO: Replace in the future with dynamic suggestions from the backend (generated via AI)
-const suggestions: string[] = [
-  "Give me the link to the course syllabus in Canvas",
-  "Give me a summary of the past class",
-  "Review my answers for the upcoming homework",
-  "Generate some practice problems for the last lecture",
-];
 
 export const ChatSection: React.FC<ChatSectionProps> = ({
   selectedCourse,
@@ -28,7 +24,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   preferredLanguage,
 }) => {
   const [messageList, setMessageList] = useState<MessageProps[]>([]);
-  const [suggestionList, setSuggestionList] = useState<string[]>(suggestions);
+  const [suggestionList, setSuggestionList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -54,7 +50,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   useEffect(() => {
     // Reset all state to initial values
     setMessageList([]);
-    setSuggestionList(suggestions);
+    setSuggestionList([]);
     setIsLoading(false);
     setIsInitialLoading(true);
     setConversationId(null);
@@ -66,9 +62,10 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       messageInput.value = "";
     }
 
-    // Start a new conversation by invoking API to get AI welcome prompt
-    invokeMessageAPI("")
-      .then((messages) => {
+    // Fetch initial suggestions and start new conversation
+    Promise.all([getSuggestionsAPI(selectedCourse.id, 4), invokeMessageAPI("")])
+      .then(([suggestions, messages]) => {
+        setSuggestionList(suggestions);
         setMessageList(messages);
       })
       .finally(() => {
