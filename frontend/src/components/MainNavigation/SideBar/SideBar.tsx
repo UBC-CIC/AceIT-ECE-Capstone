@@ -1,5 +1,5 @@
 import React from "react";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import { CourseItem } from "./CourseItem";
 import { CourseProps } from "../../../types";
 import InfoIcon from "../../../assets/Info-Icon.png";
@@ -15,7 +15,6 @@ export const SideBar: React.FC<SideBarProps> = ({
   selectedCourse,
   onCourseSelect,
 }) => {
-  const intl = useIntl();
   const availableCourses = courses.filter((course) => course.isAvailable);
   const unavailableCourses = courses.filter((course) => !course.isAvailable);
 
