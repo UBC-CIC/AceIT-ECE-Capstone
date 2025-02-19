@@ -70,51 +70,8 @@ def lambda_handler(event, context):
         # print("Course config prompt: ", course_config_prompt)
         recentCourseRelated_stuff = call_course_activity_stream(auth_token, course_id)
         # print("recentCourseRelated_stuff: ", recentCourseRelated_stuff)
-        suggested_questions = generate_suggestions(course_config_prompt, str(num_suggests), recentCourseRelated_stuff, course_id, student_language_pref)
+        suggested_questions = generate_questions_with_retries(course_config_prompt, str(num_suggests), recentCourseRelated_stuff, course_id, student_language_pref)
         print("suggestion response", suggested_questions)
-
-        if isinstance(suggested_questions, dict) and 'response' in suggested_questions:
-            try:
-                formatted_response = suggested_questions['response']
-                print("formatted LLM output:", formatted_response)
-                print("type: ", type(formatted_response))
-
-                # Step 1: Fix non-standard quotes (curly, angled French quotes, etc.)
-                formatted_response = re.sub(r'[“”«»‘’【】「」]', '"', formatted_response)
-
-                # Step 2: Ensure it's a valid JSON list
-                if not formatted_response.startswith("[") or not formatted_response.endswith("]"):
-                    formatted_response = f"[{formatted_response}]"
-
-                # Step 3: Replace non-standard separators if any (e.g., spaces, semicolons instead of commas)
-                formatted_response = re.sub(r'\s*,\s*', ',', formatted_response)  # Normalize commas
-                formatted_response = re.sub(r'[“”«»‘’【】「」]', '"', formatted_response)
-                formatted_response = re.sub(r'[，、；;]', ',', formatted_response)
-                formatted_response = re.sub(r'[;；｜/。，|/]', ',', formatted_response)
-                formatted_response = re.sub(r'\s*,\s*', ',', formatted_response).strip()
-                while formatted_response.startswith('"') and formatted_response.endswith('"'):
-                    formatted_response = formatted_response[1:-1]
-                formatted_response = formatted_response.strip()
-                if not (formatted_response.startswith("[") and formatted_response.endswith("]")):
-                    formatted_response = "[" + formatted_response + "]"  # Force it to be a list
-                # Step 4: Parse JSON
-                faq_list = json.loads(formatted_response)
-                faq_list = flatten_list(faq_list)
-                print("type of faq_list", type(faq_list))
-
-                # Step 5: Validate that it's a list
-                if not isinstance(faq_list, list):
-                    raise ValueError("LLM output is not a list")
-
-            except json.JSONDecodeError:
-                print("Error: LLM output is not valid JSON after formatting:", formatted_response)
-                faq_list = []  # Fallback empty list
-            except ValueError as ve:
-                print(f"Error: {ve}")
-                faq_list = []  # Fallback empty list
-        else:
-            print("Error: LLM response format is incorrect.")
-            faq_list = []  # Fallback empty list
 
         return {
             "statusCode": 200,
@@ -124,7 +81,7 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Methods': '*',
                 'Access-Control-Allow-Credentials': 'true'
             },
-            "body": json.dumps(faq_list)
+            "body": json.dumps(suggested_questions)
         }
     except KeyError as e:
         return {
@@ -228,3 +185,76 @@ def translate_text(text, target_language):
 
 def flatten_list(nested_list):
     return [item for sublist in nested_list for item in (sublist if isinstance(sublist, list) else [sublist])]
+
+def generate_questions_with_retries(course_config_prompt, num_suggests, recentCourseRelated_stuff, course_id, student_language_pref):
+    """Tries to generate questions up to MAX_RETRIES times if errors occur."""
+    MAX_RETRIES = 3  # Number of attempts
+    for attempt in range(1, MAX_RETRIES + 1):
+        print(f"Attempt {attempt} to generate questions...")
+
+        suggested_questions = generate_suggestions(course_config_prompt, str(num_suggests), recentCourseRelated_stuff, course_id, student_language_pref)
+        
+        faq_list = parse_llm_response(suggested_questions)
+
+        if faq_list:  # If successful, return the list
+            print(f"Successfully generated questions on attempt {attempt}.")
+            return faq_list
+
+        print(f"Attempt {attempt} failed. Retrying..." if attempt < MAX_RETRIES else "All attempts failed.")
+
+    return []  # Return empty list if all retries fail
+
+
+def parse_llm_response(suggested_questions):
+    """Parses and fixes LLM response to ensure it's a valid JSON list."""
+    if not isinstance(suggested_questions, dict) or 'response' not in suggested_questions:
+        print("Error: LLM response format is incorrect.")
+        return []
+
+    formatted_response = suggested_questions['response']
+
+    print("Formatted LLM output:", formatted_response)
+    print("Type:", type(formatted_response))
+
+    try:
+        # Step 1: Fix non-standard quotes (curly, angled French, etc.)
+        formatted_response = re.sub(r'[“”«»‘’【】「」]', '"', formatted_response)
+
+        # Step 2: Ensure it's a valid JSON list
+        if not formatted_response.startswith("[") or not formatted_response.endswith("]"):
+            formatted_response = f"[{formatted_response}]"
+
+        # Step 3: Replace non-standard separators
+        formatted_response = re.sub(r'\s*,\s*', ',', formatted_response)  # Normalize commas
+        formatted_response = re.sub(r'[“”«»‘’【】「」]', '"', formatted_response)
+        formatted_response = re.sub(r'[，、；;]', ',', formatted_response)
+        formatted_response = re.sub(r'[;；｜/。，|/]', ',', formatted_response)
+        formatted_response = re.sub(r'\s*,\s*', ',', formatted_response).strip()
+
+        # Step 4: Remove extra string wrapping (if JSON list is inside a string)
+        while formatted_response.startswith('"') and formatted_response.endswith('"'):
+            formatted_response = formatted_response[1:-1]
+
+        formatted_response = formatted_response.strip()
+        if not (formatted_response.startswith("[") and formatted_response.endswith("]")):
+            formatted_response = "[" + formatted_response + "]"  # Force list format
+
+        # Step 5: Parse JSON
+        faq_list = json.loads(formatted_response)
+        
+        faq_list = flatten_list(faq_list)
+
+        print("Type of faq_list:", type(faq_list))
+
+        # Step 7: Validate that it's a list
+        if not isinstance(faq_list, list):
+            raise ValueError("LLM output is not a list")
+
+        return faq_list  # Successfully parsed list
+
+    except json.JSONDecodeError:
+        print("Error: LLM output is not valid JSON after formatting:", formatted_response)
+    except ValueError as ve:
+        print(f"Error: {ve}")
+
+    return []  # Return empty list on failure
