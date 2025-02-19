@@ -1,13 +1,13 @@
 import * as React from "react";
+import { FormattedRelativeTime } from "react-intl";
 import { PastConversationListCardProps } from "../../../../types";
-import { formatDistanceToNow } from "date-fns";
 
 export const PastConversationListCard: React.FC<
   PastConversationListCardProps
 > = ({ summary, date, className, onClick, disabled = false }) => {
-  const formattedDate = formatDistanceToNow(new Date(date + "Z"), {
-    addSuffix: true,
-  });
+  const timestamp = new Date(date + "Z").getTime();
+  const now = Date.now();
+  const seconds = Math.round((timestamp - now) / 1000);
 
   const handleClick = () => {
     if (!disabled && onClick) {
@@ -25,7 +25,14 @@ export const PastConversationListCard: React.FC<
       <div className="h-10 text-sm font-regular overflow-hidden flex items-center">
         <span className="line-clamp-2">{summary}</span>
       </div>
-      <div className="mt-2.5 text-xs font-bold">{formattedDate}</div>
+      <div className="mt-2.5 text-xs font-bold">
+        <FormattedRelativeTime
+          value={seconds}
+          numeric="auto"
+          style="long"
+          updateIntervalInSeconds={60}
+        />
+      </div>
     </div>
   );
 };

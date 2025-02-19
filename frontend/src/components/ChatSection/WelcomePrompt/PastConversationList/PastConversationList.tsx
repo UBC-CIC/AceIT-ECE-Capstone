@@ -1,4 +1,5 @@
 import * as React from "react";
+import { FormattedMessage, useIntl } from "react-intl";
 import { PastConversationListCard } from "./PastConversationListCard";
 import { Button } from "../../../Common/Button";
 import { getPastSessionsForCourseAPI } from "../../../../api";
@@ -18,6 +19,8 @@ export const PreviousConversationList: React.FC<
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [isLoadingConversation, setIsLoadingConversation] =
     React.useState(false);
+
+  const intl = useIntl();
 
   React.useEffect(() => {
     const fetchConversations = async () => {
@@ -74,7 +77,7 @@ export const PreviousConversationList: React.FC<
   return conversations === null || conversations.length === 0 ? null : (
     <div>
       <div className="mt-5 text-sm font-bold text-center text-stone-950 pb-4">
-        Resume Past Conversation
+        <FormattedMessage id="pastConversation.title" />
       </div>
       <div className="flex flex-wrap gap-5 justify-center items-stretch text-black">
         {conversations.slice(0, 3).map((conversation, index) => (
@@ -104,7 +107,7 @@ export const PreviousConversationList: React.FC<
         {conversations.length > 3 && (
           <div className="flex-grow flex items-stretch">
             <Button
-              text="Older Conversations"
+              text={intl.formatMessage({ id: "pastConversation.olderButton" })}
               isOutlined={true}
               isDisabled={isInteractionDisabled}
               dropdownValues={conversations.slice(3).map((conversation) => ({

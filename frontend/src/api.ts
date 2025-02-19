@@ -410,3 +410,35 @@ export const updateUserLanguageAPI = async (
     throw error;
   }
 };
+
+export const getSuggestionsAPI = async (
+  course: string,
+  numSuggests?: number
+): Promise<string[]> => {
+  if (!accessToken) throw new Error("Access token is not set");
+
+  try {
+    const params = new URLSearchParams({
+      course: course,
+      ...(numSuggests && { num_suggests: numSuggests.toString() }),
+    });
+
+    const response = await fetch(
+      `${API_BASE_URL}/llm/suggestions?${params.toString()}`,
+      {
+        headers: {
+          Authorization: accessToken,
+        },
+      }
+    );
+
+    handleUnauthorized(response);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    handleApiError(error, "Failed to fetch suggestions. Please try again.");
+    throw error;
+  }
+};

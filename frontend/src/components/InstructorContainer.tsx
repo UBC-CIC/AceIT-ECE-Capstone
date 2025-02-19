@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { FormattedMessage } from "react-intl";
 import { CourseProps } from "../types";
 import { CourseNavBar } from "./CourseNavBar/CourseNavBar";
 import { CourseConfigurationSection } from "./InstructorSections/CourseConfigurationSection";
@@ -51,9 +52,7 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
         <div className="flex-none pb-2 px-4">
           <div className="bg-violet-100 border-l-4 border-indigo-950 p-4 rounded-sm">
             <p className="text-sm text-indigo-950">
-              Note: Any changes to the "Included Course Content" made in the
-              Configuration page for this course may take several minutes to
-              apply.
+              <FormattedMessage id="testAssistant.contentNote" />
             </p>
           </div>
         </div>

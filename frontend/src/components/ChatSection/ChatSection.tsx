@@ -8,17 +8,14 @@ import {
   ConversationSession,
 } from "../../types";
 import { useState, useEffect, useRef } from "react";
-import { sendMessageAPI, restorePastSessionAPI } from "../../api";
+import {
+  sendMessageAPI,
+  restorePastSessionAPI,
+  getSuggestionsAPI,
+} from "../../api";
 import SendIcon from "../../assets/Send-Icon.svg";
 import { ThreeDots } from "react-loader-spinner";
-
-// TODO: Replace in the future with dynamic suggestions from the backend (generated via AI)
-const suggestions: string[] = [
-  "Give me the link to the course syllabus in Canvas",
-  "Give me a summary of the past class",
-  "Review my answers for the upcoming homework",
-  "Generate some practice problems for the last lecture",
-];
+import { FormattedMessage, useIntl } from "react-intl";
 
 export const ChatSection: React.FC<ChatSectionProps> = ({
   selectedCourse,
@@ -27,8 +24,9 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   resetTrigger,
   preferredLanguage,
 }) => {
+  const intl = useIntl();
   const [messageList, setMessageList] = useState<MessageProps[]>([]);
-  const [suggestionList, setSuggestionList] = useState<string[]>(suggestions);
+  const [suggestionList, setSuggestionList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -54,7 +52,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   useEffect(() => {
     // Reset all state to initial values
     setMessageList([]);
-    setSuggestionList(suggestions);
+    setSuggestionList([]);
     setIsLoading(false);
     setIsInitialLoading(true);
     setConversationId(null);
@@ -66,9 +64,10 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       messageInput.value = "";
     }
 
-    // Start a new conversation by invoking API to get AI welcome prompt
-    invokeMessageAPI("")
-      .then((messages) => {
+    // Fetch initial suggestions and start new conversation
+    Promise.all([getSuggestionsAPI(selectedCourse.id, 4), invokeMessageAPI("")])
+      .then(([suggestions, messages]) => {
+        setSuggestionList(suggestions);
         setMessageList(messages);
       })
       .finally(() => {
@@ -203,7 +202,11 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
               {isLoading && <LoadingMessage />}
               {[...messageList].reverse().map((message, index) => (
                 <div key={index} className="mb-4">
-                  <Message {...message} useDarkStyle={useDarkStyle} />
+                  <Message
+                    {...message}
+                    useDarkStyle={useDarkStyle}
+                    isFirstMessage={index === 0}
+                  />
                 </div>
               ))}
             </div>
@@ -217,7 +220,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
           {suggestionList != null && suggestionList.length > 0 && (
             <div className="flex flex-col mb-4 w-full text-sm">
               <div className="font-bold text-slate-500">
-                Suggestions on what to ask
+                <FormattedMessage id="chat.suggestions" />
               </div>
               <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-indigo-950">
                 {suggestionList.map((suggestion, index) => (
@@ -236,14 +239,16 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
               onSubmit={handleFormSubmit}
             >
               <label htmlFor="messageInput" className="sr-only">
-                Ask me anything about your class
+                <FormattedMessage id="chat.inputLabel" />
               </label>
               <input
                 ref={inputRef}
                 id="messageInput"
                 type="text"
-                className="flex-1 shrink my-auto text-sm basis-3  max-md:max-w-full outline-none"
-                placeholder="Ask me anything about your class"
+                className="flex-1 shrink my-auto text-sm basis-3 max-md:max-w-full outline-none"
+                placeholder={intl.formatMessage({
+                  id: "chat.inputPlaceholder",
+                })}
                 autoComplete="off"
                 onKeyDown={handleKeyDown}
               />
@@ -257,7 +262,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
                 <img
                   loading="lazy"
                   src={SendIcon}
-                  alt="Send message"
+                  alt={intl.formatMessage({ id: "chat.sendButton" })}
                   className={`object-contain flex-1 shrink w-5 aspect-square basis-0 ${
                     isLoading ? "opacity-50" : ""
                   }`}

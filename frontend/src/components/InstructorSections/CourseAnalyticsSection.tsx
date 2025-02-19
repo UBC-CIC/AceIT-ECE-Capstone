@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useIntl } from "react-intl";
 import {
   CourseAnalyticsSectionProps,
   CourseCommonQuestions,
@@ -17,6 +18,7 @@ import {
 export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
   selectedCourse,
 }) => {
+  const intl = useIntl();
   const [studentEngagementData, setStudentEngagementData] =
     React.useState<CourseStudentEngagement>();
   const [mostCommonQuestionsData, setMostCommonQuestionsData] =
@@ -90,7 +92,7 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
       />
       <div className="flex flex-wrap gap-4 justify-center items-start ">
         <ListStatisticCard
-          title="Most Common Questions"
+          title={intl.formatMessage({ id: "analytics.mostCommonQuestions" })}
           timeframe={mostCommonQuestionsPeriod}
           items={
             mostCommonQuestionsData?.questions.map((question) => ({
@@ -102,7 +104,9 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
           loading={loading}
         />
         <ListStatisticCard
-          title="Most Referenced Materials"
+          title={intl.formatMessage({
+            id: "analytics.mostReferencedMaterials",
+          })}
           timeframe={mostReferencedMaterialsPeriod}
           items={mostReferencedMaterialsData?.materials ?? []}
           onPeriodChange={handlePeriodChangeMaterials}

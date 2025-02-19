@@ -134,12 +134,14 @@ def lambda_handler(event, context):
             welcome_message_id = str(uuid.uuid4())
             welcome_response_content = welcome_response.get('response')
             welcome_response_sources = welcome_response.get("sources")
+            translated_documents = translate_document_names(welcome_response_sources, student_language_pref)
             ai_message = {
                 "course_id": str(course_id),
                 "message_id": welcome_message_id,
                 "content": welcome_response_content,
                 "msg_source": "AI",
-                "references": welcome_response_sources,
+                "references": translated_documents,
+                "references_en": welcome_response_sources,
                 "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
             print("AI response: ", ai_message)
@@ -157,16 +159,6 @@ def lambda_handler(event, context):
             messages_table.put_item(Item=ai_message)
             # Update the conversation with the AI response
             update_conversation(conversation_id, course_id, student_id, welcome_message_id, timestamp)
-
-            translated_documents = translate_document_names(welcome_response_sources, student_language_pref)
-            ai_message = {
-                "course_id": str(course_id),
-                "message_id": welcome_message_id,
-                "content": welcome_response_content,
-                "msg_source": "AI",
-                "references": translated_documents,
-                "msg_timestamp": datetime.datetime.utcnow().isoformat(),
-            }
 
             return {
                 "statusCode": 200,
@@ -208,12 +200,14 @@ def lambda_handler(event, context):
             ai_response_dict = generate_ai_response(message_content, past_conversation, course_id, student_language_pref)
             ai_response_content = ai_response_dict.get('response')
             ai_response_sources = ai_response_dict.get("sources")
+            translated_documents = translate_document_names(ai_response_sources, student_language_pref)
             ai_message = {
                 "course_id": course_id,
                 "message_id": ai_message_id,
                 "content": ai_response_content,
                 "msg_source": "AI",
-                "references": ai_response_sources,
+                "references": translated_documents,
+                "references_en": ai_response_sources,
                 "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
             # print("ai_message: ", ai_message)
@@ -235,15 +229,7 @@ def lambda_handler(event, context):
             # Update the conversation with the AI response
             update_conversation(conversation_id, course_id, student_id, ai_message_id, timestamp)
 
-            translated_documents = translate_document_names(ai_response_sources, student_language_pref)
-            ai_message = {
-                "course_id": course_id,
-                "message_id": ai_message_id,
-                "content": ai_response_content,
-                "msg_source": "AI",
-                "references": translated_documents,
-                "msg_timestamp": datetime.datetime.utcnow().isoformat(),
-            }
+            
 
             # print("ai_message_after translation: ", ai_message)
 
