@@ -1,5 +1,13 @@
 {
   "message.referenceTitle": "Справочные материалы",
   "message.you": "Вы",
-  "message.aiName": "Ace It AI"
+  "message.aiName": "Ace It AI",
+  "header.appName": "Ace It",
+  "header.appSubtitle": "ИИ-помощник в обучении",
+  "header.changeLanguage": "Изменить язык",
+  "header.languagePopupTitle": "Изменить предпочитаемый язык ответов",
+  "header.languagePopupDescription": "Выберите предпочитаемый язык для Ace It. Это повлияет на язык ответов ИИ и интерфейса.",
+  "header.cancel": "Отмена",
+  "header.confirm": "Подтвердить",
+  "header.logout": "Выйти"
 }

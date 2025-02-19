@@ -1,5 +1,13 @@
 {
   "message.referenceTitle": "Documents de référence",
   "message.you": "Vous",
-  "message.aiName": "Ace It AI"
+  "message.aiName": "Ace It AI",
+  "header.appName": "Ace It",
+  "header.appSubtitle": "Assistant d'études IA",
+  "header.changeLanguage": "Changer de langue",
+  "header.languagePopupTitle": "Changer la langue de réponse préférée",
+  "header.languagePopupDescription": "Sélectionnez votre langue préférée pour Ace It. Cela affectera la langue des réponses de l'IA et de l'interface utilisateur.",
+  "header.cancel": "Annuler",
+  "header.confirm": "Confirmer",
+  "header.logout": "Déconnexion"
 }

@@ -22,6 +22,7 @@ export const Message: React.FC<MessageProps> = ({
   isUserMessage,
   useDarkStyle,
   references,
+  isFirstMessage,
 }) => {
   const [isReady, setIsReady] = useState(false);
   const sender = isUserMessage ? (
@@ -87,7 +88,7 @@ export const Message: React.FC<MessageProps> = ({
         >
           {content}
         </ReactMarkdown>
-        {uniqueReferences.length > 0 && (
+        {uniqueReferences.length > 0 && !isFirstMessage && (
           <>
             <div className="border-b-2 border-[#030852] my-2 opacity-[0.17]" />
             <div>

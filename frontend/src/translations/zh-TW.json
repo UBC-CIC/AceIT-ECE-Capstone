@@ -1,5 +1,13 @@
 {
   "message.referenceTitle": "參考資料",
   "message.you": "你",
-  "message.aiName": "Ace It AI"
+  "message.aiName": "Ace It AI",
+  "header.appName": "Ace It",
+  "header.appSubtitle": "AI 學習助手",
+  "header.changeLanguage": "更改語言",
+  "header.languagePopupTitle": "更改首選回應語言",
+  "header.languagePopupDescription": "選擇您首選的 Ace It 語言。這將影響 AI 回應和使用者介面的語言。",
+  "header.cancel": "取消",
+  "header.confirm": "確認",
+  "header.logout": "登出"
 }

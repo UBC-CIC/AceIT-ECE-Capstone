@@ -31,6 +31,7 @@ export interface MessageProps {
   isUserMessage?: boolean;
   useDarkStyle?: boolean;
   references?: MessageReference[];
+  isFirstMessage?: boolean;
 }
 
 export type MessageSource = "STUDENT" | "AI" | "SYSTEM";
@@ -250,3 +251,16 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
   { code: "ru", displayName: "Russian" },
   { code: "es", displayName: "Spanish" },
 ];
+
+export interface StudyAssistantProps {
+  onLocaleChange: (locale: string) => void;
+}
+
+export interface LanguagePopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  selectedLanguage: string;
+  onLanguageChange: (language: string) => void;
+  onConfirm: () => void;
+  hasLanguageChanged: boolean;
+}

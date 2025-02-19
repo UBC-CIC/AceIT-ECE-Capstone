@@ -200,7 +200,11 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
               {isLoading && <LoadingMessage />}
               {[...messageList].reverse().map((message, index) => (
                 <div key={index} className="mb-4">
-                  <Message {...message} useDarkStyle={useDarkStyle} />
+                  <Message
+                    {...message}
+                    useDarkStyle={useDarkStyle}
+                    isFirstMessage={index === 0}
+                  />
                 </div>
               ))}
             </div>

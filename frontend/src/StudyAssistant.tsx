@@ -1,9 +1,9 @@
-import { Header } from "./components/MainNavigation/Header";
+import { Header } from "./components/MainNavigation/Header/Header";
 import { useState, useEffect, useRef } from "react";
 import { SideBar } from "./components/MainNavigation/SideBar/SideBar";
 import { ChatSection } from "./components/ChatSection/ChatSection";
 import { InstructorSection } from "./components/InstructorContainer";
-import { CourseProps, UserProps } from "./types";
+import { CourseProps, UserProps, StudyAssistantProps } from "./types";
 import { toast } from "react-hot-toast";
 import { logout } from "./auth";
 import {
@@ -13,9 +13,7 @@ import {
   updateUserLanguageAPI,
 } from "./api";
 
-interface StudyAssistantProps {
-  onLocaleChange: (locale: string) => void;
-}
+// ...existing code...
 
 export const StudyAssistant = ({ onLocaleChange }: StudyAssistantProps) => {
   const [courses, setCourses] = useState<CourseProps[]>([]);
