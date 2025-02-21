@@ -255,6 +255,13 @@ class PrivAceItEceCapstoneMainStack(Stack):
             compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
         )
 
+        jwt_layer = _lambda.LayerVersion(
+            self, 
+            "JWTLayer",
+            code=_lambda.Code.from_asset("layers/jwt-layer.zip"),
+            compatible_runtimes=[_lambda.Runtime.PYTHON_3_9],
+        )
+
         # Define the Lambda function resources
         fetchReadFromS3 = _lambda.Function(
             self,
