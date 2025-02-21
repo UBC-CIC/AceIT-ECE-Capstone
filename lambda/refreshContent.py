@@ -30,9 +30,12 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Course ID is required"})
         }
     # TODO：filter content based on instructor configuration
+
+    # 1. query database get the config
+    # 2. for each selected type get the documents in it
     course_config = utils.retrieve_course_config(course_id)
     files = get_files(course_id)
-    print("files: ", files)
+
     if files is None:
         return {
             "statusCode": 500,

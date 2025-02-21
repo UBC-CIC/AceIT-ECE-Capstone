@@ -80,8 +80,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
         canvas_secret_template = {
             "adminAccessToken": "CXekV2e68mxaNx2vB2kWDhAwQ4vXHY63QFXDe6KyePrG7kQMZEaMQ3PxKkrFWfr6",
             "baseURL": "https://15.157.251.49",
-            "ltiKeyId": "10000000000006",
-            "ltiKey": "C6nfwBv8tP4tPTVk4VKnk42cnwr4CrMUnu3zkttBU6JRWwDL3PWVTGMxMWL26vTc",
+            "ltiKeyId": "10000000000007",
+            "ltiKey": "uDEQPEV2az6kaTL7rL3mDMFPtm7Ncmr9rvxmUha46v7VEXZBRPN7c38B4LUWZmzJ",
             "redirectURI": "https://d2rs0jk5lfd7j4.cloudfront.net/auth-response",
             "localLtiKeyId": "10000000000001",
             "localLtiKey": "CE2T7Pff7nuLrwByQxBcyQZGUAN7WhkJAcTHxNEJM8zAAGVcFv87wMcJY9ZtButX",
