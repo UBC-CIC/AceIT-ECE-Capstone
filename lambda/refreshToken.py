@@ -28,9 +28,9 @@ def lambda_handler(event, context):
             "body": json.dumps({"error": "Refresh token is required"})
         }
     
-    local = str(headers.get("Islocaltesting", "false")).lower() == "true"
+    # local = str(headers.get("Islocaltesting", "false")).lower() == "true"
 
-    canvas_response = refresh_token(token, local)
+    canvas_response = refresh_token(token)
 
     if canvas_response is None:
         return {
@@ -60,24 +60,13 @@ def lambda_handler(event, context):
         'body': json.dumps(response)
     }
 
-def refresh_token(refresh_token, local):
+def refresh_token(refresh_token):
     secret = utils.get_canvas_secret.get_secret()
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
-
-    # declare first
-    CLIENT_ID = ""
-    CLIENT_SECRET = ""
-    REDIRECT_URI = ""
-
-    if not local:
-        CLIENT_ID = credentials['ltiKeyId']
-        CLIENT_SECRET = credentials['ltiKey']
-        REDIRECT_URI = credentials['redirectURI']
-    if local:
-        CLIENT_ID = credentials['localLtiKeyId']
-        CLIENT_SECRET = credentials['localLtiKey']
-        REDIRECT_URI = credentials['localRedirectURI']
+    CLIENT_ID = credentials['ltiKeyId']
+    CLIENT_SECRET = credentials['ltiKey']
+    REDIRECT_URI = credentials['redirectURI']
 
     url = f"{BASE_URL}/login/oauth2/token"
 

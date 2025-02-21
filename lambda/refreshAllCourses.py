@@ -57,7 +57,6 @@ def lambda_handler(event, context):
         'body': json.dumps({"message": response_message})
     }
 
-
 def get_all_courses():
     """
     Fetch all courses from canvas lms.
@@ -82,27 +81,31 @@ def get_all_courses():
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
     url = f"{BASE_URL}/api/v1/courses"
-    try:
-        response = requests.get(url, headers=HEADERS, verify=False)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-        return None
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-        return None
+    response = requests.get(url, headers=HEADERS, verify=False)
+    return response.json()
+    # try:
+    #     response = requests.get(url, headers=HEADERS, verify=False)
+    #     response.raise_for_status()
+    #     return response.json()
+    # except requests.exceptions.HTTPError as http_err:
+    #     print(f"HTTP error occurred: {http_err}")
+    #     return None
+    # except requests.exceptions.RequestException as req_err:
+    #     print(f"Request error occurred: {req_err}")
+    #     return None
 
 def get_server_level_access_token():
     secret = utils.get_canvas_secret.get_secret()
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
-    CLIENT_ID = credentials['ltiKeyId']
-    CLIENT_SECRET = credentials['ltiKey']
+    CLIENT_ID = credentials['serverKeyId']
+    # CLIENT_SECRET = credentials['serverKey']
+    PRIVATE_KEY = credentials['jwkPrivateKey']
+    KID = credentials['kid']
 
     url = f"{BASE_URL}/login/oauth2/token"
 
-    client_assertion = get_client_assertion(CLIENT_ID, url)
+    client_assertion = get_client_assertion(CLIENT_ID, PRIVATE_KEY, KID, url)
 
     data = {
             "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
@@ -113,7 +116,8 @@ def get_server_level_access_token():
                                 "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
                                 "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
                                 "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-                                "https://canvas.instructure.com/auth/courses.readonly" # TODO: not able to get this scope yet, neccesary for getting course info
+                                # "https://canvas.instructure.com/auth/courses.readonly" 
+                                # TODO: not able to get the last scope yet, but it's neccesary for getting course info
                             ])
             }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -128,23 +132,21 @@ def get_server_level_access_token():
         print(f"Request error occurred: {req_err}")
         return None
   
-def get_client_assertion(client_id, url):
+def get_client_assertion(client_id, private_key, kid, url):
     header = {
         "alg": "RS256",
         "typ": "JWT",
-        "kid":"5W4eOMF-1ORx4aF2utnC3XMHNywQyV6kLoAgxe9hgF4"
+        "kid": kid
     }
 
     payload = {
-        "iss": f"{client_id}",
-        "sub": f"{client_id}",
-        "aud": f"{url}",
+        "iss": client_id,
+        "sub": client_id,
+        "aud": url,
         "iat": int(time.time()),
         "exp": int(time.time()) + 600, # 10 mins expiration
         "jti": str(uuid.uuid4())
     }
-    # TODO: store in secrete manager
-    private_key = "-----BEGIN PRIVATE KEY-----MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCYVCKsocevxOUI2D41G2+aTdRdPmLfXdlJYlLjjgJ0ExL2xRJU/u9KzMyTSV3y+MJLinVJf+5Q1hQmO7OcVvPwvip+8Yc4ThYcEOU1lXDTG0LRAtBxJW4UuH6wo22li15lq70EO+ppg5Y3jnzmsDzNBilfAtzW6pXiykddr0qJWKUsx73jqIAeZ0LgZAiX0bpwi2SayKISzD5tiuq9fQdz2Sej+d5vVR0r73Yb2HneaAJ1FZtQVPUpkcYnH+GInc/fYM3AVmH3aP88HWd/8Jyt5K6Ya0iVx7m0eYXAlyaiZ3TKo83/41dlvHCxJebXouwevY25S56NsbKBhBlY6IMhAgMBAAECggEAFg+tW+osRPETqKXE0KUyExttg7ma0TXC1+V1Er7I7S2sA/BDuOqZFnC1uikYga10WkNpvCTai3uNvIHN//j56GZqOitZxZZNjnAF+i40AmcC1Ml/Dbv5hue3dXad1SlrmPb374qL5w8nLNGmljR1Ac6AJGICQOAFqCxajJ9sAJsMT51dIPsJCG7VWFilkI1rHbcTmrKQNIIlvz2oPLTfSKFd+krR6xihEWGDZ8UC57DFXDd0U8MlY4IWvz55nWy7YlYmFjzIQZ75LKyZjzhF+efbHalZ+AoI7RsIi4m26yTrYAZ1VEHNTpByLjtsb8IvKEMwi8Ovapbm/+S14wVKqQKBgQDI7czbGE2uTPBHBjvkfMvxdje9hIsY3EdgNA0XtIIaJs6KDxIb76iGeyQpxz9/ixogkiZl3usttAJPJClQFqS0WKANhwDQF2H3AiMh9hJM3BErK36/MSjF2PMIOyps587b6aPsJJ15Co7hlEVe/kwfYH0Y756u7fkKvzzEKI6vtQKBgQDCFEr8FZbigD5j3Oh6Ko8C8xD1AAnOqaMp5WkSBGfTHI5eUNI7Fy9vuuEYzqjKuo9TzQnecMsn2eiSZGRHTaITXZtlvNZb4XpM5FXxA8VG5pXXq6Wm7gbxLv1gasGiCcntcxTpFD8mpLV9IalleAk+2PifblSPHMsFP2TOGIsxPQKBgCcvYS01Tyj37kAbsiB8ShW8FWDLcYkWpIDZhdgipuDMwqjgCYsTMQ2RBFt1dSe9jAngFsb1M25FVdHzXm81C0f0pLoeowTyGnPeodVktOryXBLMN7q3rpjvF256g2qbxpbSuNo7xc4uRfEuRl0hQN05pwvu50Z8OH5lD0e+FR2lAoGADyEv20j/kza2JmjRQrzQm0VBnCfdm9vDmX+F2l63jVCblKSuTub2zrn91EZACFXU2I6SZ2HZpIirRcZHvvtBWEsi0yKOf2krdJUUUg6eMXHGWqLJ7iJ+Lg0guYR5Bd3HfRhMmAL5DVUnxNJ79yoNZnXZo+wg8WsoNIeFnz9wkm0CgYEApzDz1lnG/pO3C3MzDDL6kGhIlSAutoqe1KEMsZlI4nztYbKaj4lvqyiFYepngMdr5VtImEJF4er3UrjFtHTh5eBJxKJWb1/o0RQtfCYFXi5I9IKr90aAcddG6E3MvAbL72cXjYS2vumHHMYnHyFbIVG/7hSm2h0Ptf1CQwXOzns=-----END PRIVATE KEY-----"
 
     return jwt.encode(payload, private_key, algorithm="RS256", header = header);
 
