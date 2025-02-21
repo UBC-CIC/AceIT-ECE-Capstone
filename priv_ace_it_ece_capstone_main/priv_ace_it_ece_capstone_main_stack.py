@@ -681,6 +681,22 @@ class PrivAceItEceCapstoneMainStack(Stack):
             timeout=Duration.minutes(15),
         )
 
+        get_all_materials_lambda = _lambda.Function(
+            self,
+            "GetAllMaterialsLambda",
+            function_name="GetAllMaterialsLambda",
+            runtime=_lambda.Runtime.PYTHON_3_9,
+            code=_lambda.Code.from_asset("lambda"),  # Points to the lambda directory
+            handler="getAllMaterials.lambda_handler",
+            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            vpc=my_vpc,
+            security_groups=[lambda_sg],
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
+            ),
+            timeout=Duration.minutes(15),
+        )
+
         # Define the shared IAM role
         shared_policy_for_lambda = iam.Policy(
             self,
@@ -729,6 +745,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         shared_policy_for_lambda.attach_to_role(update_conversation_prompts_lambda.role)
         shared_policy_for_lambda.attach_to_role(update_user_language_lambda.role)
         shared_policy_for_lambda.attach_to_role(generate_suggestions_lambda.role)
+        shared_policy_for_lambda.attach_to_role(get_all_materials_lambda.role)
 
         recent_course_data_analysis.add_to_role_policy(
             iam.PolicyStatement(
@@ -769,6 +786,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         specific_session_resource = student_resource.add_resource("session")
         student_send_msg_resource = student_resource.add_resource("send-message")
         instructor_resource = ui_resource.add_resource("instructor")
+        instructor_all_materials = instructor_resource.add_resource("all-materials")
         instructor_config_resource = instructor_resource.add_resource("config")
         update_system_prompt_resource = instructor_config_resource.add_resource("update-prompt")
         analytics_resource = instructor_resource.add_resource("analytics")
@@ -1172,6 +1190,42 @@ class PrivAceItEceCapstoneMainStack(Stack):
             allow_headers=["*"],
             allow_methods=["GET", "PUT"],
         )
+
+        # GET /api/ui/instructor/config?course={uuid}
+        instructor_all_materials.add_method(
+            "GET",
+            apigateway.LambdaIntegration(get_all_materials_lambda, timeout=Duration.seconds(120)),
+            request_parameters={
+                "method.request.querystring.course": True,
+                "method.request.header.Authorization": True,
+            },
+            method_responses=[
+                apigateway.MethodResponse(
+                    status_code="200",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                ),
+                apigateway.MethodResponse(
+                    status_code="400",
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Methods": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Credentials": True
+                    }
+                )
+            ]
+        )
+        instructor_all_materials.add_cors_preflight(
+            allow_origins=["*"],
+            allow_headers=["*"],
+            allow_methods=["GET"]
+        )
+
 
         # POST /api/ui/instructor/config/update-prompt
         update_system_prompt_resource.add_method(
