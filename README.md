@@ -70,7 +70,35 @@ TODO: Add diagram image here
 
 ### Repository Structure
 
-TODO: Need to come back to this after we clean up the code base some more. Once complete, we should note our logical concept about how the code was organized with a specific list afterwards of the directory with a summary next to each item.
+The repository is organized into the following main directories:
+
+- `.vscode/`: Contains Visual Studio Code configuration files.
+- `AceIT-ECE-Capstone/`: Root directory for the project.
+  - `.github/`: GitHub configuration files and workflows.
+    - `workflows/`: Contains GitHub Actions workflows for CI/CD.
+  - `docs/`: Documentation files.
+  - `frontend/`: Frontend codebase.
+    - `public/`: Public assets for the frontend.
+    - `src/`: Source code for the frontend.
+      - `assets/`: Static assets like images, fonts, etc.
+      - `components/`: Reusable React components.
+      - `hooks/`: Custom React hooks.
+      - `pages/`: Page components for different routes.
+      - `services/`: API service calls.
+      - `styles/`: CSS and styling files.
+      - `utils/`: Utility functions and helpers.
+  - `lambda/`: AWS Lambda functions.
+  - `layers/`: AWS Lambda layers.
+  - `priv_ace_it_ece_capstone_main/`: Private directory for main project files.
+  - `tests/`: Unit and integration tests for the project.
+- `app.py`: Entry point for the backend application.
+- `cdk.context.json`: AWS CDK context configuration.
+- `cdk.json`: AWS CDK project configuration.
+- `makefile`: Makefile for build automation.
+- `README.md`: Project documentation.
+- `requirements-dev.txt`: Development dependencies for the backend.
+- `requirements.txt`: Production dependencies for the backend.
+- `source.bat`: Batch script for setting up the environment.
 
 ---
 
