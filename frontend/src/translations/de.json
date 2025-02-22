@@ -47,5 +47,7 @@
   "sidebar.availableCourses": "Verfügbare Kurse",
   "sidebar.unavailableCourses": "Nicht Verfügbare Kurse",
   "sidebar.unavailableTooltip": "Wenn ein Kurs \"Nicht Verfügbar\" ist, bedeutet dies, dass die Kursleiter den KI-Assistenten nicht aktiviert haben.",
-  "testAssistant.contentNote": "Hinweis: Änderungen am \"Enthaltenen Kursinhalt\" auf der Konfigurationsseite können einige Minuten dauern, bis sie wirksam werden."
+  "testAssistant.contentNote": "Hinweis: Änderungen am \"Enthaltenen Kursinhalt\" auf der Konfigurationsseite können einige Minuten dauern, bis sie wirksam werden.",
+  "role.instructor": "Dozent",
+  "role.student": "Student"
 }

@@ -1,29 +1,36 @@
+import { IntlShape } from "react-intl";
 import { Timeframe } from "./types";
 
-export const timeframeToDisplay = (timeframe: Timeframe): string => {
+export const timeframeToDisplay = (
+  timeframe: Timeframe,
+  intl: IntlShape
+): string => {
   switch (timeframe) {
     case "WEEK":
-      return "This Week";
+      return intl.formatMessage({ id: "analytics.timeframe.week" });
     case "MONTH":
-      return "This Month";
+      return intl.formatMessage({ id: "analytics.timeframe.month" });
     case "TERM":
-      return "This Year";
+      return intl.formatMessage({ id: "analytics.timeframe.year" });
     default:
-      return "This Week";
+      return intl.formatMessage({ id: "analytics.timeframe.week" });
   }
 };
 
-export const displayToTimeframe = (display: string): Timeframe => {
-  switch (display) {
-    case "This Week":
-      return "WEEK";
-    case "This Month":
-      return "MONTH";
-    case "This Year":
-      return "TERM";
-    default:
-      return "WEEK";
+export const displayToTimeframe = (
+  display: string,
+  intl: IntlShape
+): Timeframe => {
+  if (display === intl.formatMessage({ id: "analytics.timeframe.week" })) {
+    return "WEEK";
   }
+  if (display === intl.formatMessage({ id: "analytics.timeframe.month" })) {
+    return "MONTH";
+  }
+  if (display === intl.formatMessage({ id: "analytics.timeframe.year" })) {
+    return "TERM";
+  }
+  return "WEEK";
 };
 
 export const areSetsEqual = (a: Set<string>, b: Set<string>) => {

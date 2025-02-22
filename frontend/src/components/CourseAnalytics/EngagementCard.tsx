@@ -73,7 +73,7 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2 text-sm font-semibold text-indigo-950"
           >
-            {timeframeToDisplay(timeframe)}
+            {timeframeToDisplay(timeframe, intl)}
             <img
               loading="lazy"
               src={BlueArrowIcon}
@@ -88,7 +88,7 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
                   key={display.value}
                   className="block w-full px-4 py-2 text-left hover:bg-slate-100"
                   onClick={() => {
-                    onPeriodChange(displayToTimeframe(display.value));
+                    onPeriodChange(displayToTimeframe(display.value, intl));
                     setIsDropdownOpen(false);
                   }}
                 >

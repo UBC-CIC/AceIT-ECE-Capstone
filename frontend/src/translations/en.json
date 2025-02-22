@@ -47,5 +47,7 @@
   "sidebar.availableCourses": "Available Courses",
   "sidebar.unavailableCourses": "Unavailable Courses",
   "sidebar.unavailableTooltip": "If a course is \"Unavailable\", it means that the course Instructors have not enabled the AI Assistant.",
-  "testAssistant.contentNote": "Note: Any changes to the \"Included Course Content\" made in the Configuration page for this course may take several minutes to apply."
+  "testAssistant.contentNote": "Note: Any changes to the \"Included Course Content\" made in the Configuration page for this course may take several minutes to apply.",
+  "role.instructor": "Instructor",
+  "role.student": "Student"
 }

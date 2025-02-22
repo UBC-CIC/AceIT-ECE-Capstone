@@ -47,5 +47,7 @@
   "sidebar.availableCourses": "可用课程",
   "sidebar.unavailableCourses": "不可用课程",
   "sidebar.unavailableTooltip": "如果课程\"不可用\"，表示该课程的教师尚未启用 AI 助手。",
-  "testAssistant.contentNote": "注意：在配置页面中对\"包含的课程内容\"所做的任何更改可能需要几分钟才能生效。"
+  "testAssistant.contentNote": "注意：在配置页面中对\"包含的课程内容\"所做的任何更改可能需要几分钟才能生效。",
+  "role.instructor": "教师",
+  "role.student": "学生"
 }

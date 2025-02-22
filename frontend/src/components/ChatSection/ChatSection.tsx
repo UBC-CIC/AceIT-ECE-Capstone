@@ -205,7 +205,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
                   <Message
                     {...message}
                     useDarkStyle={useDarkStyle}
-                    isFirstMessage={index === 0}
+                    isFirstMessage={index === messageList.length - 1}
                   />
                 </div>
               ))}

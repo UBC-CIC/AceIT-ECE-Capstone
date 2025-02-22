@@ -43,7 +43,7 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2"
           >
-            {timeframeToDisplay(timeframe)}
+            {timeframeToDisplay(timeframe, intl)}
             <img
               loading="lazy"
               src={WhiteArrowIcon}
@@ -58,7 +58,7 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
                   key={display.value}
                   className="block w-full px-4 py-2 text-left hover:bg-slate-100"
                   onClick={() => {
-                    onPeriodChange(displayToTimeframe(display.value));
+                    onPeriodChange(displayToTimeframe(display.value, intl));
                     setIsDropdownOpen(false);
                   }}
                 >

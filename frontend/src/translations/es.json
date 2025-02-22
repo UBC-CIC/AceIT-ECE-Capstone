@@ -47,5 +47,7 @@
   "sidebar.availableCourses": "Cursos Disponibles",
   "sidebar.unavailableCourses": "Cursos No Disponibles",
   "sidebar.unavailableTooltip": "Si un curso está \"No Disponible\", significa que los instructores del curso no han habilitado el Asistente de IA.",
-  "testAssistant.contentNote": "Nota: Cualquier cambio en el \"Contenido del Curso Incluido\" realizado en la página de Configuración puede tardar varios minutos en aplicarse."
+  "testAssistant.contentNote": "Nota: Cualquier cambio en el \"Contenido del Curso Incluido\" realizado en la página de Configuración puede tardar varios minutos en aplicarse.",
+  "role.instructor": "Instructor",
+  "role.student": "Estudiante"
 }
