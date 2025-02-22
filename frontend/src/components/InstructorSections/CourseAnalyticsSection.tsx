@@ -49,7 +49,7 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
     setLoading(true);
     const questions = await getTopQuestionsByPeriodAPI(
       selectedCourse.id,
-      5,
+      10,
       newTimeframe
     );
     setMostCommonQuestionsData({ questions });
@@ -61,7 +61,7 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
     setLoading(true);
     const materials = await getTopMaterialsByPeriodAPI(
       selectedCourse.id,
-      5,
+      10,
       newTimeframe
     );
     setMostReferencedMaterialsData({ materials });

@@ -442,3 +442,33 @@ export const getSuggestionsAPI = async (
     throw error;
   }
 };
+
+export const updateCourseContentAPI = async (
+  courseId: string
+): Promise<void> => {
+  if (!accessToken) throw new Error("Access token is not set");
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/llm/content/refresh`, {
+      method: "POST",
+      headers: {
+        Authorization: accessToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        course: courseId,
+      }),
+    });
+
+    handleUnauthorized(response);
+    if (!response.ok) {
+      throw new Error("Failed to update course content");
+    }
+  } catch (error) {
+    handleApiError(
+      error,
+      "Failed to refresh course content. Please try again."
+    );
+    throw error;
+  }
+};

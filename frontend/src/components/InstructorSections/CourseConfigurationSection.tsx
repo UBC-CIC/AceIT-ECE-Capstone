@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import {
   getCourseConfigurationAPI,
   updateCourseConfigurationAPI,
+  updateCourseContentAPI,
 } from "../../api";
 import { ThreeDots } from "react-loader-spinner";
 
@@ -52,6 +53,8 @@ export const CourseConfigurationSection: React.FC<
     });
   const [responseFormat, setResponseFormat] = React.useState("");
   const [isSaving, setIsSaving] = React.useState(false);
+  const [autoUpdateOn, setAutoUpdateOn] = React.useState(false);
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   React.useEffect(() => {
     const fetchConfig = async () => {
@@ -63,6 +66,7 @@ export const CourseConfigurationSection: React.FC<
         setSelectedContent(config.selectedIncludedCourseContent);
         setSelectedQuestions(config.selectedSupportedQuestions);
         setResponseFormat(config.customResponseFormat);
+        setAutoUpdateOn(config.autoUpdateOn);
       } catch (error) {
         console.error("Error fetching configuration:", error);
       } finally {
@@ -80,13 +84,15 @@ export const CourseConfigurationSection: React.FC<
       JSON.stringify(selectedContent) !==
         JSON.stringify(initialConfig.selectedIncludedCourseContent) ||
       JSON.stringify(selectedQuestions) !==
-        JSON.stringify(initialConfig.selectedSupportedQuestions)
+        JSON.stringify(initialConfig.selectedSupportedQuestions) ||
+      autoUpdateOn !== initialConfig.autoUpdateOn
     );
   }, [
     isEnabled,
     responseFormat,
     selectedContent,
     selectedQuestions,
+    autoUpdateOn,
     initialConfig,
   ]);
 
@@ -101,6 +107,7 @@ export const CourseConfigurationSection: React.FC<
         selectedIncludedCourseContent: selectedContent,
         selectedSupportedQuestions: selectedQuestions,
         customResponseFormat: responseFormat,
+        autoUpdateOn: autoUpdateOn,
       };
       await updateCourseConfigurationAPI(selectedCourse.id, newConfig);
       setInitialConfig(newConfig);
@@ -131,6 +138,19 @@ export const CourseConfigurationSection: React.FC<
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     setResponseFormat(e.target.value);
+  };
+
+  const handleUpdateContent = async () => {
+    setIsUpdating(true);
+    try {
+      await updateCourseContentAPI(selectedCourse.id);
+      toast.success("Course content updated successfully!");
+    } catch (error) {
+      console.error("Error updating course content:", error);
+      toast.error("Failed to update course content");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const courseContent: CourseContentItem[] = [
@@ -198,6 +218,48 @@ export const CourseConfigurationSection: React.FC<
         onToggle={() => setIsEnabled(!isEnabled)}
         disabled={isSaving}
       />
+
+      <div className="mx-0 my-8 h-0.5 bg-stone-200" />
+
+      <div className="mb-3 text-sm leading-normal text-slate-500">
+        <span className="font-semibold text-indigo-950">
+          <FormattedMessage id="configuration.refreshContent" />
+        </span>
+        <br />
+        <span>
+          <FormattedMessage id="configuration.refreshContentDescription" />
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-slate-500">
+            <FormattedMessage id="configuration.autoUpdate" />
+          </span>
+          <Toggle
+            isOn={autoUpdateOn}
+            onToggle={() => setAutoUpdateOn(!autoUpdateOn)}
+            disabled={isSaving}
+          />
+        </div>
+
+        <button
+          type="button"
+          onClick={handleUpdateContent}
+          disabled={isUpdating}
+          className={`px-6 py-3 text-sm font-bold text-white rounded-lg ${
+            isUpdating
+              ? "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
+              : "bg-indigo-950 hover:bg-indigo-900"
+          }`}
+        >
+          <FormattedMessage
+            id={
+              isUpdating ? "configuration.updating" : "configuration.updateNow"
+            }
+          />
+        </button>
+      </div>
 
       <div className="mx-0 my-8 h-0.5 bg-stone-200" />
 

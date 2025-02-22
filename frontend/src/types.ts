@@ -1,3 +1,6 @@
+// =============================================
+// Course Related Types
+// =============================================
 export interface CourseAPIModelProps {
   id: string;
   courseCode: string;
@@ -13,6 +16,9 @@ export interface CourseProps {
   isAvailable?: boolean;
 }
 
+// =============================================
+// User Related Types
+// =============================================
 export interface UserProps {
   userId: string;
   userName: string;
@@ -21,6 +27,9 @@ export interface UserProps {
 
 export type UserRole = "STUDENT" | "INSTRUCTOR";
 
+// =============================================
+// Message and Chat Types
+// =============================================
 export interface SuggestionProps {
   text: string;
 }
@@ -52,6 +61,9 @@ export interface ConversationMessage {
   student_id?: string;
 }
 
+// =============================================
+// Component Props
+// =============================================
 export interface HeaderProps {
   currentCourse: CourseProps | null;
   onLogout: () => void;
@@ -120,6 +132,9 @@ export interface CourseNavBarItemProps {
   onClick?: () => void;
 }
 
+// =============================================
+// Course Configuration Types
+// =============================================
 export type IncludedCourseContentType = keyof IncludedCourseContent;
 export type SupportedQuestionsType = keyof SupportedQuestions;
 
@@ -165,8 +180,12 @@ export interface CourseConfiguration {
   customResponseFormat: string;
   systemPrompt?: string;
   materialLastUpdatedTime?: string;
+  autoUpdateOn: boolean;
 }
 
+// =============================================
+// Analytics Types
+// =============================================
 export interface ToggleProps {
   isOn: boolean;
   onToggle: () => void;
@@ -208,9 +227,9 @@ export interface EngagementCardProps {
   loading: boolean;
 }
 
-// Expected API Response Data Formats
-// TODO: Expand this section to cover each of the APIs based on the known spec and align to mocked data
-
+// =============================================
+// API Response Types
+// =============================================
 export interface CourseStudentEngagement {
   questionsAsked: number;
   studentSessions: number;
@@ -236,6 +255,9 @@ export interface ConversationSession {
   summary: string;
 }
 
+// =============================================
+// Language and Localization Types
+// =============================================
 export interface LanguageOption {
   code: string;
   displayName: string;
