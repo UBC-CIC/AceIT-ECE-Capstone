@@ -63,7 +63,7 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
       {isOpen && (
         <div
           className="p-4"
-          style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}
         >
           {isLoading ? (
             <div className="flex justify-center p-4">

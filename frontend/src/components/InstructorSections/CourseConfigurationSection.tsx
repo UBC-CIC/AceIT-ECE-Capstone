@@ -235,18 +235,16 @@ export const CourseConfigurationSection: React.FC<
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-slate-500 my-auto">
               <FormattedMessage id="configuration.autoUpdate" />
             </span>
-            <div className="flex items-center">
-              <Toggle
-                isOn={autoUpdateOn}
-                onToggle={() => setAutoUpdateOn(!autoUpdateOn)}
-                disabled={isSaving}
-              />
-            </div>
+            <Toggle
+              isOn={autoUpdateOn}
+              onToggle={() => setAutoUpdateOn(!autoUpdateOn)}
+              disabled={isSaving}
+            />
           </div>
-          <div className="h-6 w-px bg-stone-200 mx-4" />
+          <div className="h-6 bg-indigo-950 mx-4" style={{ width: "2px" }} />
           <button
             type="button"
             onClick={handleUpdateContent}
