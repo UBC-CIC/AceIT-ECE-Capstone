@@ -32,15 +32,15 @@ def lambda_handler(event, context):
         }
 
     refreshed_courses = []
+    secret = utils.get_canvas_secret.get_secret()
+    credentials = json.loads(secret)
+    BASE_URL = credentials['baseURL']
+    TOKEN = credentials['adminAccessToken']
 
     # Invoke refreshCourse for each course
     for course in courses:
         # fetch course config and check if auto update is on
         if course["workflow_state"] == "available":
-            secret = utils.get_canvas_secret.get_secret()
-            credentials = json.loads(secret)
-            BASE_URL = credentials['baseURL']
-            TOKEN = credentials['adminAccessToken']
             course_config = call_get_course_config(TOKEN, course["id"])
             print("course config: ", course_config)
             auto_update_on = course_config.get("autoUpdateOn", False)
