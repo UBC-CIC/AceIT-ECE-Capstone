@@ -33,7 +33,7 @@ def lambda_handler(event, context):
 
     # 1. query database get the config
     # 2. for each selected type get the documents in it
-    course_config = utils.retrieve_course_config(course_id)
+    # course_config = utils.retrieve_course_config(course_id)
     files = get_files(course_id)
 
     if files is None:

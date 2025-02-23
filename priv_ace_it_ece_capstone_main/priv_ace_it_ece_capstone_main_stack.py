@@ -79,6 +79,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         }
         canvas_secret_template = {
             "adminAccessToken": "CXekV2e68mxaNx2vB2kWDhAwQ4vXHY63QFXDe6KyePrG7kQMZEaMQ3PxKkrFWfr6",
+            "adminAccountID": "1",
             "baseURL": "https://15.157.251.49",
             "ltiKeyId": "10000000000006",
             "ltiKey": "C6nfwBv8tP4tPTVk4VKnk42cnwr4CrMUnu3zkttBU6JRWwDL3PWVTGMxMWL26vTc",
@@ -585,7 +586,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="refreshAllCourses.lambda_handler",
-            layers=[boto3_layer, psycopg_layer, requests_layer],
+            layers=[boto3_layer, psycopg_layer, requests_layer, jwt_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(

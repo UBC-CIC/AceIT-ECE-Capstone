@@ -72,18 +72,12 @@ def get_access_token(jwt):
     url = f"{BASE_URL}/login/oauth2/token"
 
     data = {
-            "client_id": f"{CLIENT_ID}",
-            "client_secret": f"{CLIENT_SECRET}",
+            "client_id": CLIENT_ID,
+            "client_secret": CLIENT_SECRET,
             "grant_type": "authorization_code",
-            "redirect_uri": f"{REDIRECT_URI}",
-            "code": f"{jwt}",
-            "scope": " ".join([
-                                "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
-                                "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-                                "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
-                                "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-                                "https://canvas.instructure.com/auth/courses.readonly"
-                            ])
+            "redirect_uri": REDIRECT_URI,
+            "code": jwt,
+            "scope": "https://canvas.instructure.com/auth/courses.readonly"
             }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
