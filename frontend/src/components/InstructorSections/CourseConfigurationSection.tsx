@@ -234,17 +234,19 @@ export const CourseConfigurationSection: React.FC<
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-500 flex items-center">
-            <FormattedMessage id="configuration.autoUpdate" />
-          </span>
-          <Toggle
-            isOn={autoUpdateOn}
-            onToggle={() => setAutoUpdateOn(!autoUpdateOn)}
-            disabled={isSaving}
-          />
-        </div>
-
-        <div className="flex justify-start">
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-slate-500">
+              <FormattedMessage id="configuration.autoUpdate" />
+            </span>
+            <div className="flex items-center">
+              <Toggle
+                isOn={autoUpdateOn}
+                onToggle={() => setAutoUpdateOn(!autoUpdateOn)}
+                disabled={isSaving}
+              />
+            </div>
+          </div>
+          <div className="h-6 w-px bg-stone-200 mx-4" />
           <button
             type="button"
             onClick={handleUpdateContent}
@@ -283,7 +285,7 @@ export const CourseConfigurationSection: React.FC<
           </span>
         </div>
 
-        <div className="flex flex-col gap-3 mt-3 max-sm:gap-2">
+        <div className="flex flex-col gap-3 mt-3 mb-4 max-sm:gap-2">
           {courseContent.map((item) => (
             <CheckboxItem
               key={item.type}

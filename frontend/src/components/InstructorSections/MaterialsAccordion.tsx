@@ -35,7 +35,7 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
   };
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border-2 border-white rounded-lg overflow-hidden">
       <button
         onClick={handleToggle}
         className="w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 flex justify-between items-center"
@@ -61,7 +61,10 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
       </button>
 
       {isOpen && (
-        <div className="p-4">
+        <div
+          className="p-4"
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
+        >
           {isLoading ? (
             <div className="flex justify-center p-4">
               <ThreeDots
@@ -75,7 +78,7 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
           ) : (
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {materials.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center">
+                <p className="text-sm text-indigo-950 text-center">
                   <FormattedMessage id="configuration.noMaterialsFound" />
                 </p>
               ) : (
@@ -88,12 +91,12 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
                       href={material.source_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline flex-grow cursor-pointer truncate mr-2"
+                      className="text-sm text-indigo-950 hover:underline flex-grow cursor-pointer truncate mr-2"
                     >
                       {material.document_name}
                     </a>
                     <svg
-                      className="w-4 h-4 text-gray-400 flex-shrink-0"
+                      className="w-4 h-4 text-indigo-950 flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
