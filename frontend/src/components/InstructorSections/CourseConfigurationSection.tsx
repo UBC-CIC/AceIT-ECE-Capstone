@@ -234,22 +234,24 @@ export const CourseConfigurationSection: React.FC<
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-slate-500 my-auto">
+          <div className="flex items-center">
+            <span className="text-sm text-slate-500">
               <FormattedMessage id="configuration.autoUpdate" />
             </span>
+          </div>
+          <div className="flex items-center -mt-3">
             <Toggle
               isOn={autoUpdateOn}
               onToggle={() => setAutoUpdateOn(!autoUpdateOn)}
               disabled={isSaving}
             />
           </div>
-          <div className="h-6 bg-indigo-950 mx-4" style={{ width: "2px" }} />
+          <div className="h-8 bg-indigo-950 mx-4" style={{ width: "2px" }} />
           <button
             type="button"
             onClick={handleUpdateContent}
             disabled={isUpdating}
-            className={`px-6 py-3 text-sm font-bold text-white rounded-lg cursor-pointer ${
+            className={`px-6 py-2 text-sm font-bold text-white rounded-lg cursor-pointer ${
               !isUpdating
                 ? "bg-indigo-950 hover:bg-indigo-900"
                 : "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
