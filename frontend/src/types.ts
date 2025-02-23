@@ -293,8 +293,8 @@ export interface LanguagePopupProps {
 // Course Material Types
 // =============================================
 export interface CourseMaterial {
-  name: string;
-  link: string;
+  document_name: string;
+  source_url: string;
 }
 
 export interface MaterialsAccordionProps {

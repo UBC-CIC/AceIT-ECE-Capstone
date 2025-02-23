@@ -234,7 +234,7 @@ export const CourseConfigurationSection: React.FC<
 
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <span className="text-sm text-slate-500">
+          <span className="text-sm text-slate-500 flex items-center">
             <FormattedMessage id="configuration.autoUpdate" />
           </span>
           <Toggle
@@ -244,9 +244,7 @@ export const CourseConfigurationSection: React.FC<
           />
         </div>
 
-        <MaterialsAccordion courseId={selectedCourse.id} />
-
-        <div className="flex justify-end">
+        <div className="flex justify-start">
           <button
             type="button"
             onClick={handleUpdateContent}
@@ -295,6 +293,8 @@ export const CourseConfigurationSection: React.FC<
             />
           ))}
         </div>
+
+        <MaterialsAccordion courseId={selectedCourse.id} />
       </div>
 
       <div className="mx-0 my-8 h-0.5 bg-stone-200" />
