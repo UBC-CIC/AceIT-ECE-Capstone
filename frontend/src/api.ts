@@ -8,6 +8,7 @@ import {
   CourseStudentEngagement,
   Timeframe,
   MaterialType,
+  CourseMaterial,
 } from "./types";
 import { getCachedData, setCachedData } from "./utils/cache";
 import { RequestManager, debounce } from "./utils/request";
@@ -468,6 +469,34 @@ export const updateCourseContentAPI = async (
     handleApiError(
       error,
       "Failed to refresh course content. Please try again."
+    );
+    throw error;
+  }
+};
+
+export const getAllCourseMaterialsAPI = async (
+  course: string
+): Promise<CourseMaterial[]> => {
+  if (!accessToken) throw new Error("Access token is not set");
+
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/ui/instructor/all-materials?course=${course}`,
+      {
+        headers: {
+          Authorization: accessToken,
+        },
+      }
+    );
+    handleUnauthorized(response);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  } catch (error) {
+    handleApiError(
+      error,
+      "Failed to fetch course materials. Please try again."
     );
     throw error;
   }

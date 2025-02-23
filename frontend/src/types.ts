@@ -288,3 +288,15 @@ export interface LanguagePopupProps {
   onConfirm: () => void;
   hasLanguageChanged: boolean;
 }
+
+// =============================================
+// Course Material Types
+// =============================================
+export interface CourseMaterial {
+  name: string;
+  link: string;
+}
+
+export interface MaterialsAccordionProps {
+  courseId: string;
+}

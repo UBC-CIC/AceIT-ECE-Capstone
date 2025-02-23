@@ -47,6 +47,8 @@
   "configuration.autoUpdate": "启用自动更新",
   "configuration.updateNow": "立即更新内容",
   "configuration.updating": "正在更新...",
+  "configuration.viewIncludedMaterials": "查看当前包含的材料",
+  "configuration.noMaterialsFound": "知识库中目前没有包含任何材料",
   "analytics.mostCommonQuestions": "最常见问题",
   "analytics.mostReferencedMaterials": "最常引用材料",
   "sidebar.availableCourses": "可用课程",

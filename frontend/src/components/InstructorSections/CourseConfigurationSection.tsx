@@ -19,6 +19,7 @@ import {
   updateCourseContentAPI,
 } from "../../api";
 import { ThreeDots } from "react-loader-spinner";
+import { MaterialsAccordion } from "./MaterialsAccordion";
 
 type CourseConfigurationSectionProps = {
   selectedCourse: CourseProps;
@@ -232,7 +233,7 @@ export const CourseConfigurationSection: React.FC<
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
           <span className="text-sm text-slate-500">
             <FormattedMessage id="configuration.autoUpdate" />
           </span>
@@ -243,15 +244,17 @@ export const CourseConfigurationSection: React.FC<
           />
         </div>
 
+        <MaterialsAccordion courseId={selectedCourse.id} />
+
         <button
           type="button"
           onClick={handleUpdateContent}
           disabled={isUpdating}
-          className={`px-6 py-3 text-sm font-bold text-white rounded-lg ${
-            isUpdating
-              ? "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
-              : "bg-indigo-950 hover:bg-indigo-900"
-          }`}
+          className={`px-6 py-3 text-sm font-bold text-white rounded-lg cursor-pointer ${
+            !isUpdating
+              ? "bg-indigo-950 hover:bg-indigo-900"
+              : "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
+          } border-[none] max-sm:w-full`}
         >
           <FormattedMessage
             id={

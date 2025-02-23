@@ -47,6 +47,8 @@
   "configuration.autoUpdate": "Включить автоматическое обновление",
   "configuration.updateNow": "Обновить Сейчас",
   "configuration.updating": "Обновление...",
+  "configuration.viewIncludedMaterials": "Просмотр Включенных Материалов",
+  "configuration.noMaterialsFound": "В базе знаний пока нет материалов",
   "analytics.mostCommonQuestions": "Самые Частые Вопросы",
   "analytics.mostReferencedMaterials": "Наиболее Используемые Материалы",
   "sidebar.availableCourses": "Доступные Курсы",

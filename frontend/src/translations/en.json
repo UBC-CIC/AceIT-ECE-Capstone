@@ -47,6 +47,8 @@
   "configuration.autoUpdate": "Enable automatic updates",
   "configuration.updateNow": "Update Content Now",
   "configuration.updating": "Updating...",
+  "configuration.viewIncludedMaterials": "View Currently Included Materials",
+  "configuration.noMaterialsFound": "No materials currently included in the knowledge base",
   "analytics.mostCommonQuestions": "Most Common Questions",
   "analytics.mostReferencedMaterials": "Most Referenced Materials",
   "sidebar.availableCourses": "Available Courses",
