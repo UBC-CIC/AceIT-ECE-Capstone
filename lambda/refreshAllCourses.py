@@ -36,13 +36,18 @@ def lambda_handler(event, context):
     # Invoke refreshCourse for each course
     for course in courses:
         # fetch course config and check if auto update is on
-        course_config = retrieve_course_config(course)
-        print("course config: ", course_config)
-        auto_update_on = course_config.get("autoUpdateOn", False)
-        if course["workflow_state"] == "available" and auto_update_on:
-            invoke_refresh_course(course["id"])
-            print(course["id"])
-            refreshed_courses.append(course["id"])
+        if course["workflow_state"] == "available":
+            secret = utils.get_canvas_secret.get_secret()
+            credentials = json.loads(secret)
+            BASE_URL = credentials['baseURL']
+            TOKEN = credentials['adminAccessToken']
+            course_config = call_get_course_config(TOKEN, course["id"])
+            print("course config: ", course_config)
+            auto_update_on = course_config.get("autoUpdateOn", False)
+            if (auto_update_on):
+                invoke_refresh_course(course["id"])
+                print(course["id"])
+                refreshed_courses.append(course["id"])
 
     response_message = f"Courses: {', '.join(map(str, refreshed_courses))} have been refreshed."
 
@@ -168,3 +173,31 @@ def invoke_refresh_course(course_id):
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
         return
+
+def call_get_course_config(auth_token, course_id):
+    """
+    Calls getcourseconfig.
+    """
+    payload = {
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": auth_token,
+        },
+        "queryStringParameters": {
+            "course": course_id
+        },
+    }
+    try:
+        response = lambda_client.invoke(
+            FunctionName="GetCourseConfigLambda",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        body_dict = json.loads(response_payload["body"])
+        print("Body: ", body_dict, "Type: ", type(body_dict))
+        return body_dict
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
