@@ -73,25 +73,38 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
               />
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {materials.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center">
+                <p className="text-base text-gray-500 text-center">
                   <FormattedMessage id="configuration.noMaterialsFound" />
                 </p>
               ) : (
                 materials.map((material, index) => (
                   <div
                     key={index}
-                    className="text-sm p-2 hover:bg-gray-50 rounded"
+                    className="flex items-center p-3 bg-white rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors duration-200"
                   >
                     <a
                       href={material.link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-indigo-600 hover:text-indigo-800"
+                      className="text-base text-indigo-600 hover:text-indigo-800 hover:underline flex-grow cursor-pointer"
                     >
                       {material.name}
                     </a>
+                    <svg
+                      className="w-5 h-5 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                      />
+                    </svg>
                   </div>
                 ))
               )}

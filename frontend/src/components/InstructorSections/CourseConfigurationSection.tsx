@@ -246,22 +246,26 @@ export const CourseConfigurationSection: React.FC<
 
         <MaterialsAccordion courseId={selectedCourse.id} />
 
-        <button
-          type="button"
-          onClick={handleUpdateContent}
-          disabled={isUpdating}
-          className={`px-6 py-3 text-sm font-bold text-white rounded-lg cursor-pointer ${
-            !isUpdating
-              ? "bg-indigo-950 hover:bg-indigo-900"
-              : "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
-          } border-[none] max-sm:w-full`}
-        >
-          <FormattedMessage
-            id={
-              isUpdating ? "configuration.updating" : "configuration.updateNow"
-            }
-          />
-        </button>
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={handleUpdateContent}
+            disabled={isUpdating}
+            className={`px-6 py-3 text-sm font-bold text-white rounded-lg cursor-pointer ${
+              !isUpdating
+                ? "bg-indigo-950 hover:bg-indigo-900"
+                : "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
+            } border-[none] w-fit`}
+          >
+            <FormattedMessage
+              id={
+                isUpdating
+                  ? "configuration.updating"
+                  : "configuration.updateNow"
+              }
+            />
+          </button>
+        </div>
       </div>
 
       <div className="mx-0 my-8 h-0.5 bg-stone-200" />
