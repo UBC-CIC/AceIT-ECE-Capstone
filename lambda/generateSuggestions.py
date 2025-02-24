@@ -3,6 +3,7 @@ import boto3
 import re
 from utils.get_user_info import get_user_info
 from utils.get_course_related_stuff import call_course_activity_stream
+from utils.retrieve_course_config import call_get_course_config
 
 lambda_client = boto3.client('lambda')
 translate_client = boto3.client("translate", region_name="us-west-2")
@@ -65,7 +66,7 @@ def lambda_handler(event, context):
         
         student_language_pref = user_info.get("preferred_language","")
 
-        response = call_get_course_config(auth_token, course_id)
+        response = call_get_course_config(auth_token, course_id, lambda_client)
         course_config_prompt = response.get("systemPrompt", {})
         # print("Course config prompt: ", course_config_prompt)
         recentCourseRelated_stuff = call_course_activity_stream(auth_token, course_id)
@@ -140,48 +141,6 @@ def generate_suggestions(course_config_str, num_suggestions, course_related_stuf
         print(f"Error invoking Lambda function: {e}")
         return None
 
-
-def call_get_course_config(auth_token, course_id):
-    """
-    Calls getcourseconfig.
-    """
-    payload = {
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": auth_token,
-        },
-        "queryStringParameters": {
-            "course": course_id
-        },
-    }
-    try:
-        response = lambda_client.invoke(
-            FunctionName="GetCourseConfigLambda",  # Replace with actual function name
-            InvocationType="RequestResponse",  # Use 'Event' for async calls
-            Payload=json.dumps(payload)
-        )
-        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
-        print("response_payload: ", response_payload)
-        body_dict = json.loads(response_payload["body"])
-        print("Body: ", body_dict, "Type: ", type(body_dict))
-        return body_dict
-    except Exception as e:
-        print(f"Error invoking Lambda function: {e}")
-        return None
-
-
-def translate_text(text, target_language):
-    """Translates text to the student's preferred language using Amazon Translate."""
-    try:
-        response = translate_client.translate_text(
-            Text=text,
-            SourceLanguageCode="auto",  # Auto-detect source language
-            TargetLanguageCode=target_language
-        )
-        return response["TranslatedText"]
-    except Exception as e:
-        print(f"Error translating text: {e}")
-        return text  # Return original text if translation fails
 
 def flatten_list(nested_list):
     return [item for sublist in nested_list for item in (sublist if isinstance(sublist, list) else [sublist])]

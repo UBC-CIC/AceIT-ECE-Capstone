@@ -5,6 +5,7 @@ from psycopg2.extras import Json
 import re
 from utils.get_rds_secret import get_secret
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from utils.translation import translate_text
 
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', 'us-west-2') 
@@ -68,7 +69,7 @@ def lambda_handler(event, context):
         llm_response = call_llm(final_input)
         # Translate the response if needed
         if student_language_pref and student_language_pref != "":
-            translated_response = translate_text(llm_response, student_language_pref)
+            translated_response = translate_text(llm_response, student_language_pref, translate_client)
 
             llm_response = translated_response
 
@@ -215,16 +216,3 @@ def call_llm(input_text):
         print(f"Error generating answer: {e}")
         return "Sorry, there was an error generating an answer."
     
-
-def translate_text(text, target_language):
-    """Translates text to the student's preferred language using Amazon Translate."""
-    try:
-        response = translate_client.translate_text(
-            Text=text,
-            SourceLanguageCode="auto",  # Auto-detect source language
-            TargetLanguageCode=target_language
-        )
-        return response["TranslatedText"]
-    except Exception as e:
-        print(f"Error translating text: {e}")
-        return text  # Return original text if translation fails

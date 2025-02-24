@@ -4,6 +4,8 @@ import uuid
 import datetime
 from utils.get_user_info import get_user_info
 from utils.get_course_related_stuff import call_course_activity_stream
+from utils.retrieve_course_config import call_get_course_config
+from utils.translation import translate_document_names
 
 lambda_client = boto3.client('lambda')
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -110,7 +112,7 @@ def lambda_handler(event, context):
             # generate a system prompt, add to msg
             message_id = str(uuid.uuid4())
             timestamp = datetime.datetime.utcnow().isoformat()
-            response = call_get_course_config(auth_token, course_id)
+            response = call_get_course_config(auth_token, course_id, lambda_client)
             course_config_prompt = response.get("systemPrompt", {})
             # print("Course config prompt: ", course_config_prompt)
             recentCourseRelated_stuff = call_course_activity_stream(auth_token, course_id)
@@ -134,7 +136,7 @@ def lambda_handler(event, context):
             welcome_message_id = str(uuid.uuid4())
             welcome_response_content = welcome_response.get('response')
             welcome_response_sources = welcome_response.get("sources")
-            translated_documents = translate_document_names(welcome_response_sources, student_language_pref)
+            translated_documents = translate_document_names(welcome_response_sources, student_language_pref, translate_client)
             ai_message = {
                 "course_id": str(course_id),
                 "message_id": welcome_message_id,
@@ -200,7 +202,7 @@ def lambda_handler(event, context):
             ai_response_dict = generate_ai_response(message_content, past_conversation, course_id, student_language_pref)
             ai_response_content = ai_response_dict.get('response')
             ai_response_sources = ai_response_dict.get("sources")
-            translated_documents = translate_document_names(ai_response_sources, student_language_pref)
+            translated_documents = translate_document_names(ai_response_sources, student_language_pref, translate_client)
             ai_message = {
                 "course_id": course_id,
                 "message_id": ai_message_id,
@@ -353,36 +355,6 @@ def generate_welcome_message(course_config_str, name, course_related_stuff, cour
         print(f"Error invoking Lambda function: {e}")
         return None
 
-
-def call_get_course_config(auth_token, course_id):
-    """
-    Calls getcourseconfig.
-    """
-    payload = {
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": auth_token,
-        },
-        "queryStringParameters": {
-            "course": course_id
-        },
-    }
-    try:
-        response = lambda_client.invoke(
-            FunctionName="GetCourseConfigLambda",  # Replace with actual function name
-            InvocationType="RequestResponse",  # Use 'Event' for async calls
-            Payload=json.dumps(payload)
-        )
-        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
-        print("response_payload: ", response_payload)
-        body_dict = json.loads(response_payload["body"])
-        print("Body: ", body_dict, "Type: ", type(body_dict))
-        return body_dict
-    except Exception as e:
-        print(f"Error invoking Lambda function: {e}")
-        return None
-    
-
 def call_generate_llm_prompt(conversation_id, course_id):
     """
     Mocked AI response generation logic.
@@ -406,32 +378,3 @@ def call_generate_llm_prompt(conversation_id, course_id):
         print(f"Error invoking Lambda function: {e}")
         return None
     
-
-def translate_document_names(documents, target_language):
-    """
-    Translates only the document names while keeping other fields unchanged.
-    """
-    translated_docs = []
-
-    for doc in documents:
-        translated_name = translate_text(doc["documentName"], target_language)
-        translated_docs.append({
-            "documentName": translated_name,  # Translated name
-            "sourceUrl": doc["sourceUrl"],  # Unchanged
-            "documentContent": doc["documentContent"]  # Unchanged
-        })
-
-    return translated_docs
-
-def translate_text(text, target_language):
-    """Translates text to the student's preferred language using Amazon Translate."""
-    try:
-        response = translate_client.translate_text(
-            Text=text,
-            SourceLanguageCode="auto",  # Auto-detect source language
-            TargetLanguageCode=target_language
-        )
-        return response["TranslatedText"]
-    except Exception as e:
-        print(f"Error translating text: {e}")
-        return text  # Return original text if translation fails

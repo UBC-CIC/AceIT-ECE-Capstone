@@ -24,6 +24,34 @@ def get_db_connection():
         DB_CONNECTION = psycopg2.connect(**DB_CONFIG)
     return DB_CONNECTION
 
+def call_get_course_config(auth_token, course_id, lambda_client):
+    """
+    Calls getcourseconfig.
+    """
+    payload = {
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": auth_token,
+        },
+        "queryStringParameters": {
+            "course": course_id
+        },
+    }
+    try:
+        response = lambda_client.invoke(
+            FunctionName="GetCourseConfigLambda",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        body_dict = json.loads(response_payload["body"])
+        print("Body: ", body_dict, "Type: ", type(body_dict))
+        return body_dict
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
+
 def retrieve_course_config(course_id):
     try:
         # Connect to the PostgreSQL database
