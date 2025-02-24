@@ -100,42 +100,37 @@ def lambda_handler(event, context):
     del_response = delete_vectors_by_course(DB_CONFIG, course_id)
     print("Delete vector response: ", del_response)
 
-    url = f"https://i6t0c7ypi6.execute-api.us-west-2.amazonaws.com/prod/api/llm/content/canvas?course={course_id}"
-    response = requests.get(url)
-    print(response.json())  # Log the response if needed
-    
-    # # Check if the response was successful (status code 200)
-    if response.status_code == 200:
-        # Log the response JSON
-        print(f"Response from API: {response.json()}")  # This will print the parsed JSON response
-        
-        # Assuming the 'Payload' is part of the JSON response, you would access it like this:
-        payload_data = response.json()  # Automatically parses the JSON from the response body
-        
-        print(f"Parsed payload: {payload_data}")
+    response = call_fetch_read_from_s3(course_id)
+    print("lambda response: ", response)  # Log the response if needed
+    print("lambda response: ", type(response))
+
+    # Check if the status is OK
+    if response.get("statusCode") == 200:
+        # Update the last_updated time
+        update_course_last_update_time(course_id, DB_CONFIG)
+        print("Status is OK")
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
+            },
+            'body': json.dumps({"message": f"Refreshed content for course {course_id}"})
+        }
     else:
-        print(f"Error: Received status code {response.status_code} from the API.")
-
-    # # clear documents in s3
-    # bucket_objects = s3_client.list_objects_v2(Bucket=bucket_name)
-    # if "Contents" in bucket_objects:
-    #     for obj in bucket_objects["Contents"]:
-    #         s3_client.delete_objects(Bucket=bucket_name, Key=obj["Key"])
-    
-    # Update the last_updated time
-    update_course_last_update_time(course_id, DB_CONFIG)
-
-
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        'body': json.dumps({"message": f"Refreshed content for course {course_id}"})
-    }
+        print("Status is NOT OK")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                'Access-Control-Allow-Methods': '*',
+                'Access-Control-Allow-Credentials': 'true'
+            },
+            'body': json.dumps({"message": f"Content for course {course_id} is not refreshed!"})
+        }
 
 def get_files(course_id):
     """
@@ -221,3 +216,28 @@ def invoke_fetch_from_s3(course_id):
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
         return
+    
+def call_fetch_read_from_s3(course_id):
+    """
+    Calls getcourseconfig.
+    """
+    payload = {
+        "queryStringParameters": {
+            "course": course_id
+        }
+    }
+    try:
+        response = lambda_client.invoke(
+            FunctionName="FetchReadFromS3Function",  # Replace with actual function name
+            InvocationType="RequestResponse",  # Use 'Event' for async calls
+            Payload=json.dumps(payload)
+        )
+        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
+        print("response_payload: ", response_payload)
+        # body_dict = json.loads(response_payload["body"])
+        # print("Body: ", body_dict, "Type: ", type(body_dict))
+        # Create a LambdaResponse object with status_code and body
+        return response_payload
+    except Exception as e:
+        print(f"Error invoking Lambda function: {e}")
+        return None
