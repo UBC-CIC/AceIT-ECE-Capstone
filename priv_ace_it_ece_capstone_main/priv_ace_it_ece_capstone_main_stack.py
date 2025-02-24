@@ -77,21 +77,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
             "username": "rdsdbadmin",  # Placeholder for the username
             "password": ""   # Placeholder for the password to be generated
         }
-        canvas_secret_template = {
-            "adminAccessToken": "CXekV2e68mxaNx2vB2kWDhAwQ4vXHY63QFXDe6KyePrG7kQMZEaMQ3PxKkrFWfr6",
-            "adminAccountID": "1",
-            "baseURL": "https://15.157.251.49",
-            "ltiKeyId": "10000000000006",
-            "ltiKey": "C6nfwBv8tP4tPTVk4VKnk42cnwr4CrMUnu3zkttBU6JRWwDL3PWVTGMxMWL26vTc",
-            "redirectURI": "https://d2rs0jk5lfd7j4.cloudfront.net/auth-response",
-            # "localLtiKeyId": "10000000000001",
-            # "localLtiKey": "CE2T7Pff7nuLrwByQxBcyQZGUAN7WhkJAcTHxNEJM8zAAGVcFv87wMcJY9ZtButX",
-            # "localRedirectURI": "http://localhost:5173/auth-response"
-            "serverKeyId": "10000000000007",
-            "serverKey": "uDEQPEV2az6kaTL7rL3mDMFPtm7Ncmr9rvxmUha46v7VEXZBRPN7c38B4LUWZmzJ",
-            "kid": "5W4eOMF-1ORx4aF2utnC3XMHNywQyV6kLoAgxe9hgF4",
-            "jwkPrivateKey": "-----BEGIN PRIVATE KEY-----MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCYVCKsocevxOUI2D41G2+aTdRdPmLfXdlJYlLjjgJ0ExL2xRJU/u9KzMyTSV3y+MJLinVJf+5Q1hQmO7OcVvPwvip+8Yc4ThYcEOU1lXDTG0LRAtBxJW4UuH6wo22li15lq70EO+ppg5Y3jnzmsDzNBilfAtzW6pXiykddr0qJWKUsx73jqIAeZ0LgZAiX0bpwi2SayKISzD5tiuq9fQdz2Sej+d5vVR0r73Yb2HneaAJ1FZtQVPUpkcYnH+GInc/fYM3AVmH3aP88HWd/8Jyt5K6Ya0iVx7m0eYXAlyaiZ3TKo83/41dlvHCxJebXouwevY25S56NsbKBhBlY6IMhAgMBAAECggEAFg+tW+osRPETqKXE0KUyExttg7ma0TXC1+V1Er7I7S2sA/BDuOqZFnC1uikYga10WkNpvCTai3uNvIHN//j56GZqOitZxZZNjnAF+i40AmcC1Ml/Dbv5hue3dXad1SlrmPb374qL5w8nLNGmljR1Ac6AJGICQOAFqCxajJ9sAJsMT51dIPsJCG7VWFilkI1rHbcTmrKQNIIlvz2oPLTfSKFd+krR6xihEWGDZ8UC57DFXDd0U8MlY4IWvz55nWy7YlYmFjzIQZ75LKyZjzhF+efbHalZ+AoI7RsIi4m26yTrYAZ1VEHNTpByLjtsb8IvKEMwi8Ovapbm/+S14wVKqQKBgQDI7czbGE2uTPBHBjvkfMvxdje9hIsY3EdgNA0XtIIaJs6KDxIb76iGeyQpxz9/ixogkiZl3usttAJPJClQFqS0WKANhwDQF2H3AiMh9hJM3BErK36/MSjF2PMIOyps587b6aPsJJ15Co7hlEVe/kwfYH0Y756u7fkKvzzEKI6vtQKBgQDCFEr8FZbigD5j3Oh6Ko8C8xD1AAnOqaMp5WkSBGfTHI5eUNI7Fy9vuuEYzqjKuo9TzQnecMsn2eiSZGRHTaITXZtlvNZb4XpM5FXxA8VG5pXXq6Wm7gbxLv1gasGiCcntcxTpFD8mpLV9IalleAk+2PifblSPHMsFP2TOGIsxPQKBgCcvYS01Tyj37kAbsiB8ShW8FWDLcYkWpIDZhdgipuDMwqjgCYsTMQ2RBFt1dSe9jAngFsb1M25FVdHzXm81C0f0pLoeowTyGnPeodVktOryXBLMN7q3rpjvF256g2qbxpbSuNo7xc4uRfEuRl0hQN05pwvu50Z8OH5lD0e+FR2lAoGADyEv20j/kza2JmjRQrzQm0VBnCfdm9vDmX+F2l63jVCblKSuTub2zrn91EZACFXU2I6SZ2HZpIirRcZHvvtBWEsi0yKOf2krdJUUUg6eMXHGWqLJ7iJ+Lg0guYR5Bd3HfRhMmAL5DVUnxNJ79yoNZnXZo+wg8WsoNIeFnz9wkm0CgYEApzDz1lnG/pO3C3MzDDL6kGhIlSAutoqe1KEMsZlI4nztYbKaj4lvqyiFYepngMdr5VtImEJF4er3UrjFtHTh5eBJxKJWb1/o0RQtfCYFXi5I9IKr90aAcddG6E3MvAbL72cXjYS2vumHHMYnHyFbIVG/7hSm2h0Ptf1CQwXOzns=-----END PRIVATE KEY-----"
-        }
 
         # Create the secret in Secrets Manager for DB credentials
         db_secret = secretsmanager.Secret(
@@ -104,13 +89,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 exclude_punctuation=True,  # Optionally exclude punctuation from the generated password
                 password_length=16  # Length of the generated password
             )
-        )
-
-        canvas_secret = secretsmanager.Secret(
-            self, 
-            "CanvasSecret",
-            secret_name="canvasSecret",
-            secret_string_value=SecretValue.unsafe_plain_text(json.dumps(canvas_secret_template))
         )
 
         my_rds = rds.DatabaseInstance(

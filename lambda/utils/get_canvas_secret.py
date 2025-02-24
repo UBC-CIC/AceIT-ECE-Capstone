@@ -1,7 +1,7 @@
 import boto3
 
 def get_secret():
-    secret_name = "canvasSecret"
+    secret_name = "CanvasSecrets"
     region_name = "us-west-2"
 
     # Create a Secrets Manager client
