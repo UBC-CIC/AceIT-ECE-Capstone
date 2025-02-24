@@ -35,3 +35,32 @@ def get_secret():
 
     secret = get_secret_value_response['SecretString']
     return secret
+
+def get_rds_proxy_endpoint(proxy_name):
+    """
+    Fetches the endpoint of the RDS Proxy by its name.
+    """
+    rds_client = boto3.client('rds')
+    try:
+        response = rds_client.describe_db_proxies(DBProxyName=proxy_name)
+        endpoint = response['DBProxies'][0]['Endpoint']
+        return endpoint
+    except Exception as e:
+        print(f"Error fetching RDS Proxy endpoint: {e}")
+        return None
+
+def load_db_config():
+    """
+    Loads the static database configuration and dynamically fetches the RDS proxy endpoint.
+    """
+    proxy_name = "MyRdsProxy"  # Use the actual name of your RDS Proxy
+    endpoint = get_rds_proxy_endpoint(proxy_name)
+    
+    if not endpoint:
+        raise Exception("Failed to fetch RDS Proxy endpoint.")
+    print("fetched endpoint: ", endpoint)
+    return {
+        "host": endpoint,
+        "port": 5432,
+        "dbname": "postgres"
+    }

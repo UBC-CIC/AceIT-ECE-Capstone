@@ -3,7 +3,7 @@ import boto3
 import psycopg2
 from psycopg2.extras import Json
 import re
-from utils.get_rds_secret import get_secret
+from utils.get_rds_secret import get_secret, load_db_config
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from utils.translation import translate_text
 
@@ -44,13 +44,12 @@ def lambda_handler(event, context):
         credentials = json.loads(secret)
         username = credentials['username']
         password = credentials['password']
-        # Database connection parameters
+        static_db_config = load_db_config()
+        # Combine static DB config and dynamic credentials
         DB_CONFIG = {
-            "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
-            "port": 5432,
-            "dbname": "postgres",
+            **static_db_config,
             "user": username,
-            "password": password,
+            "password": password
         }
 
          # Fetch embeddings for the query from AWS PostgreSQL

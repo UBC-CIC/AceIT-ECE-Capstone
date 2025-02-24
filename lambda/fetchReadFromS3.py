@@ -11,7 +11,7 @@ import psycopg2
 from datetime import datetime
 import psycopg2.extras
 import utils.get_canvas_secret
-from utils.get_rds_secret import get_secret
+from utils.get_rds_secret import get_secret, load_db_config
 from io import BytesIO
 from utils.create_course_vectors_tables import create_table_if_not_exists
 from utils.get_course_related_stuff import fetch_syllabus_from_canvas
@@ -50,12 +50,12 @@ def lambda_handler(event, context):
     username = credentials['username']
     password = credentials['password']
     # Database connection parameters
+    static_db_config = load_db_config()
+    # Combine static DB config and dynamic credentials
     DB_CONFIG = {
-        "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
-        "port": 5432,
-        "dbname": "postgres",
+        **static_db_config,
         "user": username,
-        "password": password,
+        "password": password
     }
 
     ret = create_table_if_not_exists(DB_CONFIG, course_id)

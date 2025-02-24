@@ -150,13 +150,12 @@ def get_availability(course_id):
     credentials = json.loads(secret)
     username = credentials['username']
     password = credentials['password']
-    # Database connection parameters
+    static_db_config = utils.get_rds_secret.load_db_config()
+    # Combine static DB config and dynamic credentials
     DB_CONFIG = {
-        "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
-        "port": 5432,
-        "dbname": "postgres",
+        **static_db_config,
         "user": username,
-        "password": password,
+        "password": password
     }
     try:
         # Connect to the PostgreSQL database

@@ -5,7 +5,7 @@ import psycopg2
 from datetime import datetime
 import uuid
 import psycopg2.extras
-from utils.get_rds_secret import get_secret
+from utils.get_rds_secret import get_secret, load_db_config
 
 def lambda_handler(event, context):
     params = event.get("queryStringParameters", {})
@@ -28,12 +28,12 @@ def lambda_handler(event, context):
     username = credentials['username']
     password = credentials['password']
     # Database connection parameters
+    static_db_config = load_db_config()
+    # Combine static DB config and dynamic credentials
     DB_CONFIG = {
-        "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
-        "port": 5432,
-        "dbname": "postgres",
+        **static_db_config,
         "user": username,
-        "password": password,
+        "password": password
     }
     ret1 = delete_vectors_by_course(DB_CONFIG, course_id)
 

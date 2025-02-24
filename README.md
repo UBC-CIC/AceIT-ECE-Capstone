@@ -130,7 +130,7 @@ TODO (e.g. APIs and styling / branding)
 
 #### Backend Code Configuration
 
-TODO
+rds db host(endpoint)/proxy(endpoint)
 
 #### Infrastructure Code Configuration
 
