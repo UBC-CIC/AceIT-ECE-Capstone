@@ -4,6 +4,7 @@ import boto3
 import psycopg2
 import psycopg2.extras
 from .get_rds_secret import get_cached_secret
+from .get_rds_secret import load_db_config
 
 # Cache for database connection
 DB_CONNECTION = None
@@ -13,10 +14,10 @@ def get_db_connection():
     global DB_CONNECTION
     if DB_CONNECTION is None or DB_CONNECTION.closed:
         credentials = get_cached_secret()
+        static_db_config = load_db_config()
+        # Combine static DB config and dynamic credentials
         DB_CONFIG = {
-            "host": "myrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com",
-            "port": 5432,
-            "dbname": "postgres",
+            **static_db_config,
             "user": credentials['username'],
             "password": credentials['password'],
         }
