@@ -173,11 +173,13 @@ def extract_messages(threads, depth=0):
     """
     result = ""
     for thread in threads:
-        # Indentation based on depth to format hierarchy
-        indent = "  " * depth
-        result += f"{indent}- {thread['message']}\n"
-        if "replies" in thread and thread["replies"]:
-            result += extract_messages(thread["replies"], depth + 1)
+        if thread.get("deleted", "") != True:
+            # Indentation based on depth to format hierarchy
+            if "message" in thread and thread["message"]:
+                indent = "  " * depth
+                result += f"{indent}- {thread['message']}\n"
+                if "replies" in thread and thread["replies"]:
+                    result += extract_messages(thread["replies"], depth + 1)
     return result
 
 def indent_string(text, indent_level=1, indent_char="  "):
@@ -205,9 +207,10 @@ def fetch_assignments_from_canvas(auth_token, base_url, course_id):
                 str_to_indent = "Assignment name: \n" + assignment_name + "\n"
                 assignment_str += indent_string(str_to_indent, 2)
                 # get due date
-                due_date = assignment.get("due_at", "None")
-                str_to_indent = "Assignment due date: \n" + due_date + "\n"
-                assignment_str += indent_string(str_to_indent, 2)
+                due_date = assignment.get("due_at", "")
+                if due_date:
+                    str_to_indent = "Assignment due date: \n" + due_date + "\n"
+                    assignment_str += indent_string(str_to_indent, 2)
                 # get description
                 description_html = assignment.get("description", "")
                 if description_html:
@@ -235,106 +238,107 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
         quizzes_list = response.json()
         return_str = "Quizzes: \n"
         counter = 0
-        for quiz in quizzes_list and quiz.get("published"):
-            counter += 1
-            quiz_str = f"  Quiz {counter}: \n"
-            # get quiz title
-            quiz_title = quiz.get("title", "")
-            str_to_indent = "Quiz title: " + quiz_title + "\n"
-            quiz_str += indent_string(str_to_indent, 2)
-            # get due date
-            quiz_due_date = quiz.get("due_at", "")
-            if quiz_due_date:
-                str_to_indent = "Quiz due date: " + quiz_due_date + "\n"
+        for quiz in quizzes_list:
+            if quiz.get("published", ""):
+                counter += 1
+                quiz_str = f"  Quiz {counter}: \n"
+                # get quiz title
+                quiz_title = quiz.get("title", "")
+                str_to_indent = "Quiz title: " + quiz_title + "\n"
                 quiz_str += indent_string(str_to_indent, 2)
-            # get quiz description
-            quiz_description = quiz.get("description", "")
-            str_to_indent = "Quiz description: " + quiz_description + "\n"
-            quiz_str += indent_string(str_to_indent, 2)
-            # get quiz type
-            quiz_type = quiz.get("quiz_type", "") # possible value: {graded_survey,practice_quiz,survey,assignment}
-            str_to_indent = "Quiz type: " + quiz_type + "\n"
-            quiz_str += indent_string(str_to_indent, 2)
-            # get question and answer
-            quiz_id = quiz.get("id", "")
-            if quiz_id:
-                questions_url = f"{base_url}/api/v1/courses/{course_id}/quizzes/{quiz_id}/questions"
-                questions_response = requests.get(questions_url, headers=headers, verify=False)
-                if questions_response.status_code == 200:
-                    questions_list = questions_response.json()
-                    quiz_str += indent_string("Quiz questions: \n", 2)
-                    question_counter = 0
-                    for question in questions_list:
-                        question_counter += 1
-                        # question number
-                        question_position = question.get("position", question_counter)
-                        str_to_indent = f"Question {question_position}: \n"
-                        quiz_str += indent_string(str_to_indent, 3)
-                        
-                        # question points
-                        points_possible = question.get("points_possible", "")
-                        str_to_indent = f"Available points for Question {question_position}: " + points_possible + "\n"
-                        quiz_str += indent_string(str_to_indent, 4)
-
-                        # name
-                        question_name = question.get("question_name", "")
-                        str_to_indent = "Question name: " + question_name + "\n"
-                        quiz_str += indent_string(str_to_indent, 4)
-
-                        # type
-                        question_type = question.get("question_type", "")
-                        str_to_indent = "Question type: " + question_type + "\n"
-                        quiz_str += indent_string(str_to_indent, 4)
-
-                        # question text html form
-                        question_content_html = question.get("question_text", "")
-                        if question_content_html:
-                            # Convert HTML to plain text
-                            soup = BeautifulSoup(question_content_html, "html.parser")
-                            question_content_str = soup.get_text(separator="\n").strip()
-                            str_to_indent = "Question description: \n" + question_content_str + "\n"
+                # get due date
+                quiz_due_date = quiz.get("due_at", "")
+                if quiz_due_date:
+                    str_to_indent = "Quiz due date: " + quiz_due_date + "\n"
+                    quiz_str += indent_string(str_to_indent, 2)
+                # get quiz description
+                quiz_description = quiz.get("description", "")
+                str_to_indent = "Quiz description: " + quiz_description + "\n"
+                quiz_str += indent_string(str_to_indent, 2)
+                # get quiz type
+                quiz_type = quiz.get("quiz_type", "") # possible value: {graded_survey,practice_quiz,survey,assignment}
+                str_to_indent = "Quiz type: " + quiz_type + "\n"
+                quiz_str += indent_string(str_to_indent, 2)
+                # get question and answer
+                quiz_id = quiz.get("id", "")
+                if quiz_id:
+                    questions_url = f"{base_url}/api/v1/courses/{course_id}/quizzes/{quiz_id}/questions"
+                    questions_response = requests.get(questions_url, headers=headers, verify=False)
+                    if questions_response.status_code == 200:
+                        questions_list = questions_response.json()
+                        quiz_str += indent_string("Quiz questions: \n", 2)
+                        question_counter = 0
+                        for question in questions_list:
+                            question_counter += 1
+                            # question number
+                            question_position = question.get("position", question_counter)
+                            str_to_indent = f"Question {question_position}: \n"
+                            quiz_str += indent_string(str_to_indent, 3)
+                            
+                            # question points
+                            points_possible = question.get("points_possible", "")
+                            str_to_indent = f"Available points for Question {question_position}: " + points_possible + "\n"
                             quiz_str += indent_string(str_to_indent, 4)
 
-                        # add question answers if available
-                        show_correct_answers = quiz.get("show_correct_answers", "") # boolean
-                        answers_list = quiz.get("answers", "") # json list
-                        due_date = datetime.strptime(quiz_due_date, "%Y-%m-%dT%H:%M:%SZ")
-                        past_due = due_date <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-                        has_answer = (quiz_type == "practice_quiz") or (quiz_type == "assignment")
+                            # name
+                            question_name = question.get("question_name", "")
+                            str_to_indent = "Question name: " + question_name + "\n"
+                            quiz_str += indent_string(str_to_indent, 4)
 
-                        if answers_list and show_correct_answers and past_due and has_answer:
-                            str_to_indent = f"Answers: \n"
-                            answer_str = indent_string(str_to_indent, 4)
-                            if question_type != "matching_question":
-                                answer_counter = 0
-                                for answer in answers_list:
-                                    answer_counter += 1
-                                    # answer text
-                                    answer_text = answer.get("text", "")
-                                    str_to_indent = f"Answer {answer_counter}: \n" + answer_text + "\n"
-                                    answer_str += indent_string(str_to_indent, 5)
-                                    # answer weight
-                                    answer_weight = answer.get("weight", "")
-                                    str_to_indent = f"Answer {answer_counter} wight: \n" + answer_weight + "%" + "\n"
-                                    answer_str += indent_string(str_to_indent, 5)
-                            else:
-                                # matching_question need to get both left and right for each matching
-                                match_counter = 0
-                                for answer in answers_list:
-                                    match_counter += 1
-                                    # answer left + right
-                                    answer_left = answer.get("left", "")
-                                    answer_right = answer.get("right", "")
-                                    if answer_left and answer_right:
-                                        str_to_indent = f"Matching {answer_counter}: \n" + answer_left + "--" + answer_right+ "\n"
+                            # type
+                            question_type = question.get("question_type", "")
+                            str_to_indent = "Question type: " + question_type + "\n"
+                            quiz_str += indent_string(str_to_indent, 4)
+
+                            # question text html form
+                            question_content_html = question.get("question_text", "")
+                            if question_content_html:
+                                # Convert HTML to plain text
+                                soup = BeautifulSoup(question_content_html, "html.parser")
+                                question_content_str = soup.get_text(separator="\n").strip()
+                                str_to_indent = "Question description: \n" + question_content_str + "\n"
+                                quiz_str += indent_string(str_to_indent, 4)
+
+                            # add question answers if available
+                            show_correct_answers = quiz.get("show_correct_answers", "") # boolean
+                            answers_list = quiz.get("answers", "") # json list
+                            due_date = datetime.strptime(quiz_due_date, "%Y-%m-%dT%H:%M:%SZ")
+                            past_due = due_date <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+                            has_answer = (quiz_type == "practice_quiz") or (quiz_type == "assignment")
+
+                            if answers_list and show_correct_answers and past_due and has_answer:
+                                str_to_indent = f"Answers: \n"
+                                answer_str = indent_string(str_to_indent, 4)
+                                if question_type != "matching_question":
+                                    answer_counter = 0
+                                    for answer in answers_list:
+                                        answer_counter += 1
+                                        # answer text
+                                        answer_text = answer.get("text", "")
+                                        str_to_indent = f"Answer {answer_counter}: \n" + answer_text + "\n"
                                         answer_str += indent_string(str_to_indent, 5)
+                                        # answer weight
+                                        answer_weight = answer.get("weight", "")
+                                        str_to_indent = f"Answer {answer_counter} wight: \n" + answer_weight + "%" + "\n"
+                                        answer_str += indent_string(str_to_indent, 5)
+                                else:
+                                    # matching_question need to get both left and right for each matching
+                                    match_counter = 0
+                                    for answer in answers_list:
+                                        match_counter += 1
+                                        # answer left + right
+                                        answer_left = answer.get("left", "")
+                                        answer_right = answer.get("right", "")
+                                        if answer_left and answer_right:
+                                            str_to_indent = f"Matching {answer_counter}: \n" + answer_left + "--" + answer_right+ "\n"
+                                            answer_str += indent_string(str_to_indent, 5)
 
-                            quiz_str += answer_str
-                else:
-                    print("failed to get questions and answers")
+                                quiz_str += answer_str
+                    else:
+                        print("failed to get questions and answers")
 
-            url_quiz = quiz.get("html_url", "")
-            quiz_str += "  Quiz link: " + url_quiz + "\n"
+                url_quiz = quiz.get("html_url", "")
+                quiz_str += "  Quiz link: " + url_quiz + "\n"
 
         url_quizzes = f"{base_url}/courses/{course_id}/quizzes"
         return_str += "Quizzes link: " + url_quizzes   

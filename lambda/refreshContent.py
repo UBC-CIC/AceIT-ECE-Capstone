@@ -17,6 +17,11 @@ def lambda_handler(event, context):
     body = json.loads(event.get("body", {}))
     course_id = body.get("course", {})  # Read course ID from request body
     course_id = str(course_id)
+    running_async = body.get("async", False)
+    if running_async:
+        pass # TODO: add wrapper call
+    else:
+        pass # TODO: add wrapper call
 
     if not course_id:
         return {

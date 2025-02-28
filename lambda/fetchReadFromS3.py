@@ -197,7 +197,7 @@ def lambda_handler(event, context):
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
-                    store_embeddings("Assingments", embedding, course_id, DB_CONFIG, assignments_url, chunk)
+                    store_embeddings("Assignments", embedding, course_id, DB_CONFIG, assignments_url, chunk)
 
     if quizzes_enabled:
         quizzes_url = f"{BASE_URL}/courses/{course_id}/quizzes"
@@ -245,7 +245,7 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Credentials': 'true'
         },
         # "body": json.dumps({"pdf_results": results, "embeddings": embeddings, "db":retdb})
-        "body": json.dumps(results)
+        # "body": json.dumps(results)
     }
     
 def read_pdf_streaming(bucket_name, file_key, text_splitter):
