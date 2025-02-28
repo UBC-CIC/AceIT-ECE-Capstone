@@ -7,7 +7,7 @@ import requests  # to make HTTP requests
 import utils
 import utils.get_canvas_secret
 import utils.get_rds_secret
-import utils.retrieve_course_config
+from utils.retrieve_course_config import call_get_course_config
 
 s3_client = boto3.client('s3')
 bucket_name = 'bucket-for-course-documents'
@@ -29,11 +29,7 @@ def lambda_handler(event, context):
             },
             "body": json.dumps({"error": "Course ID is required"})
         }
-    # TODO：filter content based on instructor configuration
 
-    # 1. query database get the config
-    # 2. for each selected type get the documents in it
-    # course_config = utils.retrieve_course_config(course_id)
     files = get_files(course_id)
 
     if files is None:
@@ -56,7 +52,6 @@ def lambda_handler(event, context):
 
             file_url = file["url"]  # Canvas file URL
             file_key = f"{course_id}/{file['filename']}"  # Store in "course_id/" folder
-            file_size = file["size"]
             file_updated = file["updated_at"]
         
             try:

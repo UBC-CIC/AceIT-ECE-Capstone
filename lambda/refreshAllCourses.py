@@ -1,17 +1,12 @@
 import json
-import uuid
-import time
-import jwt
 import boto3
 import psycopg2
 import psycopg2.extras
 from psycopg2.extras import DictCursor
 import requests  # to make HTTP requests
-import base64
 import utils
 import utils.get_canvas_secret
 import utils.get_rds_secret
-from utils.retrieve_course_config import retrieve_course_config
 from utils.retrieve_course_config import call_get_course_config
 
 s3_client = boto3.client('s3')
@@ -35,7 +30,6 @@ def lambda_handler(event, context):
     refreshed_courses = []
     secret = utils.get_canvas_secret.get_secret()
     credentials = json.loads(secret)
-    BASE_URL = credentials['baseURL']
     TOKEN = credentials['adminAccessToken']
 
     # Invoke refreshCourse for each course
@@ -102,61 +96,61 @@ def get_all_courses():
         print(f"Request error occurred: {req_err}")
         return None
 
-def get_server_level_access_token():
-    secret = utils.get_canvas_secret.get_secret()
-    credentials = json.loads(secret)
-    BASE_URL = credentials['baseURL']
-    CLIENT_ID = credentials['serverKeyId']
-    # CLIENT_SECRET = credentials['serverKey']
-    PRIVATE_KEY = credentials['jwkPrivateKey']
-    KID = credentials['kid']
+# def get_server_level_access_token():
+#     secret = utils.get_canvas_secret.get_secret()
+#     credentials = json.loads(secret)
+#     BASE_URL = credentials['baseURL']
+#     CLIENT_ID = credentials['serverKeyId']
+#     # CLIENT_SECRET = credentials['serverKey']
+#     PRIVATE_KEY = credentials['jwkPrivateKey']
+#     KID = credentials['kid']
 
-    url = f"{BASE_URL}/login/oauth2/token"
+#     url = f"{BASE_URL}/login/oauth2/token"
 
-    client_assertion = get_client_assertion(CLIENT_ID, PRIVATE_KEY, KID, url)
+#     client_assertion = get_client_assertion(CLIENT_ID, PRIVATE_KEY, KID, url)
 
-    data = {
-            "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
-            "client_assertion": client_assertion,
-            "grant_type": "client_credentials",
-            "scope": " ".join([
-                                "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
-                                "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-                                "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
-                                "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-                                # "https://canvas.instructure.com/auth/courses.readonly" 
-                                # TODO: not able to get the last scope yet, but it's neccesary for getting course info
-                            ])
-            }
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    try:
-        response = requests.post(url, data=data, headers=headers, verify=False)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-        return None
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-        return None
+#     data = {
+#             "client_assertion_type": "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+#             "client_assertion": client_assertion,
+#             "grant_type": "client_credentials",
+#             "scope": " ".join([
+#                                 "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
+#                                 "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
+#                                 "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
+#                                 "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+#                                 # "https://canvas.instructure.com/auth/courses.readonly" 
+#                                 # TODO: not able to get the last scope yet, but it's neccesary for getting course info
+#                             ])
+#             }
+#     headers = {"Content-Type": "application/x-www-form-urlencoded"}
+#     try:
+#         response = requests.post(url, data=data, headers=headers, verify=False)
+#         response.raise_for_status()
+#         return response.json()
+#     except requests.exceptions.HTTPError as http_err:
+#         print(f"HTTP error occurred: {http_err}")
+#         return None
+#     except requests.exceptions.RequestException as req_err:
+#         print(f"Request error occurred: {req_err}")
+#         return None
   
-def get_client_assertion(client_id, private_key, kid, url):
-    header = {
-        "alg": "RS256",
-        "typ": "JWT",
-        "kid": kid
-    }
+# def get_client_assertion(client_id, private_key, kid, url):
+#     header = {
+#         "alg": "RS256",
+#         "typ": "JWT",
+#         "kid": kid
+#     }
 
-    payload = {
-        "iss": client_id,
-        "sub": client_id,
-        "aud": url,
-        "iat": int(time.time()),
-        "exp": int(time.time()) + 600, # 10 mins expiration
-        "jti": str(uuid.uuid4())
-    }
+#     payload = {
+#         "iss": client_id,
+#         "sub": client_id,
+#         "aud": url,
+#         "iat": int(time.time()),
+#         "exp": int(time.time()) + 600, # 10 mins expiration
+#         "jti": str(uuid.uuid4())
+#     }
 
-    return jwt.encode(payload, private_key, algorithm="RS256", header = header);
+#     return jwt.encode(payload, private_key, algorithm="RS256", header = header);
 
 def invoke_refresh_course(course_id):
     payload = {
