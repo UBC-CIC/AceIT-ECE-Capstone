@@ -18,119 +18,138 @@ def lambda_handler(event, context):
     course_id = body.get("course", {})  # Read course ID from request body
     course_id = str(course_id)
     running_async = body.get("async", False)
-    if running_async:
-        pass # TODO: add wrapper call
+
+    is_recursive = body.get("recursive", False)
+    if running_async and not is_recursive:
+        # Asynchronous execution: Invoke itself asynchronously
+        function_name = os.environ['RefreshContentLambda']
+        body["recursive"] = True  # Prevent further async invocation
+        invoke_params = {
+            "FunctionName": function_name,
+            "InvocationType": "Event",  # Asynchronous execution
+            "Payload": json.dumps({"body": json.dumps(body)})
+        }
+        try:
+            lambda_client.invoke(**invoke_params)
+            return {
+                "statusCode": 202,
+                "body": json.dumps({"message": "Function is executing asynchronously"})
+            }
+        except Exception as e:
+            return {
+                "statusCode": 500,
+                "body": json.dumps({"message": "Error invoking function asynchronously", "error": str(e)})
+            }
     else:
-        pass # TODO: add wrapper call
+        # Synchronous execution
+        if not course_id:
+            return {
+                "statusCode": 400,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
+                "body": json.dumps({"error": "Course ID is required"})
+            }
 
-    if not course_id:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Course ID is required"})
-        }
+        files = get_files(course_id)
 
-    files = get_files(course_id)
+        if files is None:
+            return {
+                "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
+                "body": json.dumps({"error": "Failed to fetch files from Canvas API"})
+            }
+        # Store course documents into S3 buckets
+        text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
+        for file in files:
+            if file["locked"] == False and file['upload_status'] == 'success' and file["hidden"] == False and get_extension(file["display_name"]) in text_format:
+                file_name = file["display_name"]
+                print("file name: ", file_name)
 
-    if files is None:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Failed to fetch files from Canvas API"})
-        }
-    # Store course documents into S3 buckets
-    text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
-    for file in files:
-        if file["locked"] == False and file['upload_status'] == 'success' and file["hidden"] == False and get_extension(file["display_name"]) in text_format:
-            file_name = file["display_name"]
-            print("file name: ", file_name)
+                file_url = file["url"]  # Canvas file URL
+                file_key = f"{course_id}/{file['filename']}"  # Store in "course_id/" folder
+                file_updated = file["updated_at"]
+            
+                try:
+                    print(f"Streaming {file_key} to S3...")
 
-            file_url = file["url"]  # Canvas file URL
-            file_key = f"{course_id}/{file['filename']}"  # Store in "course_id/" folder
-            file_updated = file["updated_at"]
-        
-            try:
-                print(f"Streaming {file_key} to S3...")
+                    with requests.get(file_url, stream=True, verify=False) as response:
+                        response.raise_for_status()  # Ensure request success
 
-                with requests.get(file_url, stream=True, verify=False) as response:
-                    response.raise_for_status()  # Ensure request success
-
-                    # Upload stream directly to S3 with metadata
-                    s3_client.upload_fileobj(
-                        response.raw,
-                        bucket_name,
-                        file_key,
-                        ExtraArgs={
-                            "Metadata": {
-                                "original_url": file_url,
-                                "display_name": file_name,
-                                "updated_at": file_updated,
+                        # Upload stream directly to S3 with metadata
+                        s3_client.upload_fileobj(
+                            response.raw,
+                            bucket_name,
+                            file_key,
+                            ExtraArgs={
+                                "Metadata": {
+                                    "original_url": file_url,
+                                    "display_name": file_name,
+                                    "updated_at": file_updated,
+                                }
                             }
-                        }
-                    )
+                        )
 
-                print(f"Successfully uploaded {file_key} to S3 with metadata.")
-            
-            except Exception as e:
-                print(f"Failed to upload {file_key}: {e}")
-            
-    secret = utils.get_rds_secret.get_secret()
-    credentials = json.loads(secret)
-    username = credentials['username']
-    password = credentials['password']
-    static_db_config = utils.get_rds_secret.load_db_config()
-    # Combine static DB config and dynamic credentials
-    DB_CONFIG = {
-        **static_db_config,
-        "user": username,
-        "password": password
-    }
-
-    # delete this course vector
-    del_response = delete_vectors_by_course(DB_CONFIG, course_id)
-    print("Delete vector response: ", del_response)
-
-    response = call_fetch_read_from_s3(course_id)
-    print("lambda response: ", response)  # Log the response if needed
-    print("lambda response: ", type(response))
-
-    # Check if the status is OK
-    if response.get("statusCode") == 200:
-        # Update the last_updated time
-        update_course_last_update_time(course_id, DB_CONFIG)
-        print("Status is OK")
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            'body': json.dumps({"message": f"Refreshed content for course {course_id}"})
+                    print(f"Successfully uploaded {file_key} to S3 with metadata.")
+                
+                except Exception as e:
+                    print(f"Failed to upload {file_key}: {e}")
+                
+        secret = utils.get_rds_secret.get_secret()
+        credentials = json.loads(secret)
+        username = credentials['username']
+        password = credentials['password']
+        static_db_config = utils.get_rds_secret.load_db_config()
+        # Combine static DB config and dynamic credentials
+        DB_CONFIG = {
+            **static_db_config,
+            "user": username,
+            "password": password
         }
-    else:
-        print("Status is NOT OK")
-        return {
-            'statusCode': 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            'body': json.dumps({"message": f"Content for course {course_id} is not refreshed!"})
-        }
+
+        # delete this course vector
+        del_response = delete_vectors_by_course(DB_CONFIG, course_id)
+        print("Delete vector response: ", del_response)
+
+        response = call_fetch_read_from_s3(course_id)
+        print("lambda response: ", response)  # Log the response if needed
+        print("lambda response: ", type(response))
+
+        # Check if the status is OK
+        if response.get("statusCode") == 200:
+            # Update the last_updated time
+            update_course_last_update_time(course_id, DB_CONFIG)
+            print("Status is OK")
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
+                'body': json.dumps({"message": f"Refreshed content for course {course_id}"})
+            }
+        else:
+            print("Status is NOT OK")
+            return {
+                'statusCode': 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
+                'body': json.dumps({"message": f"Content for course {course_id} is not refreshed!"})
+            }
 
 def get_files(course_id):
     """
