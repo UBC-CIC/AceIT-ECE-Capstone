@@ -265,12 +265,13 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
                     for question in questions_list:
                         question_counter += 1
                         # question number
-                        str_to_indent = f"Question {question.get("position", question_counter)}: \n"
+                        question_position = question.get("position", question_counter)
+                        str_to_indent = f"Question {question_position}: \n"
                         quiz_str += indent_string(str_to_indent, 3)
                         
                         # question points
                         points_possible = question.get("points_possible", "")
-                        str_to_indent = f"Available points for Question {question.get("position", question_counter)}: " + points_possible + "\n"
+                        str_to_indent = f"Available points for Question {question_position}: " + points_possible + "\n"
                         quiz_str += indent_string(str_to_indent, 4)
 
                         # name
