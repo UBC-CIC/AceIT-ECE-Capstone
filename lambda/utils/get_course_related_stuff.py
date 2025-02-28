@@ -195,29 +195,31 @@ def fetch_assignments_from_canvas(auth_token, base_url, course_id):
         assignments_list = response.json()
         return_str = "Assignments: \n"
         counter = 0
-        for assignment in assignments_list and assignment.get("workflow_state", "") == "published" and not assignment.get("quiz_id", "") and not assignment.get("is_quiz_assignment", ""): # get none quiz assingments
-            counter += 1
-            assignment_str = f" Assignment {counter}: \n"
-            # get name
-            assignment_name = assignment.get("name", "")
-            str_to_indent = "Assignment name: \n" + assignment_name + "\n"
-            assignment_str += indent_string(str_to_indent, 2)
-            # get due date
-            due_date = assignment.get("due_at", "None")
-            str_to_indent = "Assignment due date: \n" + due_date + "\n"
-            assignment_str += indent_string(str_to_indent, 2)
-            # get description
-            description_html = assignment.get("description", "")
-            if description_html:
-                # Convert HTML to plain text
-                soup = BeautifulSoup(description_html, "html.parser")
-                description_str = soup.get_text(separator="\n").strip()
-                str_to_indent = "Assignment description: \n" + description_str + "\n"
+        for assignment in assignments_list : 
+            # get none quiz assingments
+            if assignment.get("workflow_state", "") == "published" and not assignment.get("quiz_id", "") and not assignment.get("is_quiz_assignment", ""):
+                counter += 1
+                assignment_str = f" Assignment {counter}: \n"
+                # get name
+                assignment_name = assignment.get("name", "")
+                str_to_indent = "Assignment name: \n" + assignment_name + "\n"
                 assignment_str += indent_string(str_to_indent, 2)
-            # add assignment link
-            url_assignment = assignment.get("html_url", "")
-            assignment_str += f"  Assignment {counter} link: " + url_assignment + "\n"
-            return_str += assignment_str
+                # get due date
+                due_date = assignment.get("due_at", "None")
+                str_to_indent = "Assignment due date: \n" + due_date + "\n"
+                assignment_str += indent_string(str_to_indent, 2)
+                # get description
+                description_html = assignment.get("description", "")
+                if description_html:
+                    # Convert HTML to plain text
+                    soup = BeautifulSoup(description_html, "html.parser")
+                    description_str = soup.get_text(separator="\n").strip()
+                    str_to_indent = "Assignment description: \n" + description_str + "\n"
+                    assignment_str += indent_string(str_to_indent, 2)
+                # add assignment link
+                url_assignment = assignment.get("html_url", "")
+                assignment_str += f"  Assignment {counter} link: " + url_assignment + "\n"
+                return_str += assignment_str
 
         url_assignments = f"{base_url}/courses/{course_id}/assignments"
         return_str += "Assignments link: " + url_assignments   
