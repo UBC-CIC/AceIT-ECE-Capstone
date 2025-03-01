@@ -11,12 +11,11 @@ import psycopg2
 from datetime import datetime
 import psycopg2.extras
 import utils.get_canvas_secret
+import utils.get_course_related_stuff
 from utils.get_rds_secret import get_secret, load_db_config
-from io import BytesIO
 from utils.create_course_vectors_tables import create_table_if_not_exists
-from utils.get_course_related_stuff import fetch_syllabus_from_canvas
-import utils
 from utils.retrieve_course_config import retrieve_course_config
+from io import BytesIO
 
 s3_client = boto3.client("s3")
 bedrock = boto3.client("bedrock-runtime",
@@ -80,12 +79,12 @@ def lambda_handler(event, context):
     files_enabled = course_config["selectedIncludedCourseContent"].get("FILES", False)
     syllabus_enabled = course_config["selectedIncludedCourseContent"].get("SYLLABUS", False)
     home_enabled = course_config["selectedIncludedCourseContent"].get("HOME", False)
-    announcement_enabled = course_config["selectedIncludedCourseContent"].get("ANNOUNCEMENTS", False)
-    assignment_enabled = course_config["selectedIncludedCourseContent"].get("ASSIGNMENTS", False)
+    announcements_enabled = course_config["selectedIncludedCourseContent"].get("ANNOUNCEMENTS", False)
+    assignments_enabled = course_config["selectedIncludedCourseContent"].get("ASSIGNMENTS", False)
     quizzes_enabled = course_config["selectedIncludedCourseContent"].get("QUIZZES", False)
-    discussion_enabled = course_config["selectedIncludedCourseContent"].get("DISCUSSIONS", False)
+    discussions_enabled = course_config["selectedIncludedCourseContent"].get("DISCUSSIONS", False)
     pages_enabled = course_config["selectedIncludedCourseContent"].get("PAGES", False)
-    modules_enabled = course_config["selectedIncludedCourseContent"].get("MODULES", False)
+    modules_enabled = course_config["selectedIncludedCourseContent"].get("MODULES", False) # To be deleted, no longer supported 
     
     prefix = f"{course_id}/"  # Assuming course_id is used as a folder structure
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
@@ -147,14 +146,14 @@ def lambda_handler(event, context):
     
     print("file metadata: ", files_metadata)
 
-    # add canvas syllabus
+    # add canvas contents based on instructor configuration
+    canvas_secret = utils.get_canvas_secret.get_secret()
+    canvas_credentials = json.loads(canvas_secret)
+    BASE_URL = canvas_credentials['baseURL']
+    TOKEN = canvas_credentials['adminAccessToken']
     if syllabus_enabled:
-        secret = utils.get_canvas_secret.get_secret()
-        credentials = json.loads(secret)
-        BASE_URL = credentials['baseURL']
-        TOKEN = credentials['adminAccessToken']
-        url = f"{BASE_URL}/courses/{course_id}/assignments/syllabus"
-        syllabus_text = fetch_syllabus_from_canvas(TOKEN, BASE_URL, course_id)
+        syllabus_url = f"{BASE_URL}/courses/{course_id}/assignments/syllabus"
+        syllabus_text = utils.get_course_related_stuff.fetch_syllabus_from_canvas(TOKEN, BASE_URL, course_id)
         if syllabus_text:
             syllabus_chunks = text_splitter.split_text(syllabus_text)
             embeddings = []
@@ -162,7 +161,79 @@ def lambda_handler(event, context):
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
-                    store_embeddings("Syllabus", embedding, course_id, DB_CONFIG, url, chunk)
+                    store_embeddings("Syllabus", embedding, course_id, DB_CONFIG, syllabus_url, chunk)
+
+    if home_enabled:
+        home_url = f"{BASE_URL}/courses/{course_id}"
+        home_text = utils.get_course_related_stuff.fetch_home_from_canvas(TOKEN, BASE_URL, course_id)
+        if home_text:
+            home_chunks = text_splitter.split_text(home_text)
+            embeddings = []
+            for chunk in home_chunks:
+                embedding = generate_embeddings(chunk)
+                if embedding:
+                    embeddings.append(embedding)
+                    store_embeddings("Home", embedding, course_id, DB_CONFIG, home_url, chunk)
+
+    if announcements_enabled:
+        announcements_url = f"{BASE_URL}/courses/{course_id}/announcements"
+        announcements_text = utils.get_course_related_stuff.fetch_announcments_from_canvas(TOKEN, BASE_URL, course_id)
+        if announcements_text:
+            announcements_chunks = text_splitter.split_text(announcements_text)
+            embeddings = []
+            for chunk in announcements_chunks:
+                embedding = generate_embeddings(chunk)
+                if embedding:
+                    embeddings.append(embedding)
+                    store_embeddings("Announcements", embedding, course_id, DB_CONFIG, announcements_url, chunk)
+
+    if assignments_enabled:
+        assignments_url = f"{BASE_URL}/courses/{course_id}/assignments"
+        assignments_text = utils.get_course_related_stuff.fetch_assignments_from_canvas(TOKEN, BASE_URL, course_id)
+        if assignments_text:
+            assignments_chunks = text_splitter.split_text(assignments_text)
+            embeddings = []
+            for chunk in assignments_chunks:
+                embedding = generate_embeddings(chunk)
+                if embedding:
+                    embeddings.append(embedding)
+                    store_embeddings("Assignments", embedding, course_id, DB_CONFIG, assignments_url, chunk)
+
+    if quizzes_enabled:
+        quizzes_url = f"{BASE_URL}/courses/{course_id}/quizzes"
+        quizzes_text = utils.get_course_related_stuff.fetch_quizzes_from_canvas(TOKEN, BASE_URL, course_id)
+        if quizzes_text:
+            quizzes_chunks = text_splitter.split_text(quizzes_text)
+            embeddings = []
+            for chunk in quizzes_chunks:
+                embedding = generate_embeddings(chunk)
+                if embedding:
+                    embeddings.append(embedding)
+                    store_embeddings("Quizzes", embedding, course_id, DB_CONFIG, quizzes_url, chunk)
+
+    if discussions_enabled:
+        discussions_url = f"{BASE_URL}/courses/{course_id}/discussion_topics"
+        discussions_text = utils.get_course_related_stuff.fetch_discussions_from_canvas(TOKEN, BASE_URL, course_id)
+        if discussions_text:
+            discussions_chunks = text_splitter.split_text(discussions_text)
+            embeddings = []
+            for chunk in discussions_chunks:
+                embedding = generate_embeddings(chunk)
+                if embedding:
+                    embeddings.append(embedding)
+                    store_embeddings("Discussions", embedding, course_id, DB_CONFIG, discussions_url, chunk)
+
+    if pages_enabled:
+        pages_url = f"{BASE_URL}/courses/{course_id}/pages"
+        pages_text = utils.get_course_related_stuff.fetch_pages_from_canvas(TOKEN, BASE_URL, course_id)
+        if pages_text:
+            pages_chunks = text_splitter.split_text(pages_text)
+            embeddings = []
+            for chunk in pages_chunks:
+                embedding = generate_embeddings(chunk)
+                if embedding:
+                    embeddings.append(embedding)
+                    store_embeddings("Pages", embedding, course_id, DB_CONFIG, pages_url, chunk)
 
     # 4. Return the results
     return {
@@ -174,7 +245,7 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Credentials': 'true'
         },
         # "body": json.dumps({"pdf_results": results, "embeddings": embeddings, "db":retdb})
-        "body": json.dumps(results)
+        # "body": json.dumps(results)
     }
     
 def read_pdf_streaming(bucket_name, file_key, text_splitter):
@@ -195,6 +266,51 @@ def read_pdf_streaming(bucket_name, file_key, text_splitter):
     except Exception as e:
         return f"Error processing PDF: {str(e)}"
 
+def read_docx_streaming(bucket_name, file_key, text_splitter):
+    """Extract text from a large DOCX file using S3 streaming."""
+    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+    file_stream = BytesIO(response["Body"].read())  # Read DOCX into memory
+
+    try:
+        doc = docx.Document(file_stream)  # Open DOCX in memory
+        paragraphs = [p.text for p in doc.paragraphs]
+        text = "\n".join(paragraphs)
+        
+        chunks = text_splitter.split_text(text)
+        return chunks
+    except Exception as e:
+        return f"Error processing DOCX: {str(e)}"
+
+def read_html_streaming(bucket_name, file_key, text_splitter):
+    """Extract text from an HTML file streamed from S3."""
+    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+    
+    try:
+        html_content = response["Body"].read().decode("utf-8")  # Read and decode HTML
+        soup = BeautifulSoup(html_content, "html.parser")
+        text = soup.get_text(separator="\n")
+        
+        chunks = text_splitter.split_text(text)
+        return chunks
+    except Exception as e:
+        return f"Error processing HTML: {str(e)}"
+
+def read_text_streaming(bucket_name, file_key, text_splitter):
+    """Extract text from a large text file using chunk streaming."""
+    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+    
+    extracted_text = []
+    chunk_size = 8192  # 8KB chunks to process large files efficiently
+    
+    try:
+        # Read file in chunks
+        for chunk in response["Body"].iter_chunks(chunk_size=chunk_size):
+            extracted_text.append(chunk.decode("utf-8"))  # Decode bytes to string
+        
+        chunks = text_splitter.split_text("\n".join(extracted_text))
+        return chunks
+    except Exception as e:
+        return f"Error processing text file: {str(e)}"
 
 def generate_embeddings(chunk):
     model_id = "amazon.titan-embed-text-v2:0"  # Or whatever the correct model ID
@@ -226,56 +342,6 @@ def generate_embeddings(chunk):
     except Exception as e:
         print(f"Error invoking model: {str(e)}")
         return None
-
-def read_docx_streaming(bucket_name, file_key, text_splitter):
-    """Extract text from a large DOCX file using S3 streaming."""
-    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-    file_stream = BytesIO(response["Body"].read())  # Read DOCX into memory
-
-    try:
-        doc = docx.Document(file_stream)  # Open DOCX in memory
-        paragraphs = [p.text for p in doc.paragraphs]
-        text = "\n".join(paragraphs)
-        
-        chunks = text_splitter.split_text(text)
-        return chunks
-    except Exception as e:
-        return f"Error processing DOCX: {str(e)}"
-
-
-def read_html_streaming(bucket_name, file_key, text_splitter):
-    """Extract text from an HTML file streamed from S3."""
-    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-    
-    try:
-        html_content = response["Body"].read().decode("utf-8")  # Read and decode HTML
-        soup = BeautifulSoup(html_content, "html.parser")
-        text = soup.get_text(separator="\n")
-        
-        chunks = text_splitter.split_text(text)
-        return chunks
-    except Exception as e:
-        return f"Error processing HTML: {str(e)}"
-
-
-def read_text_streaming(bucket_name, file_key, text_splitter):
-    """Extract text from a large text file using chunk streaming."""
-    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-    
-    extracted_text = []
-    chunk_size = 8192  # 8KB chunks to process large files efficiently
-    
-    try:
-        # Read file in chunks
-        for chunk in response["Body"].iter_chunks(chunk_size=chunk_size):
-            extracted_text.append(chunk.decode("utf-8"))  # Decode bytes to string
-        
-        chunks = text_splitter.split_text("\n".join(extracted_text))
-        return chunks
-    except Exception as e:
-        return f"Error processing text file: {str(e)}"
-
-
 
 def store_embeddings(document_name, embeddings, course_id, DB_CONFIG, source_url, document_content):
     """

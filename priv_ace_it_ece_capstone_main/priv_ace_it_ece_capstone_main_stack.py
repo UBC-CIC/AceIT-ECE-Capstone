@@ -564,7 +564,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="refreshAllCourses.lambda_handler",
-            layers=[boto3_layer, psycopg_layer, requests_layer, jwt_layer],
+            layers=[boto3_layer, psycopg_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
@@ -756,7 +756,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             # default_cors_preflight_options={
             #     "allow_origins": ["https://d2rs0jk5lfd7j4.cloudfront.net"],
             #     "allow_methods": ["OPTIONS", "GET", "POST"],
-            #     "allow_headers": ["Content-Type", "Authorization", "jwt"],
+            #     "allow_headers": ["Content-Type", "Authorization"],
             #     "allow_credentials": True
             # }
         )
