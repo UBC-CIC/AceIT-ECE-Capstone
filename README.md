@@ -131,6 +131,7 @@ Method 2: Manual deployment without using GitHub Actions.
 - AWS Bedrock Request Access to: (In AWS Console > AWS Bedrock)
   - Llama 3.3
   - Amazon Text Embeddings Titan v2
+- Clone this Github repository.
 
 Method I. Using Github Action [Recommended]
 1. Create an IAM role that GitHub Actions can assume to deploy resources on AWS.
@@ -146,6 +147,7 @@ Method I. Using Github Action [Recommended]
     - AWS_ROLE_ARN: The ARN of the IAM Role created.
     - AWS_REGION: Your preferred AWS region (e.g., us-west-2).
     - AWS_ACCOUNT_ID: Your AWS Account ID.
+  1.10 Open the github workflows in .github/workflows/deploy.yml, replace the value of ```role-to-assume``` and ```aws-region``` to be ```${{ secrets.AWS_ROLE_ARN }}``` and ```${{ secrets.AWS_REGION }}``` respectively.
 2. Create an S3 bucket to host the frontend files.
   2.1 Go to AWS Console > S3 > Create bucket > General Purpose, make sure you are in the desired region.
   2.2 Give a name to the bucket, this is for the front end, so uncheck ```Block all public access```
@@ -207,9 +209,41 @@ TODO (e.g. APIs and styling / branding)
 
 #### Backend Code Configuration
 
-1. manual create canavs secret
-2. in get_canvas_secret.py, replace the secret_name with the name of your secret (e.g. "CanvasSecrets")
-3. 
+1. Due to security considerations, it is the best practice to manually create Canavs Secrets.
+  1.1 Go to AWS Console > Secrets Manager > Store a new secret
+  1.2 Select secret type = Other type of secret
+  1.3 Under the Secret Value - Key/Value, enter: 
+
+| Secret key      | Secret value |
+| --------------- | ------------ |
+| ltiKey          | The LTI Key obtained from Canvas   |
+| redirectURI     | The CloudFront Distribution domain name set up in AWS Configuration steps     |
+| jwkPrivateKey   | The JWK PrivateKey issued by the Canvas server   |
+| baseURL         | The base URL of the Canvas server    |
+| ltiKeyId        | The LTI Key Id displayed on Canvas     |
+| serverKey       | The server Key Id of Canvas   |
+| kid             | The ID associated with the key    |
+| adminAccessToken| The Canvas Admin Access Token     |
+| adminAccountID  | The Canvas Admin Account ID    |
+| serverKeyId     | The Canvas Server key ID    |
+
+2. Give this Secret a name. If the name is other than "
+CanvasSecrets", please also change the secret name in get_canvas_secret.py. Replace ```secret_name``` with the name of your secret (e.g. "CanvasSecrets")
+3. Once the necessary secrets have been configured in AWS Secrets Manager, you can deploy the backend code. There are two methods for deployment:
+  - Method I. Using Github Action [Recommended]
+  3.1.1 Create a new GitHub repository (if not already done):
+    Go to GitHub → New Repository → Set the repository name (e.g., AceIT-ECE-Capstone).
+  3.1.2 Commit and push your cloned repository to GitHub.
+  3.1.3 Ensure that GitHub Secrets are properly set up in AWS Configuration step
+  3.1.4 Trigger the GitHub Actions deployment - Push any changes to main to trigger the deployment workflow
+  3.1.5 If successful, the backend Lambda functions and infrastructure should be deployed. You can check the deployed stack url in GitHub Repository > Actions > Select the latest deployment workflow.
+
+  - Method II. Manual Deployment Without GitHub Actions
+  3.2.1 If you prefer not to use GitHub Actions, follow these steps to deploy the backend manually using AWS CDK.
+  3.2.2 Install AWS CDK, python dependencies by running ```npm install -g aws-cdk```, ```pip install -r requirements.txt``` and ```pip install -r requirements-dev.txt```in terminal and make sure the working directory is at the root, i.e. ACEIT-ECE-CAPSTONE.
+  3.2.3 Make sure you've completed steps in AWS Configuration Method II to set up your AWS Credentials
+  3.2.4 Type in terminal ```cdk bootstrap```, then type ```cdk deploy --require-approval never```
+  3.2.5 If successful, there will be a deployed stack url displayed in your terminal. these will be your backend function urls.
 
 #### Infrastructure Code Configuration
 
