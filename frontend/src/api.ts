@@ -445,7 +445,8 @@ export const getSuggestionsAPI = async (
 };
 
 export const updateCourseContentAPI = async (
-  courseId: string
+  courseId: string,
+  isAsync?: boolean
 ): Promise<void> => {
   if (!accessToken) throw new Error("Access token is not set");
 
@@ -458,6 +459,7 @@ export const updateCourseContentAPI = async (
       },
       body: JSON.stringify({
         course: courseId,
+        async: isAsync,
       }),
     });
 

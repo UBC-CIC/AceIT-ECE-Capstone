@@ -146,8 +146,8 @@ export const CourseConfigurationSection: React.FC<
   const handleUpdateContent = async () => {
     setIsUpdating(true);
     try {
-      await updateCourseContentAPI(selectedCourse.id);
-      toast.success("Course content updated successfully!");
+      await updateCourseContentAPI(selectedCourse.id, true);
+      toast.success("Starting to update content. This may take a few minutes.");
     } catch (error) {
       console.error("Error updating course content:", error);
       toast.error("Failed to update course content");

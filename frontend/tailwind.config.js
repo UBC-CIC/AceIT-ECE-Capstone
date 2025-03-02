@@ -1,9 +1,22 @@
-import dotenv from "dotenv";
-dotenv.config();
+require("dotenv").config();
 
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  safelist: [
+    "bg-primary",
+    "bg-secondary",
+    "bg-tertiary",
+    "bg-disabled",
+    "text-primary",
+    "text-secondary",
+    "text-tertiary",
+    "text-disabled",
+    "border-primary",
+    "border-secondary",
+    "border-tertiary",
+    "border-disabled",
+  ],
   theme: {
     extend: {
       colors: {
