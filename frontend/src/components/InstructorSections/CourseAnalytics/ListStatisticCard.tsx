@@ -108,7 +108,7 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
             </ol>
             {hasMoreItems && (
               <button
-                className="mt-2.5 font-semibold text-blue-400 max-md:max-w-full text-left"
+                className="mt-2.5 font-semibold text-primary max-md:max-w-full text-left"
                 onClick={() => setShowAll(!showAll)}
               >
                 <FormattedMessage

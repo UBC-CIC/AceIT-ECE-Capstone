@@ -5,7 +5,7 @@ export const colors: {
   disabled: string;
 } = {
   primary: "#1E1B4B",
-  secondary: "#EDE9FE",
+  secondary: "#dae8ff",
   tertiary: "#FFFFFF",
   disabled: "#E5E5E5",
 };
