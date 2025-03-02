@@ -16,8 +16,7 @@ import {
 import SendIcon from "../../assets/Send-Icon.svg";
 import { ThreeDots } from "react-loader-spinner";
 import { FormattedMessage, useIntl } from "react-intl";
-
-const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+import { colors } from "../../../theme.ts";
 
 export const ChatSection: React.FC<ChatSectionProps> = ({
   selectedCourse,
@@ -187,7 +186,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
               height="50"
               width="50"
               radius="9"
-              color={COLOUR_PRIMARY}
+              color={colors.primary}
               ariaLabel="loading-conversation"
             />
           </div>
@@ -247,7 +246,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
                 ref={inputRef}
                 id="messageInput"
                 type="text"
-                className="flex-1 shrink my-auto text-sm basis-3 max-md:max-w-full outline-none"
+                className="flex-1 shrink my-auto text-sm basis-3 max-md:max-w-full outline-none text-primary"
                 placeholder={intl.formatMessage({
                   id: "chat.inputPlaceholder",
                 })}

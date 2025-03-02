@@ -2,8 +2,9 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { HeaderProps } from "../../../types";
 import { FormattedMessage } from "react-intl";
+import { branding } from "../../../../theme.ts";
 const UBCLogoWhite = new URL(
-  `../../../assets/${import.meta.env.VITE_REACT_APP_THEME_LOGO_FILE_NAME}`,
+  `../../../assets/${branding.logo}`,
   import.meta.url
 ).href;
 import { LanguagePopup } from "./LanguagePopup";

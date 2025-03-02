@@ -20,8 +20,7 @@ import {
 } from "../../api";
 import { ThreeDots } from "react-loader-spinner";
 import { MaterialsAccordion } from "./MaterialsAccordion";
-
-const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+import { colors } from "../../../theme.ts";
 
 type CourseConfigurationSectionProps = {
   selectedCourse: CourseProps;
@@ -148,9 +147,9 @@ export const CourseConfigurationSection: React.FC<
     try {
       await updateCourseContentAPI(selectedCourse.id, true);
       toast.success("Starting to update content. This may take a few minutes.");
+      setIsUpdating(false);
     } catch (error) {
-      console.error("Error updating course content:", error);
-      toast.error("Failed to update course content");
+      console.error("Error updating content:", error);
     } finally {
       setIsUpdating(false);
     }
@@ -197,7 +196,7 @@ export const CourseConfigurationSection: React.FC<
           height="50"
           width="50"
           radius="9"
-          color={COLOUR_PRIMARY}
+          color={colors.primary}
           ariaLabel="loading-configuration"
         />
       </div>
@@ -222,7 +221,7 @@ export const CourseConfigurationSection: React.FC<
         disabled={isSaving}
       />
 
-      <div className="mx-0 my-8 h-0.5 bg-secondary" />
+      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
 
       <div className="mb-3 text-sm leading-normal text-primary">
         <span className="font-semibold text-primary">
@@ -248,29 +247,26 @@ export const CourseConfigurationSection: React.FC<
               disabled={isSaving}
             />
           </div>
-          <div className="h-8 bg-primary mx-4" style={{ width: "2px" }} />
+          <div
+            className="h-8 bg-primary bg-opacity-10 mx-4"
+            style={{ width: "2px" }}
+          />
           <button
             type="button"
             onClick={handleUpdateContent}
             disabled={isUpdating}
             className={`px-6 py-2 text-sm font-bold text-white rounded-lg cursor-pointer ${
               !isUpdating
-                ? "bg-primary hover:bg-secondary"
+                ? "bg-primary hover:bg-primary hover:bg-opacity-85"
                 : "bg-primary bg-opacity-50 cursor-not-allowed"
             } border-[none] w-fit`}
           >
-            <FormattedMessage
-              id={
-                isUpdating
-                  ? "configuration.updating"
-                  : "configuration.updateNow"
-              }
-            />
+            <FormattedMessage id="configuration.updateNow" />
           </button>
         </div>
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-secondary" />
+      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
 
       <div className="mb-8">
         <div className="mb-3 text-sm leading-normal text-primary">
@@ -301,7 +297,7 @@ export const CourseConfigurationSection: React.FC<
         <MaterialsAccordion courseId={selectedCourse.id} />
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-secondary" />
+      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
 
       <div className="mb-8">
         <div className="mb-3 text-sm leading-normal text-primary">
@@ -326,7 +322,7 @@ export const CourseConfigurationSection: React.FC<
         </div>
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-secondary" />
+      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
 
       <div className="mb-3 text-sm leading-normal text-primary">
         <span className="font-semibold text-primary">
@@ -355,9 +351,9 @@ export const CourseConfigurationSection: React.FC<
       <button
         type="submit"
         disabled={!hasChanges || isSaving}
-        className={`px-6 py-3 mt-8 text-sm font-bold text-white rounded-lg cursor-pointer ${
+        className={`px-6 py-3 mt-8 text-sm font-bold text-white rounded-lg ${
           hasChanges && !isSaving
-            ? "bg-primary hover:bg-secondary"
+            ? "bg-primary hover:bg-primary hover:bg-opacity-85 cursor-pointer"
             : "bg-primary bg-opacity-50 cursor-not-allowed"
         } border-[none] max-sm:w-full`}
       >

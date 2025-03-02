@@ -13,7 +13,7 @@ export const Toggle: React.FC<ToggleProps> = ({ isOn, onToggle, disabled }) => {
         }}
         type="button" // Prevent form submission
         className={`inline-flex items-center px-1.5 rounded-2xl w-[80px] h-[38px] ${
-          isOn ? "bg-primary" : "bg-secondary"
+          isOn ? "bg-primary" : "bg-primary bg-opacity-50"
         } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
         role="switch"
         aria-checked={isOn}

@@ -8,8 +8,7 @@ import {
   PreviousConversationListProps,
   ConversationSession,
 } from "../../../../types";
-
-const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+import { colors } from "../../../../../theme.ts";
 
 export const PreviousConversationList: React.FC<
   PreviousConversationListProps
@@ -52,7 +51,7 @@ export const PreviousConversationList: React.FC<
           height="50"
           width="50"
           radius="9"
-          color={COLOUR_PRIMARY}
+          color={colors.primary}
           ariaLabel="loading-conversations"
         />
       </div>
@@ -99,7 +98,7 @@ export const PreviousConversationList: React.FC<
                   height="20"
                   width="20"
                   radius="9"
-                  color={COLOUR_PRIMARY}
+                  color={colors.primary}
                   ariaLabel="loading-conversation"
                 />
               </div>

@@ -48,7 +48,7 @@ export const SideBar: React.FC<SideBarProps> = ({
                 alt="Info Icon"
                 className="object-contain shrink-0 self-stretch my-auto w-4 aspect-square"
               />
-              <div className="absolute bottom-full mb-2 hidden group-hover:block bg-primary text-tertiary text-xs rounded py-1 px-2 w-64">
+              <div className="absolute top-full mt-2 hidden group-hover:block bg-primary text-tertiary text-xs rounded py-1 px-2 w-64">
                 <FormattedMessage id="sidebar.unavailableTooltip" />
               </div>
             </div>

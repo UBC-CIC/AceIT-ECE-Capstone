@@ -3,8 +3,7 @@ import { CourseMaterial, MaterialsAccordionProps } from "../../types";
 import { getAllCourseMaterialsAPI } from "../../api";
 import { ThreeDots } from "react-loader-spinner";
 import { FormattedMessage } from "react-intl";
-
-const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+import { colors } from "../../../theme.ts";
 
 export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
   courseId,
@@ -42,13 +41,15 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
         onClick={handleToggle}
         className="w-full px-4 py-3 text-left bg-white hover:bg-secondary flex justify-between items-center"
       >
-        <span className="font-medium text-sm text-primary">
-          <FormattedMessage id="configuration.viewIncludedMaterials" />
-        </span>
-        <br />
-        <span className="text-sm leading-normal text-primary">
-          <FormattedMessage id="configuration.materialsDescription" />
-        </span>
+        <div className="text-sm leading-normal text-primary">
+          <span className="font-semibold text-primary">
+            <FormattedMessage id="configuration.viewIncludedMaterials" />
+          </span>
+          <br />
+          <span>
+            <FormattedMessage id="configuration.materialsDescription" />
+          </span>
+        </div>
         <svg
           className={`w-5 h-5 transition-transform ${
             isOpen ? "rotate-180" : ""
@@ -77,7 +78,7 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
                 height="30"
                 width="30"
                 radius="9"
-                color={COLOUR_PRIMARY}
+                color={colors.primary}
                 ariaLabel="loading-materials"
               />
             </div>

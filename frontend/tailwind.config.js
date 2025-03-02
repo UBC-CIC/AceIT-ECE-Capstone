@@ -1,4 +1,4 @@
-require("dotenv").config();
+const { colors } = require("./theme.js");
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -19,12 +19,7 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        primary: process.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY,
-        secondary: process.env.VITE_REACT_APP_THEME_COLOUR_SECONDARY,
-        tertiary: process.env.VITE_REACT_APP_THEME_COLOUR_TERTIARY,
-        disabled: process.env.VITE_REACT_APP_THEME_COLOUR_DISABLED,
-      },
+      colors,
     },
   },
   plugins: [],

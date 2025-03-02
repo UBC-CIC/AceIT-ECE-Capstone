@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src", "../ace-it/src/Message.tsx"]
+  "include": ["src", "../ace-it/src/Message.tsx", "theme.js"]
 }

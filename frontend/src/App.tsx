@@ -7,14 +7,8 @@ import { handleAuthentication } from "./auth.ts";
 import { setAccessToken, fetchCoursesAPI, fetchUserInfoAPI } from "./api.ts";
 import { SkeletonTheme } from "react-loading-skeleton";
 import { IntlProvider } from "react-intl";
-import { UserProps, CourseProps } from "./types";
-
-const BG_FIRST = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_FIRST;
-const BG_SECOND = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_SECOND;
-const BG_THIRD = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_THIRD;
-const BG_FOURTH = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_FOURTH;
-const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
-const COLOUR_SECONDARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_SECONDARY;
+import { UserProps, CourseProps, UserRole } from "./types";
+import { colors, bg_gradient } from "../theme.ts";
 
 // Import all translation files
 import enMessages from "./translations/en.json";
@@ -25,6 +19,8 @@ import frCAMessages from "./translations/fr-CA.json";
 import deMessages from "./translations/de.json";
 import ruMessages from "./translations/ru.json";
 import esMessages from "./translations/es.json";
+
+const USE_MOCK_DATA = import.meta.env.VITE_REACT_APP_USE_MOCK_DATA;
 
 // Create a messages object that will hold all translations
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,6 +35,37 @@ const messages: { [key: string]: any } = {
   es: esMessages,
 };
 
+const mockData = {
+  user: {
+    userId: "123",
+    userName: "Zane",
+    preferred_language: "en",
+  },
+  fetchedCourses: [
+    {
+      id: "1",
+      courseCode: "TEST101",
+      name: "Test Instructor Course",
+      userCourseRole: "INSTRUCTOR" as UserRole,
+      isAvailable: true,
+    },
+    {
+      id: "2",
+      courseCode: "TEST202",
+      name: "Test Student Course",
+      userCourseRole: "STUDENT" as UserRole,
+      isAvailable: true,
+    },
+    {
+      id: "2",
+      courseCode: "TEST302",
+      name: "Test Student Course",
+      userCourseRole: "STUDENT" as UserRole,
+      isAvailable: false,
+    },
+  ],
+};
+
 export const App = () => {
   const [accessToken, setAccessTokenState] = useState<string>();
   const [locale, setLocale] = useState("en");
@@ -48,18 +75,27 @@ export const App = () => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        // Perform authentication
-        await handleAuthentication((token) => {
-          setAccessToken(token);
-          setAccessTokenState(token);
-        });
+        let user: UserProps, fetchedCourses: CourseProps[];
 
-        // Fetch user info and courses
-        toast.loading("Loading your info from Canvas...");
-        const [user, fetchedCourses] = await Promise.all([
-          fetchUserInfoAPI(),
-          fetchCoursesAPI(),
-        ]);
+        // Authenticate and load initial application data
+        if (USE_MOCK_DATA) {
+          setAccessToken("123");
+          setAccessTokenState("123");
+          user = mockData.user;
+          fetchedCourses = mockData.fetchedCourses;
+        } else {
+          // Perform authentication
+          await handleAuthentication((token) => {
+            setAccessToken(token);
+            setAccessTokenState(token);
+          });
+
+          toast.loading("Loading your info from Canvas...");
+          [user, fetchedCourses] = await Promise.all([
+            fetchUserInfoAPI(),
+            fetchCoursesAPI(),
+          ]);
+        }
 
         setUserInfo(user);
         setLocale(user.preferred_language);
@@ -86,13 +122,13 @@ export const App = () => {
       <div
         className="h-screen flex flex-col px-6 py-5 w-auto bg-white"
         style={{
-          background: `linear-gradient(to bottom right, ${BG_FIRST}, ${BG_SECOND}, ${BG_THIRD}, ${BG_FOURTH})`,
+          background: `linear-gradient(to bottom right, ${bg_gradient.first}, ${bg_gradient.second}, ${bg_gradient.third}, ${bg_gradient.fourth})`,
         }}
       >
         <StrictMode>
           <SkeletonTheme
-            baseColor={COLOUR_PRIMARY}
-            highlightColor={COLOUR_SECONDARY}
+            baseColor={colors.secondary}
+            highlightColor={colors.tertiary}
           >
             <Toaster position="top-center" />
             {accessToken !== null && userInfo && courses && (

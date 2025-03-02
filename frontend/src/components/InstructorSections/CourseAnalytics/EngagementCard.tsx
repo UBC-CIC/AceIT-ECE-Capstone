@@ -47,6 +47,22 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
 }) => {
   const intl = useIntl();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const displayTimeframes = [
     {
       display: intl.formatMessage({ id: "analytics.timeframe.week" }),
@@ -68,7 +84,7 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
         <div className="text-sm font-semibold text-primary">
           <FormattedMessage id="analytics.studentEngagement" />
         </div>
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2 text-sm font-semibold text-primary"
@@ -86,7 +102,7 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
               {displayTimeframes.map((display) => (
                 <button
                   key={display.value}
-                  className="block w-full px-4 py-2 text-left hover:bg-secondary"
+                  className="block w-full px-4 py-2 text-left text-sm font-semibold hover:bg-primary hover:bg-opacity-5"
                   onClick={() => {
                     onPeriodChange(displayToTimeframe(display.value, intl));
                     setIsDropdownOpen(false);

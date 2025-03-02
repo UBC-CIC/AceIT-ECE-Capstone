@@ -14,7 +14,22 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
 }) => {
   const [showAll, setShowAll] = React.useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
   const intl = useIntl();
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const displayTimeframes = [
     {
@@ -38,10 +53,10 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
     <div className="flex flex-col flex-1 py-px text-sm bg-secondary rounded-lg border border-solid border-primary border-opacity-10 min-w-[400px] max-md:max-w-full">
       <div className="flex flex-wrap gap-5 justify-between px-6 py-4 w-full font-semibold text-tertiary rounded-lg bg-primary shadow-[0px_2px_25px_rgba(0,0,0,0.15)] max-md:px-5 max-md:max-w-full">
         <div>{title}</div>
-        <div className="flex gap-2 text-right relative">
+        <div className="flex gap-2 text-right relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 text-sm"
           >
             {timeframeToDisplay(timeframe, intl)}
             <img
@@ -56,7 +71,7 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
               {displayTimeframes.map((display) => (
                 <button
                   key={display.value}
-                  className="block w-full px-4 py-2 text-left hover:bg-secondary"
+                  className="block w-full px-4 py-2 text-left text-sm hover:bg-primary hover:bg-opacity-5"
                   onClick={() => {
                     onPeriodChange(displayToTimeframe(display.value, intl));
                     setIsDropdownOpen(false);

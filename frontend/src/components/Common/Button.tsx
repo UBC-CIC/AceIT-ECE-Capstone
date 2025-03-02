@@ -25,7 +25,7 @@ export const Button: React.FC<ButtonProps> = ({
   return (
     <div className={`relative w-full flex-grow`}>
       <button
-        className={`flex gap-2.5 justify-center items-center px-2.5 py-3 text-sm font-bold text-primary rounded-lg border-2 border-solid border-primary h-full hover:bg-secondary ${
+        className={`flex gap-2.5 justify-center items-center px-2.5 py-3 text-sm font-bold text-primary rounded-lg border-2 border-solid border-primary h-full hover:bg-primary hover:bg-opacity-85 ${
           isDisabled ? "opacity-50 cursor-not-allowed hover:bg-transparent" : ""
         } ${className}`}
         onClick={handleButtonClick}
@@ -46,7 +46,7 @@ export const Button: React.FC<ButtonProps> = ({
           {dropdownValues.map((value, index) => (
             <div
               key={index}
-              className="px-2.5 py-2 hover:bg-secondary cursor-pointer"
+              className="px-2.5 py-2 hover:bg-primary hover:bg-opacity-5 cursor-pointer"
               onClick={() => {
                 setShowDropdown(false);
                 if (onClick) onClick(value);

@@ -61,7 +61,7 @@ export const LanguagePopup: React.FC<LanguagePopupProps> = ({
               disabled={!hasLanguageChanged}
               className={`px-6 py-3 text-sm font-bold text-white rounded-lg ${
                 hasLanguageChanged
-                  ? "bg-primary hover:bg-secondary"
+                  ? "bg-primary hover:bg-primary hover:bg-opacity-85"
                   : "bg-primary opacity-50 cursor-not-allowed"
               }`}
             >
