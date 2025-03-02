@@ -11,6 +11,12 @@ Ace It is an AI Study Assistant designed to help university students with their 
 
 This repository contains the complete code for the project, including the frontend, backend, and AWS infrastructure.
 
+### Demo
+
+Note that the quality of the demo video is lower than actual due to gif compression.
+
+<img src="./docs/demo.gif" width="750">
+
 ### User Experience & Features
 
 Users may have one of two roles for each course they are associated with in Canvas, either "Student" or "Instructor". Users are not assigned roles for courses in Ace It, the solution instead uses the roles specified in Canvas.
@@ -47,12 +53,6 @@ The solution also features:
 1. Easy configurable theming and branding.
 2. Serverless AWS cloud deployment.
 3. Model agnostic LLM support.
-
-### Demo
-
-Note that the quality of the demo video is lower than actual due to gif compression.
-
-<img src="./docs/demo.gif" width="750">
 
 ### Screenshots
 
