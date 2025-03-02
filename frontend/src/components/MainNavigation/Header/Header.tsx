@@ -99,7 +99,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="self-stretch my-auto">•</div>
             <button
               onClick={onLogout}
-              className="self-stretch my-auto font-semibold leading-7 w-[60px] hover:text-secondary transition-colors duration-200 hover:underline"
+              className="self-stretch my-auto font-semibold leading-7 hover:text-secondary transition-colors duration-200 hover:underline"
             >
               <FormattedMessage id="header.logout" defaultMessage="Log Out" />
             </button>

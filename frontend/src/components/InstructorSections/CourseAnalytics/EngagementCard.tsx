@@ -16,7 +16,7 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
   loading,
 }) => {
   return (
-    <div className="flex-1 min-w-[220px] max-w-[220px]">
+    <div className="flex-1 min-w-[300px] max-w-[300px]">
       <div className="flex gap-3 items-center p-2">
         <img
           loading="lazy"
