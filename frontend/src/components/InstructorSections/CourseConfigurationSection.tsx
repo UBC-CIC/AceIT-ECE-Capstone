@@ -200,7 +200,10 @@ export const CourseConfigurationSection: React.FC<
   }
 
   return (
-    <form onSubmit={handleSave} className="h-full overflow-y-auto">
+    <form
+      onSubmit={handleSave}
+      className="flex flex-col h-full overflow-y-auto pb-6"
+    >
       <div className="mb-3 text-sm leading-normal text-primary pt-3">
         <span className="font-semibold text-primary">
           <FormattedMessage id="configuration.enableAccess" />
@@ -217,7 +220,7 @@ export const CourseConfigurationSection: React.FC<
         disabled={isSaving}
       />
 
-      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
+      <div className="border-b-2 border-solid border-primary border-opacity-20 my-8 w-full" />
 
       <div className="mb-3 text-sm leading-normal text-primary">
         <span className="font-semibold text-primary">
@@ -262,9 +265,9 @@ export const CourseConfigurationSection: React.FC<
         </div>
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
+      <div className="border-b-2 border-solid border-primary border-opacity-20 my-8 w-full" />
 
-      <div className="mb-8">
+      <div>
         <div className="mb-3 text-sm leading-normal text-primary">
           <span className="font-semibold text-primary">
             <FormattedMessage id="configuration.includedContent" />
@@ -293,9 +296,9 @@ export const CourseConfigurationSection: React.FC<
         <MaterialsAccordion courseId={selectedCourse.id} />
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
+      <div className="border-b-2 border-solid border-primary border-opacity-20 my-8 w-full" />
 
-      <div className="mb-8">
+      <div>
         <div className="mb-3 text-sm leading-normal text-primary">
           <span className="font-semibold text-primary">
             <FormattedMessage id="configuration.supportedQuestions" />
@@ -318,7 +321,7 @@ export const CourseConfigurationSection: React.FC<
         </div>
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-primary bg-opacity-10" />
+      <div className="border-b-2 border-solid border-primary border-opacity-20 my-8 w-full" />
 
       <div className="mb-3 text-sm leading-normal text-primary">
         <span className="font-semibold text-primary">
@@ -351,7 +354,7 @@ export const CourseConfigurationSection: React.FC<
           hasChanges && !isSaving
             ? "bg-primary hover:bg-primary hover:bg-opacity-85 cursor-pointer"
             : "bg-primary bg-opacity-50 cursor-not-allowed"
-        } border-[none] max-sm:w-full`}
+        } border-[none] max-sm:w-full mb-0`}
       >
         <FormattedMessage id="configuration.saveButton" />
       </button>

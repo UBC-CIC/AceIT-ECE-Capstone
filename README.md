@@ -50,11 +50,17 @@ The solution also features:
 
 ### Demo
 
-TODO: Add gif of short demo video highlighting the key features
+Note that the quality of the demo video is lower than actual due to gif compression.
+
+<img src="./docs/demo.gif" width="750">
 
 ### Screenshots
 
-TODO: Add table of screenshots of key functionality
+|                                         |                                         |
+| :-------------------------------------: | :-------------------------------------: |
+| ![Screenshot 1](./docs/screenshot1.png) | ![Screenshot 2](./docs/screenshot2.png) |
+| :-------------------------------------: | :-------------------------------------: |
+| ![Screenshot 3](./docs/screenshot3.png) | ![Screenshot 4](./docs/screenshot4.png) |
 
 ---
 
@@ -262,3 +268,5 @@ There are two key types of frontend configuration. They are as follows:
 
 1. Configure theme and branding in `frontend/theme.ts`
 2. Configure API destinations in `frontend/.env`
+
+Further details on what to configure in each of these files can be found within the files themselves.

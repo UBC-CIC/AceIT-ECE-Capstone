@@ -32,22 +32,23 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
   const [isInitialLoading, setIsInitialLoading] = useState<boolean>(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
 
+  const messageContainerRef = useRef<HTMLDivElement>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     setTimeout(() => {
-      if (messageEndRef.current) {
-        messageEndRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-        });
+      if (messageContainerRef.current) {
+        messageContainerRef.current.scrollTop =
+          messageContainerRef.current.scrollHeight;
       }
-    }, 100);
+    }, 50);
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messageList.length > 0) {
+      scrollToBottom();
+    }
   }, [messageList]);
 
   useEffect(() => {
@@ -133,7 +134,6 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       };
       setMessageList([...messageList, userMessage]);
       messageInput.value = "";
-      scrollToBottom(); // Add explicit scroll after user message
 
       setIsLoading(true);
       setSuggestionList([]);
@@ -143,7 +143,6 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
       );
       setMessageList((prevMessages) => [...prevMessages, ...aiResponses]);
       setIsLoading(false);
-      scrollToBottom(); // Add explicit scroll after AI response
     }
   };
 
@@ -179,7 +178,10 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
 
   return (
     <div className="h-full flex flex-col min-h-0">
-      <div className="flex-1 overflow-y-auto min-h-0 bg-transparent">
+      <div
+        ref={messageContainerRef}
+        className="flex-1 overflow-y-auto min-h-0 bg-transparent"
+      >
         {isInitialLoading ? (
           <div className="flex justify-center items-center h-64">
             <ThreeDots
@@ -199,7 +201,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
                 onConversationSelect={handleConversationSelect}
               />
             </div>
-            <div className="flex flex-col-reverse flex-1 mt-8">
+            <div className="flex flex-col-reverse flex-1 mt-8 pb-2">
               {isLoading && <LoadingMessage />}
               {[...messageList].reverse().map((message, index) => (
                 <div key={index} className="mb-4">
@@ -210,14 +212,14 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
                   />
                 </div>
               ))}
+              <div ref={messageEndRef} className="h-4" />
             </div>
-            <div ref={messageEndRef} />
           </div>
         )}
       </div>
 
       {!isInitialLoading && (
-        <div className="flex-none bg-transparent">
+        <div className="flex-none bg-transparent z-10">
           {suggestionList != null && suggestionList.length > 0 && (
             <div className="flex flex-col mb-4 w-full text-sm">
               <div className="font-bold text-primary">

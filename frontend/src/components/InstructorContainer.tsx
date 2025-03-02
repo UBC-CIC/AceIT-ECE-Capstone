@@ -57,8 +57,8 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
           </div>
         </div>
       )}
-      <div className="flex-1 min-h-0 px-6 pb-6 overflow-y-auto">
-        <div className="h-full">{renderContent()}</div>
+      <div className="flex-1 min-h-0 px-6 pb-4 overflow-hidden">
+        <div className="h-full overflow-hidden">{renderContent()}</div>
       </div>
     </div>
   );

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { ListStatisticCardProps } from "../../../types";
-import { timeframeToDisplay, displayToTimeframe } from "../../../utils";
+import { ListStatisticCardProps, Timeframe } from "../../../types";
 import Skeleton from "react-loading-skeleton";
 import WhiteArrowIcon from "../../../assets/White-Arrow-Icon.svg";
 
@@ -34,17 +33,20 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
   const displayTimeframes = [
     {
       display: intl.formatMessage({ id: "analytics.timeframe.week" }),
-      value: "week",
+      value: "WEEK",
     },
     {
       display: intl.formatMessage({ id: "analytics.timeframe.month" }),
-      value: "month",
+      value: "MONTH",
     },
     {
       display: intl.formatMessage({ id: "analytics.timeframe.year" }),
-      value: "year",
+      value: "YEAR",
     },
   ];
+
+  const currentTimeframeDisplay =
+    displayTimeframes.find((t) => t.value === timeframe)?.display || timeframe;
 
   const displayedItems = showAll ? items : items.slice(0, 5);
   const hasMoreItems = items.length > 5;
@@ -58,7 +60,7 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2 text-sm"
           >
-            {timeframeToDisplay(timeframe, intl)}
+            {currentTimeframeDisplay}
             <img
               loading="lazy"
               src={WhiteArrowIcon}
@@ -73,7 +75,7 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
                   key={display.value}
                   className="block w-full px-4 py-2 text-left text-sm hover:bg-primary hover:bg-opacity-5"
                   onClick={() => {
-                    onPeriodChange(displayToTimeframe(display.value, intl));
+                    onPeriodChange(display.value as Timeframe);
                     setIsDropdownOpen(false);
                   }}
                 >

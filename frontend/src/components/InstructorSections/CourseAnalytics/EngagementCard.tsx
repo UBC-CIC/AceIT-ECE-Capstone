@@ -1,7 +1,10 @@
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { MetricsCardProps, EngagementCardProps } from "../../../types";
-import { timeframeToDisplay, displayToTimeframe } from "../../../utils";
+import {
+  MetricsCardProps,
+  EngagementCardProps,
+  Timeframe,
+} from "../../../types";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import BlueArrowIcon from "../../../assets/Blue-Arrow-Icon.svg";
@@ -66,17 +69,20 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
   const displayTimeframes = [
     {
       display: intl.formatMessage({ id: "analytics.timeframe.week" }),
-      value: "week",
+      value: "WEEK",
     },
     {
       display: intl.formatMessage({ id: "analytics.timeframe.month" }),
-      value: "month",
+      value: "MONTH",
     },
     {
       display: intl.formatMessage({ id: "analytics.timeframe.year" }),
-      value: "year",
+      value: "TERM",
     },
   ];
+
+  const currentTimeframeDisplay =
+    displayTimeframes.find((t) => t.value === timeframe)?.display || timeframe;
 
   return (
     <div className="flex flex-col bg-secondary rounded-lg border border-solid border-primary border-opacity-10 w-full">
@@ -89,7 +95,7 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-2 text-sm font-semibold text-primary"
           >
-            {timeframeToDisplay(timeframe, intl)}
+            {currentTimeframeDisplay}
             <img
               loading="lazy"
               src={BlueArrowIcon}
@@ -104,7 +110,7 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
                   key={display.value}
                   className="block w-full px-4 py-2 text-left text-sm font-semibold hover:bg-primary hover:bg-opacity-5"
                   onClick={() => {
-                    onPeriodChange(displayToTimeframe(display.value, intl));
+                    onPeriodChange(display.value as Timeframe);
                     setIsDropdownOpen(false);
                   }}
                 >

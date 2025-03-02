@@ -25,7 +25,11 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
     React.useState<CourseCommonQuestions>();
   const [mostReferencedMaterialsData, setMostReferencedMaterialsData] =
     React.useState<CourseMostReferencedMaterials>();
-  const [loading, setLoading] = React.useState(true);
+
+  // Separate loading states for each card
+  const [engagementLoading, setEngagementLoading] = React.useState(true);
+  const [questionsLoading, setQuestionsLoading] = React.useState(true);
+  const [materialsLoading, setMaterialsLoading] = React.useState(true);
 
   const [studentEngagementPeriod, setStudentEngagementPeriod] =
     React.useState<Timeframe>("WEEK");
@@ -35,18 +39,18 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
     React.useState<Timeframe>("WEEK");
 
   const handlePeriodChangeEngagement = async (newTimeframe: Timeframe) => {
-    setLoading(true);
+    setEngagementLoading(true);
     const data = await getCourseStudentEngagementAPI(
       selectedCourse.id,
       newTimeframe
     );
     setStudentEngagementData(data);
     setStudentEngagementPeriod(newTimeframe);
-    setLoading(false);
+    setEngagementLoading(false);
   };
 
   const handlePeriodChangeQuestions = async (newTimeframe: Timeframe) => {
-    setLoading(true);
+    setQuestionsLoading(true);
     const questions = await getTopQuestionsByPeriodAPI(
       selectedCourse.id,
       10,
@@ -54,11 +58,11 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
     );
     setMostCommonQuestionsData({ questions });
     setMostCommonQuestionsPeriod(newTimeframe);
-    setLoading(false);
+    setQuestionsLoading(false);
   };
 
   const handlePeriodChangeMaterials = async (newTimeframe: Timeframe) => {
-    setLoading(true);
+    setMaterialsLoading(true);
     const materials = await getTopMaterialsByPeriodAPI(
       selectedCourse.id,
       10,
@@ -66,16 +70,20 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
     );
     setMostReferencedMaterialsData({ materials });
     setMostReferencedMaterialsPeriod(newTimeframe);
-    setLoading(false);
+    setMaterialsLoading(false);
   };
 
   React.useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      await handlePeriodChangeEngagement(studentEngagementPeriod);
-      await handlePeriodChangeQuestions(mostCommonQuestionsPeriod);
-      await handlePeriodChangeMaterials(mostReferencedMaterialsPeriod);
-      setLoading(false);
+      setEngagementLoading(true);
+      setQuestionsLoading(true);
+      setMaterialsLoading(true);
+
+      await Promise.all([
+        handlePeriodChangeEngagement(studentEngagementPeriod),
+        handlePeriodChangeQuestions(mostCommonQuestionsPeriod),
+        handlePeriodChangeMaterials(mostReferencedMaterialsPeriod),
+      ]);
     };
     fetchData();
   }, [selectedCourse]);
@@ -88,7 +96,7 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
         studentsUsingAceIt={studentEngagementData?.uniqueStudents ?? 0}
         timeframe={studentEngagementPeriod}
         onPeriodChange={handlePeriodChangeEngagement}
-        loading={loading}
+        loading={engagementLoading}
       />
       <div className="flex flex-wrap gap-4 justify-center items-start ">
         <ListStatisticCard
@@ -101,7 +109,7 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
             })) ?? []
           }
           onPeriodChange={handlePeriodChangeQuestions}
-          loading={loading}
+          loading={questionsLoading}
         />
         <ListStatisticCard
           title={intl.formatMessage({
@@ -110,7 +118,7 @@ export const CourseAnalyticsSection: React.FC<CourseAnalyticsSectionProps> = ({
           timeframe={mostReferencedMaterialsPeriod}
           items={mostReferencedMaterialsData?.materials ?? []}
           onPeriodChange={handlePeriodChangeMaterials}
-          loading={loading}
+          loading={materialsLoading}
         />
       </div>
     </div>
