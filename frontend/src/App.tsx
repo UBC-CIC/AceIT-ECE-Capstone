@@ -20,7 +20,7 @@ import deMessages from "./translations/de.json";
 import ruMessages from "./translations/ru.json";
 import esMessages from "./translations/es.json";
 
-const USE_MOCK_DATA = import.meta.env.VITE_REACT_APP_USE_MOCK_DATA;
+const USE_MOCK_DATA = import.meta.env.VITE_REACT_APP_USE_MOCK_DATA === "true";
 
 // Create a messages object that will hold all translations
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
