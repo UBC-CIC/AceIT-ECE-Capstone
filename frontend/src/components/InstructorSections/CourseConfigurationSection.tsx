@@ -21,6 +21,8 @@ import {
 import { ThreeDots } from "react-loader-spinner";
 import { MaterialsAccordion } from "./MaterialsAccordion";
 
+const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+
 type CourseConfigurationSectionProps = {
   selectedCourse: CourseProps;
 };
@@ -195,7 +197,7 @@ export const CourseConfigurationSection: React.FC<
           height="50"
           width="50"
           radius="9"
-          color="#1e1b4b"
+          color={COLOUR_PRIMARY}
           ariaLabel="loading-configuration"
         />
       </div>
@@ -204,8 +206,8 @@ export const CourseConfigurationSection: React.FC<
 
   return (
     <form onSubmit={handleSave} className="h-full overflow-y-auto">
-      <div className="mb-3 text-sm leading-normal text-slate-500 pt-3">
-        <span className="font-semibold text-indigo-950">
+      <div className="mb-3 text-sm leading-normal text-primary pt-3">
+        <span className="font-semibold text-primary">
           <FormattedMessage id="configuration.enableAccess" />
         </span>
         <br />
@@ -220,10 +222,10 @@ export const CourseConfigurationSection: React.FC<
         disabled={isSaving}
       />
 
-      <div className="mx-0 my-8 h-0.5 bg-stone-200" />
+      <div className="mx-0 my-8 h-0.5 bg-secondary" />
 
-      <div className="mb-3 text-sm leading-normal text-slate-500">
-        <span className="font-semibold text-indigo-950">
+      <div className="mb-3 text-sm leading-normal text-primary">
+        <span className="font-semibold text-primary">
           <FormattedMessage id="configuration.refreshContent" />
         </span>
         <br />
@@ -235,7 +237,7 @@ export const CourseConfigurationSection: React.FC<
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
           <div className="flex items-center">
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-primary">
               <FormattedMessage id="configuration.autoUpdate" />
             </span>
           </div>
@@ -246,15 +248,15 @@ export const CourseConfigurationSection: React.FC<
               disabled={isSaving}
             />
           </div>
-          <div className="h-8 bg-indigo-950 mx-4" style={{ width: "2px" }} />
+          <div className="h-8 bg-primary mx-4" style={{ width: "2px" }} />
           <button
             type="button"
             onClick={handleUpdateContent}
             disabled={isUpdating}
             className={`px-6 py-2 text-sm font-bold text-white rounded-lg cursor-pointer ${
               !isUpdating
-                ? "bg-indigo-950 hover:bg-indigo-900"
-                : "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
+                ? "bg-primary hover:bg-secondary"
+                : "bg-primary bg-opacity-50 cursor-not-allowed"
             } border-[none] w-fit`}
           >
             <FormattedMessage
@@ -268,11 +270,11 @@ export const CourseConfigurationSection: React.FC<
         </div>
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-stone-200" />
+      <div className="mx-0 my-8 h-0.5 bg-secondary" />
 
       <div className="mb-8">
-        <div className="mb-3 text-sm leading-normal text-slate-500">
-          <span className="font-semibold text-indigo-950">
+        <div className="mb-3 text-sm leading-normal text-primary">
+          <span className="font-semibold text-primary">
             <FormattedMessage id="configuration.includedContent" />
           </span>
           <br />
@@ -299,11 +301,11 @@ export const CourseConfigurationSection: React.FC<
         <MaterialsAccordion courseId={selectedCourse.id} />
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-stone-200" />
+      <div className="mx-0 my-8 h-0.5 bg-secondary" />
 
       <div className="mb-8">
-        <div className="mb-3 text-sm leading-normal text-slate-500">
-          <span className="font-semibold text-indigo-950">
+        <div className="mb-3 text-sm leading-normal text-primary">
+          <span className="font-semibold text-primary">
             <FormattedMessage id="configuration.supportedQuestions" />
           </span>
           <br />
@@ -324,10 +326,10 @@ export const CourseConfigurationSection: React.FC<
         </div>
       </div>
 
-      <div className="mx-0 my-8 h-0.5 bg-stone-200" />
+      <div className="mx-0 my-8 h-0.5 bg-secondary" />
 
-      <div className="mb-3 text-sm leading-normal text-slate-500">
-        <span className="font-semibold text-indigo-950">
+      <div className="mb-3 text-sm leading-normal text-primary">
+        <span className="font-semibold text-primary">
           <FormattedMessage id="configuration.customFormat" />
         </span>
         <br />
@@ -347,7 +349,7 @@ export const CourseConfigurationSection: React.FC<
         placeholder={intl.formatMessage({
           id: "configuration.responseFormatPlaceholder",
         })}
-        className="p-2.5 w-full text-sm rounded-lg border border-solid border-stone-950 border-opacity-30 text-indigo-950"
+        className="p-2.5 w-full text-sm rounded-lg border border-solid border-secondary text-primary"
       />
 
       <button
@@ -355,8 +357,8 @@ export const CourseConfigurationSection: React.FC<
         disabled={!hasChanges || isSaving}
         className={`px-6 py-3 mt-8 text-sm font-bold text-white rounded-lg cursor-pointer ${
           hasChanges && !isSaving
-            ? "bg-indigo-950 hover:bg-indigo-900"
-            : "bg-indigo-950 bg-opacity-40 cursor-not-allowed"
+            ? "bg-primary hover:bg-secondary"
+            : "bg-primary bg-opacity-50 cursor-not-allowed"
         } border-[none] max-sm:w-full`}
       >
         <FormattedMessage id="configuration.saveButton" />

@@ -49,6 +49,7 @@
   "configuration.updating": "Updating...",
   "configuration.viewIncludedMaterials": "View Currently Included Materials",
   "configuration.noMaterialsFound": "No materials currently included in the knowledge base",
+  "configuration.materialsDescription": "The listed materials reflect what is currently live in the AI Study Assistant. You must save any configuration changes then refresh course content for any updates to be reflected here.",
   "analytics.mostCommonQuestions": "Most Common Questions",
   "analytics.mostReferencedMaterials": "Most Referenced Materials",
   "sidebar.availableCourses": "Available Courses",

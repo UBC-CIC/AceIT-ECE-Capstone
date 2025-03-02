@@ -50,8 +50,8 @@ export const InstructorSection: React.FC<InstructorSectionProps> = ({
       </div>
       {activeSection == "Test Assistant" && (
         <div className="flex-none pb-2 px-4">
-          <div className="bg-violet-100 border-l-4 border-indigo-950 p-4 rounded-sm">
-            <p className="text-sm text-indigo-950">
+          <div className="bg-secondary border-l-4 border-primary p-4 rounded-sm">
+            <p className="text-sm text-primary">
               <FormattedMessage id="testAssistant.contentNote" />
             </p>
           </div>

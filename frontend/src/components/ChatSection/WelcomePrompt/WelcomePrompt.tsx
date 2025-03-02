@@ -17,7 +17,7 @@ export const WelcomePrompt: React.FC<WelcomePromptProps> = ({
         alt=""
         className="object-contain w-9 aspect-[0.95]"
       />
-      <div className="mt-5 text-2xl text-center text-stone-950">
+      <div className="mt-5 text-2xl text-center text-primary">
         <FormattedMessage
           id="welcome.helpText"
           values={{ courseCode: selectedCourse.courseCode }}

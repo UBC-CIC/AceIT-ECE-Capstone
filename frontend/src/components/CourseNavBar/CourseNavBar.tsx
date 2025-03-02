@@ -20,7 +20,7 @@ export const CourseNavBar: React.FC<CourseNavBarProps> = ({
   const intl = useIntl();
 
   return (
-    <div className="flex flex-col w-full border-b-[3px] border-[#160211]/10">
+    <div className="flex flex-col w-full border-b-[3px] border-primary/10">
       <div className="flex relative gap-10 items-center px-5 py-0 max-md:gap-5 max-md:px-5 max-md:py-0 max-sm:gap-3.5 max-sm:px-4 max-sm:py-0">
         {navigationItems.map((item) => (
           <CourseNavBarItem

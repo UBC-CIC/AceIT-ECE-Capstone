@@ -49,6 +49,7 @@
   "configuration.updating": "Mise à jour en cours...",
   "configuration.viewIncludedMaterials": "Voir le Matériel Actuellement Inclus",
   "configuration.noMaterialsFound": "Aucun matériel actuellement inclus dans la base de connaissances",
+  "configuration.materialsDescription": "Les documents listés reflètent ce qui est présentement actif dans l'Assistant d'Études IA. Vous devez sauvegarder toutes les modifications de configuration puis actualiser le contenu du cours pour que les mises à jour soient reflétées ici.",
   "analytics.mostCommonQuestions": "Questions les Plus Fréquentes",
   "analytics.mostReferencedMaterials": "Matériels les Plus Référencés",
   "sidebar.availableCourses": "Cours Disponibles",

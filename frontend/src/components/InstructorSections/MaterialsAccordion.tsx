@@ -4,6 +4,8 @@ import { getAllCourseMaterialsAPI } from "../../api";
 import { ThreeDots } from "react-loader-spinner";
 import { FormattedMessage } from "react-intl";
 
+const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+
 export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
   courseId,
 }) => {
@@ -35,13 +37,17 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
   };
 
   return (
-    <div className="border-2 border-slate-200 rounded-lg overflow-hidden">
+    <div className="border-2 border-secondary rounded-lg overflow-hidden">
       <button
         onClick={handleToggle}
-        className="w-full px-4 py-3 text-left bg-gray-50 hover:bg-gray-100 flex justify-between items-center"
+        className="w-full px-4 py-3 text-left bg-white hover:bg-secondary flex justify-between items-center"
       >
-        <span className="font-medium text-sm text-indigo-950">
+        <span className="font-medium text-sm text-primary">
           <FormattedMessage id="configuration.viewIncludedMaterials" />
+        </span>
+        <br />
+        <span className="text-sm leading-normal text-primary">
+          <FormattedMessage id="configuration.materialsDescription" />
         </span>
         <svg
           className={`w-5 h-5 transition-transform ${
@@ -63,7 +69,7 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
       {isOpen && (
         <div
           className="p-4"
-          style={{ backgroundColor: "rgba(255, 255, 255, 0.2)" }}
+          style={{ backgroundColor: "rgba(255, 255, 255, 0.3)" }}
         >
           {isLoading ? (
             <div className="flex justify-center p-4">
@@ -71,14 +77,14 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
                 height="30"
                 width="30"
                 radius="9"
-                color="#1e1b4b"
+                color={COLOUR_PRIMARY}
                 ariaLabel="loading-materials"
               />
             </div>
           ) : (
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {materials.length === 0 ? (
-                <p className="text-sm text-indigo-950 text-center">
+                <p className="text-sm text-primary text-center">
                   <FormattedMessage id="configuration.noMaterialsFound" />
                 </p>
               ) : (
@@ -91,12 +97,12 @@ export const MaterialsAccordion: React.FC<MaterialsAccordionProps> = ({
                       href={material.source_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-indigo-950 hover:underline flex-grow cursor-pointer truncate mr-2"
+                      className="text-sm text-primary hover:underline flex-grow cursor-pointer truncate mr-2"
                     >
                       {material.document_name}
                     </a>
                     <svg
-                      className="w-4 h-4 text-indigo-950 flex-shrink-0"
+                      className="w-4 h-4 text-primary flex-shrink-0"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"

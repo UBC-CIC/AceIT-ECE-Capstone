@@ -9,6 +9,13 @@ import { SkeletonTheme } from "react-loading-skeleton";
 import { IntlProvider } from "react-intl";
 import { UserProps, CourseProps } from "./types";
 
+const BG_FIRST = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_FIRST;
+const BG_SECOND = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_SECOND;
+const BG_THIRD = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_THIRD;
+const BG_FOURTH = import.meta.env.VITE_REACT_APP_THEME_COLOUR_BG_FOURTH;
+const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+const COLOUR_SECONDARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_SECONDARY;
+
 // Import all translation files
 import enMessages from "./translations/en.json";
 import zhMessages from "./translations/zh.json";
@@ -79,15 +86,14 @@ export const App = () => {
       <div
         className="h-screen flex flex-col px-6 py-5 w-auto bg-white"
         style={{
-          background: `linear-gradient(to bottom right, 
-            rgba(137, 188, 255, 1) 0%,
-            rgba(255, 134, 225, 0.3) 0%,
-            rgba(134, 255, 213, 1) 100%,
-            rgba(137, 239, 255, 0.5) 100%)`,
+          background: `linear-gradient(to bottom right, ${BG_FIRST}, ${BG_SECOND}, ${BG_THIRD}, ${BG_FOURTH})`,
         }}
       >
         <StrictMode>
-          <SkeletonTheme baseColor="#a6a3d1" highlightColor="#9e9adb">
+          <SkeletonTheme
+            baseColor={COLOUR_PRIMARY}
+            highlightColor={COLOUR_SECONDARY}
+          >
             <Toaster position="top-center" />
             {accessToken !== null && userInfo && courses && (
               <StudyAssistant

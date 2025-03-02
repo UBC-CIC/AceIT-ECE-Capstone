@@ -1,13 +1,13 @@
 import * as React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { MetricsCardProps, EngagementCardProps } from "../../types";
-import { timeframeToDisplay, displayToTimeframe } from "../../utils";
+import { MetricsCardProps, EngagementCardProps } from "../../../types";
+import { timeframeToDisplay, displayToTimeframe } from "../../../utils";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-import BlueArrowIcon from "../../assets/Blue-Arrow-Icon.svg";
-import MessageIcon from "../../assets/Message-Icon.png";
-import PersonIcon from "../../assets/Person-Icon.png";
-import QuestionIcon from "../../assets/Question-Icon.png";
+import BlueArrowIcon from "../../../assets/Blue-Arrow-Icon.svg";
+import MessageIcon from "../../../assets/Message-Icon.png";
+import PersonIcon from "../../../assets/Person-Icon.png";
+import QuestionIcon from "../../../assets/Question-Icon.png";
 
 const MetricsCard: React.FC<MetricsCardProps> = ({
   title,
@@ -25,7 +25,7 @@ const MetricsCard: React.FC<MetricsCardProps> = ({
           className="object-contain w-10 h-10 flex-shrink-0"
         />
         <div className="flex flex-col min-w-0 flex-1">
-          <div className="text-sm font-semibold truncate">{title}</div>
+          <div className="text-sm font-semibold text-primary">{title}</div>
           {loading ? (
             <Skeleton width="100%" height={20} />
           ) : (
@@ -63,15 +63,15 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
   ];
 
   return (
-    <div className="flex flex-col bg-violet-100 rounded-lg border border-solid border-stone-950 border-opacity-10 w-full">
+    <div className="flex flex-col bg-secondary rounded-lg border border-solid border-primary border-opacity-10 w-full">
       <div className="flex justify-between items-center px-6 py-4">
-        <div className="text-sm font-semibold text-indigo-950">
+        <div className="text-sm font-semibold text-primary">
           <FormattedMessage id="analytics.studentEngagement" />
         </div>
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-2 text-sm font-semibold text-indigo-950"
+            className="flex items-center gap-2 text-sm font-semibold text-primary"
           >
             {timeframeToDisplay(timeframe, intl)}
             <img
@@ -82,11 +82,11 @@ export const EngagementCard: React.FC<EngagementCardProps> = ({
             />
           </button>
           {isDropdownOpen && (
-            <div className="absolute top-full right-0 mt-1 bg-white text-slate-700 rounded-md shadow-lg z-10">
+            <div className="absolute top-full right-0 mt-1 bg-white text-primary rounded-md shadow-lg z-10">
               {displayTimeframes.map((display) => (
                 <button
                   key={display.value}
-                  className="block w-full px-4 py-2 text-left hover:bg-slate-100"
+                  className="block w-full px-4 py-2 text-left hover:bg-secondary"
                   onClick={() => {
                     onPeriodChange(displayToTimeframe(display.value, intl));
                     setIsDropdownOpen(false);

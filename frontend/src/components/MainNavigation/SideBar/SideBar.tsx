@@ -19,7 +19,7 @@ export const SideBar: React.FC<SideBarProps> = ({
   const unavailableCourses = courses.filter((course) => !course.isAvailable);
 
   return (
-    <div className="flex flex-wrap gap-3 items-start px-4 py-5 h-full text-sm rounded-xl border-white border-solid bg-white bg-opacity-50 border-[3px] min-w-[290px] text-indigo-950 w-[290px] overflow-y-auto">
+    <div className="flex flex-wrap gap-3 items-start px-4 py-5 h-full text-sm rounded-xl border-white border-solid bg-white bg-opacity-50 border-[3px] min-w-[290px] text-primary w-[290px] overflow-y-auto">
       <div className="flex flex-col flex-1 shrink w-full basis-0 min-w-[240px]">
         {selectedCourse && availableCourses.length > 0 && (
           <>
@@ -48,7 +48,7 @@ export const SideBar: React.FC<SideBarProps> = ({
                 alt="Info Icon"
                 className="object-contain shrink-0 self-stretch my-auto w-4 aspect-square"
               />
-              <div className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-700 text-white text-xs rounded py-1 px-2 w-64">
+              <div className="absolute bottom-full mb-2 hidden group-hover:block bg-primary text-tertiary text-xs rounded py-1 px-2 w-64">
                 <FormattedMessage id="sidebar.unavailableTooltip" />
               </div>
             </div>

@@ -7,7 +7,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({
 }) => {
   return (
     <div
-      className="flex-1 grow shrink gap-2.5 self-stretch p-2.5 rounded-lg border border-white border-solid bg-white bg-opacity-50 hover:bg-opacity-90 transition-all duration-200 cursor-pointer min-w-[240px] w-[201px]"
+      className="flex-1 text-primary grow shrink gap-2.5 self-stretch p-2.5 rounded-lg border border-white border-solid bg-white bg-opacity-50 hover:bg-opacity-90 transition-all duration-200 cursor-pointer min-w-[240px] w-[201px]"
       onClick={onClick}
       role="button"
       tabIndex={0}

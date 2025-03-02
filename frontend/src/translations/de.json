@@ -49,6 +49,7 @@
   "configuration.updating": "Aktualisierung läuft...",
   "configuration.viewIncludedMaterials": "Aktuell enthaltene Materialien anzeigen",
   "configuration.noMaterialsFound": "Derzeit keine Materialien in der Wissensbasis enthalten",
+  "configuration.materialsDescription": "Die aufgelisteten Materialien spiegeln den aktuellen Stand im KI-Studienassistenten wider. Sie müssen alle Konfigurationsänderungen speichern und dann den Kursinhalt aktualisieren, damit die Änderungen hier angezeigt werden.",
   "analytics.mostCommonQuestions": "Häufigste Fragen",
   "analytics.mostReferencedMaterials": "Am häufigsten referenzierte Materialien",
   "sidebar.availableCourses": "Verfügbare Kurse",

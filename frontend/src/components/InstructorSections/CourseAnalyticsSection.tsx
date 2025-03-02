@@ -7,8 +7,8 @@ import {
   CourseStudentEngagement,
   Timeframe,
 } from "../../types";
-import { EngagementCard } from "../CourseAnalytics/EngagementCard";
-import { ListStatisticCard } from "../CourseAnalytics/ListStatisticCard";
+import { EngagementCard } from "./CourseAnalytics/EngagementCard";
+import { ListStatisticCard } from "./CourseAnalytics/ListStatisticCard";
 import {
   getTopQuestionsByPeriodAPI,
   getTopMaterialsByPeriodAPI,

@@ -9,6 +9,8 @@ import {
   ConversationSession,
 } from "../../../../types";
 
+const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+
 export const PreviousConversationList: React.FC<
   PreviousConversationListProps
 > = ({ courseId, onConversationSelect }) => {
@@ -50,7 +52,7 @@ export const PreviousConversationList: React.FC<
           height="50"
           width="50"
           radius="9"
-          color="#1e1b4b"
+          color={COLOUR_PRIMARY}
           ariaLabel="loading-conversations"
         />
       </div>
@@ -76,7 +78,7 @@ export const PreviousConversationList: React.FC<
 
   return conversations === null || conversations.length === 0 ? null : (
     <div>
-      <div className="mt-5 text-sm font-bold text-center text-stone-950 pb-4">
+      <div className="mt-5 text-sm font-bold text-center text-primary pb-4">
         <FormattedMessage id="pastConversation.title" />
       </div>
       <div className="flex flex-wrap gap-5 justify-center items-stretch text-black">
@@ -92,12 +94,12 @@ export const PreviousConversationList: React.FC<
               disabled={isInteractionDisabled}
             />
             {selectedId === conversation.conversation_id && (
-              <div className="absolute inset-0 flex items-center justify-center bg-indigo-100 rounded-lg">
+              <div className="absolute inset-0 flex items-center justify-center bg-secondary rounded-lg">
                 <ThreeDots
                   height="20"
                   width="20"
                   radius="9"
-                  color="#1e1b4b"
+                  color={COLOUR_PRIMARY}
                   ariaLabel="loading-conversation"
                 />
               </div>

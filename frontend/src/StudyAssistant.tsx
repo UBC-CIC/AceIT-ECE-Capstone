@@ -80,7 +80,7 @@ export const StudyAssistant = ({
               </>
             ) : (
               <div className="flex-1 flex flex-col rounded-xl border-white border-solid bg-white bg-opacity-50 border-[3px] items-center justify-start pt-32 p-8">
-                <p className="text-center text-xl text-gray-600">
+                <p className="text-center text-xl text-primary">
                   <span className="font-bold">
                     Uh oh... Looks like you have no courses in Canvas.
                   </span>

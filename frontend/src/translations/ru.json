@@ -49,6 +49,7 @@
   "configuration.updating": "Обновление...",
   "configuration.viewIncludedMaterials": "Просмотр Включенных Материалов",
   "configuration.noMaterialsFound": "В базе знаний пока нет материалов",
+  "configuration.materialsDescription": "Перечисленные материалы отражают то, что в настоящее время активно в ИИ-ассистенте. Вы должны сохранить любые изменения конфигурации, а затем обновить содержание курса, чтобы отразить любые обновления.",
   "analytics.mostCommonQuestions": "Самые Частые Вопросы",
   "analytics.mostReferencedMaterials": "Наиболее Используемые Материалы",
   "sidebar.availableCourses": "Доступные Курсы",

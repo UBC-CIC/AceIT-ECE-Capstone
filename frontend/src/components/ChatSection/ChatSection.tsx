@@ -17,6 +17,8 @@ import SendIcon from "../../assets/Send-Icon.svg";
 import { ThreeDots } from "react-loader-spinner";
 import { FormattedMessage, useIntl } from "react-intl";
 
+const COLOUR_PRIMARY = import.meta.env.VITE_REACT_APP_THEME_COLOUR_PRIMARY;
+
 export const ChatSection: React.FC<ChatSectionProps> = ({
   selectedCourse,
   useDarkStyle,
@@ -185,7 +187,7 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
               height="50"
               width="50"
               radius="9"
-              color="#1e1b4b"
+              color={COLOUR_PRIMARY}
               ariaLabel="loading-conversation"
             />
           </div>
@@ -219,10 +221,10 @@ export const ChatSection: React.FC<ChatSectionProps> = ({
         <div className="flex-none bg-transparent">
           {suggestionList != null && suggestionList.length > 0 && (
             <div className="flex flex-col mb-4 w-full text-sm">
-              <div className="font-bold text-slate-500">
+              <div className="font-bold text-primary">
                 <FormattedMessage id="chat.suggestions" />
               </div>
-              <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-indigo-950">
+              <div className="flex flex-wrap gap-4 items-start mt-4 w-full text-primary">
                 {suggestionList.map((suggestion, index) => (
                   <SuggestionCard
                     key={index}

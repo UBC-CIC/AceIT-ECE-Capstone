@@ -49,6 +49,7 @@
   "configuration.updating": "正在更新...",
   "configuration.viewIncludedMaterials": "查看当前包含的材料",
   "configuration.noMaterialsFound": "知识库中目前没有包含任何材料",
+  "configuration.materialsDescription": "列出的材料反映了 AI 学习助手中当前的内容。您必须保存任何配置更改，然后刷新课程内容，以反映任何更新。",
   "analytics.mostCommonQuestions": "最常见问题",
   "analytics.mostReferencedMaterials": "最常引用材料",
   "sidebar.availableCourses": "可用课程",

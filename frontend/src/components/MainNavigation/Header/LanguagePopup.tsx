@@ -18,18 +18,18 @@ export const LanguagePopup: React.FC<LanguagePopupProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-[480px] bg-white rounded-lg shadow-lg z-50 text-gray-800"
+        className="w-[480px] bg-white rounded-lg shadow-lg z-50 text-primary"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
           <div className="text-left">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
+            <h2 className="text-xl font-bold text-primary mb-1">
               <FormattedMessage
                 id="header.languagePopupTitle"
                 defaultMessage="Change Preferred Response Language"
               />
             </h2>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-primary mb-4">
               <FormattedMessage
                 id="header.languagePopupDescription"
                 defaultMessage="Select your preferred language for Ace It. This will impact both the language of the AI responses and user interface."
@@ -51,7 +51,7 @@ export const LanguagePopup: React.FC<LanguagePopupProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-3 text-sm font-bold text-black rounded-lg bg-gray-100 hover:bg-gray-200"
+              className="px-6 py-3 text-sm font-bold text-primary rounded-lg bg-gray-100 hover:bg-gray-200"
             >
               <FormattedMessage id="header.cancel" defaultMessage="Cancel" />
             </button>
@@ -61,8 +61,8 @@ export const LanguagePopup: React.FC<LanguagePopupProps> = ({
               disabled={!hasLanguageChanged}
               className={`px-6 py-3 text-sm font-bold text-white rounded-lg ${
                 hasLanguageChanged
-                  ? "bg-indigo-950 hover:bg-indigo-900"
-                  : "bg-indigo-950 opacity-50 cursor-not-allowed"
+                  ? "bg-primary hover:bg-secondary"
+                  : "bg-primary opacity-50 cursor-not-allowed"
               }`}
             >
               <FormattedMessage id="header.confirm" defaultMessage="Confirm" />

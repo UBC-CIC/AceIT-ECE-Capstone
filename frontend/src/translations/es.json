@@ -49,6 +49,7 @@
   "configuration.updating": "Actualizando...",
   "configuration.viewIncludedMaterials": "Ver Materiales Incluidos Actualmente",
   "configuration.noMaterialsFound": "No hay materiales incluidos actualmente en la base de conocimientos",
+  "configuration.materialsDescription": "Los materiales listados reflejan lo que está actualmente activo en el Asistente de Estudio AI. Debe guardar cualquier cambio de configuración y luego actualizar el contenido del curso para que se reflejen las actualizaciones aquí.",
   "analytics.mostCommonQuestions": "Preguntas Más Comunes",
   "analytics.mostReferencedMaterials": "Materiales Más Referenciados",
   "sidebar.availableCourses": "Cursos Disponibles",

@@ -15,7 +15,7 @@ export const CheckboxItem: React.FC<CheckboxItemProps> = ({
         className="w-4 h-4"
         aria-label={title}
       />
-      <div className="text-sm font-medium text-slate-500">{title}</div>
+      <div className="text-sm font-medium text-primary">{title}</div>
     </label>
   );
 };

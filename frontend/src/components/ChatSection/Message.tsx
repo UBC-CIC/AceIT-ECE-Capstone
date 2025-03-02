@@ -41,7 +41,7 @@ export const Message: React.FC<MessageProps> = ({
   const uniqueReferences = references ? deduplicateReferences(references) : [];
 
   return (
-    <div className="flex flex-col w-full text-sm text-indigo-950 max-md:max-w-full">
+    <div className="flex flex-col w-full text-sm text-primary max-md:max-w-full">
       <div className={`${isUserMessage ? "text-right" : ""} max-md:max-w-full`}>
         {sender} · {time}
       </div>
@@ -49,30 +49,42 @@ export const Message: React.FC<MessageProps> = ({
         className={`${
           isUserMessage ? "self-end" : "self-start"
         } p-2.5 rounded-lg border ${
-          useDarkStyle ? "border-indigo-300" : "border-white"
+          useDarkStyle ? "border-secondary" : "border-white"
         } border-solid bg-white bg-opacity-50 max-md:max-w-full`}
       >
         <ReactMarkdown
           components={{
-            p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
+            p: ({ children }) => (
+              <p className="mb-4 last:mb-0 text-primary">{children}</p>
+            ),
             ul: ({ children }) => (
-              <ul className="list-disc pl-5 mb-4">{children}</ul>
+              <ul className="list-disc pl-5 mb-4 text-primary">{children}</ul>
             ),
             ol: ({ children }) => (
-              <ol className="list-decimal pl-5 mb-4">{children}</ol>
+              <ol className="list-decimal pl-5 mb-4 text-primary">
+                {children}
+              </ol>
             ),
-            li: ({ children }) => <li className="mb-1">{children}</li>,
+            li: ({ children }) => (
+              <li className="mb-1 text-primary">{children}</li>
+            ),
             h1: ({ children }) => (
-              <h1 className="text-2xl font-bold mb-4">{children}</h1>
+              <h1 className="text-2xl font-bold mb-4 text-primary">
+                {children}
+              </h1>
             ),
             h2: ({ children }) => (
-              <h2 className="text-xl font-bold mb-3">{children}</h2>
+              <h2 className="text-xl font-bold mb-3 text-primary">
+                {children}
+              </h2>
             ),
             h3: ({ children }) => (
-              <h3 className="text-lg font-bold mb-2">{children}</h3>
+              <h3 className="text-lg font-bold mb-2 text-primary">
+                {children}
+              </h3>
             ),
             strong: ({ children }) => (
-              <strong className="font-bold">{children}</strong>
+              <strong className="font-bold text-primary">{children}</strong>
             ),
             a: ({ children, href }) => (
               <a
@@ -90,7 +102,7 @@ export const Message: React.FC<MessageProps> = ({
         </ReactMarkdown>
         {uniqueReferences.length > 0 && !isFirstMessage && (
           <>
-            <div className="border-b-2 border-[#030852] my-2 opacity-[0.17]" />
+            <div className="border-b-2 border-secondary my-2" />
             <div>
               <strong>
                 <FormattedMessage

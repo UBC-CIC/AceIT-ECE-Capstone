@@ -14,10 +14,10 @@ export const CourseItem: React.FC<CourseProps & { onClick?: () => void }> = ({
   const baseClasses =
     "flex flex-col py-2.5 pr-2.5 pl-2.5 mt-3 w-full rounded-lg border border-white border-solid transition-all duration-200";
   const stateClasses = !isAvailable
-    ? "bg-neutral-200 text-neutral-600 cursor-not-allowed"
+    ? "bg-disabled bg-opacity-50 text-disabled cursor-not-allowed"
     : isActive
-    ? "text-white bg-indigo-950"
-    : "bg-violet-100 hover:bg-violet-200 cursor-pointer";
+    ? "text-tertiary bg-primary"
+    : "bg-secondary hover:bg-primary cursor-pointer";
 
   return (
     <div
