@@ -59,7 +59,6 @@ Note that the quality of the demo video is lower than actual due to gif compress
 |                                         |                                         |
 | :-------------------------------------: | :-------------------------------------: |
 | ![Screenshot 1](./docs/screenshot1.png) | ![Screenshot 2](./docs/screenshot2.png) |
-| :-------------------------------------: | :-------------------------------------: |
 | ![Screenshot 3](./docs/screenshot3.png) | ![Screenshot 4](./docs/screenshot4.png) |
 
 ---

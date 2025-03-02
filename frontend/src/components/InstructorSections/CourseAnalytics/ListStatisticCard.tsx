@@ -41,7 +41,7 @@ export const ListStatisticCard: React.FC<ListStatisticCardProps> = ({
     },
     {
       display: intl.formatMessage({ id: "analytics.timeframe.year" }),
-      value: "YEAR",
+      value: "TERM",
     },
   ];
 
