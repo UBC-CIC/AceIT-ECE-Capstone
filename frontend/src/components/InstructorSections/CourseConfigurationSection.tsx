@@ -36,11 +36,9 @@ export const CourseConfigurationSection: React.FC<
   const [isEnabled, setIsEnabled] = React.useState(false);
   const [selectedContent, setSelectedContent] =
     React.useState<IncludedCourseContent>({
-      HOME: false,
       ANNOUNCEMENTS: false,
       SYLLABUS: false,
       ASSIGNMENTS: false,
-      MODULES: false,
       FILES: false,
       QUIZZES: false,
       DISCUSSIONS: false,
@@ -156,14 +154,12 @@ export const CourseConfigurationSection: React.FC<
   };
 
   const courseContent: CourseContentItem[] = [
-    { title: "Home", type: "HOME" as IncludedCourseContentType },
     {
       title: "Announcements",
       type: "ANNOUNCEMENTS" as IncludedCourseContentType,
     },
     { title: "Syllabus", type: "SYLLABUS" as IncludedCourseContentType },
     { title: "Assignments", type: "ASSIGNMENTS" as IncludedCourseContentType },
-    { title: "Modules", type: "MODULES" as IncludedCourseContentType },
     { title: "Files", type: "FILES" as IncludedCourseContentType },
     { title: "Quizzes", type: "QUIZZES" as IncludedCourseContentType },
     { title: "Discussions", type: "DISCUSSIONS" as IncludedCourseContentType },

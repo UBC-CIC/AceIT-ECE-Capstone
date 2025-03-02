@@ -155,11 +155,9 @@ export interface CheckboxItemProps {
 }
 
 export interface IncludedCourseContent {
-  HOME: boolean;
   ANNOUNCEMENTS: boolean;
   SYLLABUS: boolean;
   ASSIGNMENTS: boolean;
-  MODULES: boolean;
   FILES: boolean;
   QUIZZES: boolean;
   DISCUSSIONS: boolean;
