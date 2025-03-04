@@ -4,58 +4,25 @@ import requests
 import psycopg2
 import utils.get_canvas_secret
 import utils.get_rds_secret
+from utils.construct_response import construct_response
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     if not headers:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Header is missing"})
-        }
+        return construct_response(400, {"error": "Header is missing"})
+    
     token  = headers.get("Authorization", {})
     if not token:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Authorization token is required"})
-        }
+        return construct_response(400, {"error": "Missing required fields: 'Authorization' is required"})
 
     courses_as_students = get_student_courses(token)
     if courses_as_students is None:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Failed to fetch student courses from Canvas API"})
-        }
+        return construct_response(500, {"error": "Failed to fetch student courses from Canvas"})
+    
     courses_as_instructor = get_instructor_courses(token)
-        
     if courses_as_instructor is None:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Failed to fetch instructor courses from Canvas API"})
-        }
+        return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
+    
     availableStudentList = []
     availableInstructorList = []
     unavailableStudentList = []
@@ -86,20 +53,13 @@ def lambda_handler(event, context):
             availableInstructorList.append(cur_course)
             print("type of id", type(course["id"]))
 
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        'body': json.dumps({
-            "availableCoursesAsStudent": availableStudentList, 
-            "availableCoursesAsInstructor": availableInstructorList,
-            "unavailableCoursesAsStudent": unavailableStudentList})
+    response_body = {
+        "availableCoursesAsStudent": availableStudentList, 
+        "availableCoursesAsInstructor": availableInstructorList,
+        "unavailableCoursesAsStudent": unavailableStudentList
     }
 
+    return construct_response(200, response_body)
 
 def get_student_courses(token):
     """

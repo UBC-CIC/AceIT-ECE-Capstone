@@ -591,8 +591,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         invoke_llm_completion_lambda = _lambda.Function(
             self,
-            "InvokeLLMComletionLambda",
-            function_name="InvokeLLMComletionLambda",
+            "InvokeLLMCompletionLambda",
+            function_name="InvokeLLMCompletionLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="invokeLLMCompletion.lambda_handler",

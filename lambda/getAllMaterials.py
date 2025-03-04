@@ -1,58 +1,28 @@
-import json
-import os
-import boto3
 import psycopg2
-from datetime import datetime
-import uuid
 import psycopg2.extras
-from utils.create_course_config_table import create_table_if_not_exists
 from utils.get_rds_secret import get_cached_secret, load_db_config
 from utils.get_user_info import get_user_info
-from utils.retrieve_course_config import retrieve_course_config
-import re
+from utils.construct_response import construct_response
 
 def lambda_handler(event, context):
     try:
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required Authorization token"})
-            }
+            return construct_response(400, {"error": "Missing required header fields: 'Authorization' is required"})
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
         if not user_info:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-            }
+            return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
+        # Extract Canvas user ID
+        student_id = user_info.get("userId", "")
+        if not student_id:
+            return construct_response(500, {"error": "User ID not found"})
 
         course_id = event.get("queryStringParameters", {}).get("course")
         if not course_id:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required parameter: course"})
-            }
+            return construct_response(400, {"error": "Missing required parameter: 'course' is required"})
         # Get database credentials
         credentials = get_cached_secret()
         username = credentials['username']
@@ -64,7 +34,7 @@ def lambda_handler(event, context):
             "user": username,
             "password": password
         }
-        print("Connecting to database")
+
         DB_CONNECTION = psycopg2.connect(**DB_CONFIG)
 
         documents = []
@@ -72,7 +42,6 @@ def lambda_handler(event, context):
         # Connect to the PostgreSQL database
         DB_CONNECTION = psycopg2.connect(**DB_CONFIG)
         cursor = DB_CONNECTION.cursor()
-        print("Connected to the database successfully.")
 
         # Construct query to get document names and URLs
         query = f"""
@@ -82,8 +51,6 @@ def lambda_handler(event, context):
         
         cursor.execute(query)
         rows = cursor.fetchall()
-        print("Query executed successfully.")
-        print("Rows: ", rows)
 
         # Use a set to get unique pairs of document_name and source_url
         unique_documents = {
@@ -95,28 +62,7 @@ def lambda_handler(event, context):
             {"document_name": name, "source_url": url} for name, url in unique_documents
         ]
 
-        # Debugging: Check the unique documents
-        print("Unique Documents List: ", json.dumps(documents, indent=2))
-
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            'body': json.dumps(documents)
-        }
+        return construct_response(200, documents)
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Unexpected error when invoking get all materials function."})
-        }
+        return construct_response(400, {"error": "Unexpected error when invoking get all materials function"})

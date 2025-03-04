@@ -1,65 +1,29 @@
 import json
-import utils.get_canvas_secret
 import requests
+import utils.get_canvas_secret
+from utils.construct_response import construct_response
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     if not headers:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Header is missing"})
-        }
+        return construct_response(400, {"error": "Header is missing"})
+    
     jwt = headers.get("Authorization", {})
     if not jwt:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Authorization token is required"})
-        }
+        return construct_response(400, {"error": "Missing required fields: 'Authorization' is required"})
     
-    # local = str(headers.get("Islocaltesting", "false")).lower() == "true"
-
     canvas_response = get_access_token(jwt)
 
     if canvas_response is None:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Failed to fetch access_token from Canvas"})
-        }
+        return construct_response(500, {"error": "Failed to fetch access_token from Canvas"})
     
-    response = {
+    response_body = {
         "access_token": canvas_response["access_token"],
         "refresh_token": canvas_response["refresh_token"],
         "expires_in": 3600
     }
 
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        'body': json.dumps(response)
-    }
+    return construct_response(200, response_body)
 
 def get_access_token(jwt):
     secret = utils.get_canvas_secret.get_secret()

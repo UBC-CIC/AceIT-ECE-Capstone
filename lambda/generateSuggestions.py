@@ -4,6 +4,7 @@ import re
 from utils.get_user_info import get_user_info
 from utils.get_course_related_stuff import call_course_activity_stream
 from utils.retrieve_course_config import call_get_course_config
+from utils.construct_response import construct_response
 
 lambda_client = boto3.client('lambda')
 translate_client = boto3.client("translate", region_name="us-west-2")
@@ -14,45 +15,18 @@ def lambda_handler(event, context):
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required Authorization token"})
-            }
+            return construct_response(400, {"error": "Missing required fields: 'Authorization' is required"})
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
         if not user_info:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-            }
+            return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
+        
         # Extract Canvas user ID
         student_id = user_info.get("userId")
         if not student_id:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "User ID not found"})
-            }
-        student_id = str(student_id)
-
+            return construct_response(500, {"error": "User ID not found"})
+    
         params = event.get("queryStringParameters", {})
         course_id = params.get("course")
         course_id = str(course_id)
@@ -68,43 +42,17 @@ def lambda_handler(event, context):
 
         response = call_get_course_config(auth_token, course_id, lambda_client)
         course_config_prompt = response.get("systemPrompt", {})
-        # print("Course config prompt: ", course_config_prompt)
         recentCourseRelated_stuff = call_course_activity_stream(auth_token, course_id)
-        # print("recentCourseRelated_stuff: ", recentCourseRelated_stuff)
         suggested_questions = generate_questions_with_retries(course_config_prompt, str(num_suggests), recentCourseRelated_stuff, course_id, student_language_pref)
-        print("suggestion response", suggested_questions)
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps(suggested_questions)
-        }
+        return construct_response(200, suggested_questions)
+    
     except KeyError as e:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": f"Bad Request: {str(e)}"})
-        }
+        return construct_response(400, {"error": f"Bad Request: {str(e)}"})
+    
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, 
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": "Internal Server Error"}
+        return construct_response(500, {"error": "Internal Server Error"})
 
 
 def generate_suggestions(course_config_str, num_suggestions, course_related_stuff, course_id, student_language_pref):
@@ -133,9 +81,7 @@ def generate_suggestions(course_config_str, num_suggestions, course_related_stuf
             Payload=json.dumps(payload)
         )
         response_payload = json.loads(response["Payload"].read().decode("utf-8"))
-        print("response_payload: ", response_payload)
         body_dict = json.loads(response_payload["body"])
-        print("Body: ", body_dict, "Type: ", type(body_dict))
         return body_dict
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
@@ -149,17 +95,12 @@ def generate_questions_with_retries(course_config_prompt, num_suggests, recentCo
     """Tries to generate questions up to MAX_RETRIES times if errors occur."""
     MAX_RETRIES = 3  # Number of attempts
     for attempt in range(1, MAX_RETRIES + 1):
-        print(f"Attempt {attempt} to generate questions...")
-
         suggested_questions = generate_suggestions(course_config_prompt, str(num_suggests), recentCourseRelated_stuff, course_id, student_language_pref)
         
         faq_list = parse_llm_response(suggested_questions)
 
         if faq_list:  # If successful, return the list
-            print(f"Successfully generated questions on attempt {attempt}.")
             return faq_list
-
-        print(f"Attempt {attempt} failed. Retrying..." if attempt < MAX_RETRIES else "All attempts failed.")
 
     return []  # Return empty list if all retries fail
 
@@ -167,13 +108,9 @@ def generate_questions_with_retries(course_config_prompt, num_suggests, recentCo
 def parse_llm_response(suggested_questions):
     """Parses and fixes LLM response to ensure it's a valid JSON list."""
     if not isinstance(suggested_questions, dict) or 'response' not in suggested_questions:
-        print("Error: LLM response format is incorrect.")
         return []
 
     formatted_response = suggested_questions['response']
-
-    print("Formatted LLM output:", formatted_response)
-    print("Type:", type(formatted_response))
 
     try:
         # Step 1: Fix non-standard quotes (curly, angled French, etc.)
@@ -202,8 +139,6 @@ def parse_llm_response(suggested_questions):
         faq_list = json.loads(formatted_response)
         
         faq_list = flatten_list(faq_list)
-
-        print("Type of faq_list:", type(faq_list))
 
         # Step 7: Validate that it's a list
         if not isinstance(faq_list, list):

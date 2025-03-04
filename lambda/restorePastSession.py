@@ -1,6 +1,6 @@
-import json
 import boto3
 from utils.get_user_info import get_user_info
+from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -13,62 +13,29 @@ def lambda_handler(event, context):
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required Authorization token"})
-            }
+            return construct_response(400, {"error": "Missing required header field: 'Authorization' is required"})
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
         if not user_info:
-            return {
-                "statusCode": 500,
-                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-            }
+            return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
         # Extract Canvas user ID
         student_id = user_info.get("userId")
         if not student_id:
-            return {
-                "statusCode": 500,
-                "body": json.dumps({"error": "User ID not found"})
-            }
-        student_id = str(student_id)
+            return construct_response(500, {"error": "User ID not found"})
 
         # Extract path parameters to get conversation_id
         query_params = event.get("queryStringParameters", {})
         conversation_id = query_params.get("conversation_id")
         
         if not conversation_id:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required query parameter: conversation_id"})
-            }
+            return construct_response(400, {"error": "Missing required query parameter: 'conversation_id' is required"})
         
         # Fetch conversation details
         conversation = conversations_table.get_item(Key={"conversation_id": conversation_id})
         if "Item" not in conversation:
-            return {
-                "statusCode": 404,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Conversation not found"})
-            }
+            return construct_response(404, {"error": "Conversation not found"})
+        
         conversation_data = conversation["Item"]
 
         # Fetch all messages in the conversation
@@ -83,27 +50,13 @@ def lambda_handler(event, context):
         # Sort messages by timestamp
         messages.sort(key=lambda x: x.get("timestamp", ""))
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({
-                "conversation": conversation_data,
-                "messages": messages
-            })
+        response_body = {
+            "conversation": conversation_data,
+            "messages": messages
         }
+
+        return construct_response(200, response_body)
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, 
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": "Internal Server Error"}
+        return construct_response(500, {"error": "Internal Server Error"})

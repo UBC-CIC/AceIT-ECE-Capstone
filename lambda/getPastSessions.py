@@ -2,6 +2,7 @@ import json
 import re
 import boto3
 from utils.get_user_info import get_user_info
+from utils.construct_response import construct_response
 
 lambda_client = boto3.client('lambda')
 session = boto3.Session()
@@ -16,60 +17,23 @@ def lambda_handler(event, context):
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required Authorization token"})
-            }
+            return construct_response(400, {"error": "Missing required header field: 'Authorization' is required"})
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
         if not user_info:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-            }
+            return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
         # Extract Canvas user ID
         student_id = user_info.get("userId")
         if not student_id:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "User ID not found"})
-            }
-        student_id = str(student_id)
+            return construct_response(500, {"error": "User ID not found"})
 
         # Parse input from the request query parameters
         query_params = event.get("queryStringParameters", {})
         course_id = query_params.get("course", "")
         
         if not (course_id):
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required parameter: need course id"})
-            }
+            return construct_response(400, {"error": "Missing required parameter: 'course' is required"})
         
         # Retrieve conversations for the given course ID
         response = conversations_table.scan(
@@ -92,7 +56,6 @@ def lambda_handler(event, context):
             updated_sum = "Summary not available"
             if ("summary not available" in summary.lower()) and len(message_list) >= 3:
                 summary = call_llm(message_list)
-                print("Summary: ", summary)
                 updated_sum = summary
                 update_summary_in_db(conversation["conversation_id"], summary)
             else:
@@ -104,27 +67,11 @@ def lambda_handler(event, context):
                     "summary": updated_sum
                 })
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps(past_conversations)
-        }
+        return construct_response(200, past_conversations)
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, 
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": "Internal Server Error"}
+        return construct_response(500, {"error": "Internal Server Error"})
 
 
 def generate_summary_input(message_ids_list):
@@ -141,7 +88,6 @@ def generate_summary_input(message_ids_list):
 
     # Sort messages by timestamp
     messages.sort(key=lambda x: x.get("timestamp", ""))
-    print("Messages to generate summary: ", messages)
     conversation_hist = ""
 
     for message in messages:
@@ -184,14 +130,12 @@ def call_llm(message_ids_list):
 
         response_body = response['body'].read().decode('utf-8')
         if not response_body.strip():
-            print("LLM response is empty!")
             return "Summary not available."
         response_json = json.loads(response_body)
         generated_summary = response_json.get("generation", "Summary not available")
         generated_summary = re.sub(r"^(Summary:|summary:|ai:|AI:|Course Overview:)\s*", "", generated_summary).strip()
         generated_summary = re.sub(r"[*#_]", "", generated_summary).strip()
 
-        print("Generated summary: ", generated_summary)
         return generated_summary
     
     except Exception as e:

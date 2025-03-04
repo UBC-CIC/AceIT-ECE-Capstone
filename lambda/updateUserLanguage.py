@@ -2,6 +2,7 @@ import json
 import boto3
 import re
 from utils.get_user_info import get_user_info
+from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -15,43 +16,16 @@ def lambda_handler(event, context):
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required Authorization token"})
-            }
+            return construct_response(400, {"error": "Missing required header field: 'Authorization' is required"})
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
         if not user_info:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-            }
+            return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
         # Extract user ID
         user_id = user_info.get("userId")
         if not user_id:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "User ID not found"})
-            }
+            return construct_response(500, {"error": "User ID not found"})
 
         # Extract body
         body = json.loads(event.get("body", "{}"))
@@ -59,16 +33,7 @@ def lambda_handler(event, context):
 
         # Validate preferred_language format (ISO 639-1 or RFC 5646)
         if preferred_language and not re.match(LANGUAGE_CODE_PATTERN, preferred_language):
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Invalid preferred_language. Must be an ISO 639-1 code (e.g., 'en', 'es') or an RFC 5646 format with region (e.g., 'es-MX', 'fr-CA')."})
-            }
+            return construct_response(400, {"error": "Invalid preferred_language. Must be an ISO 639-1 code (e.g., 'en', 'es') or an RFC 5646 format with region (e.g., 'es-MX', 'fr-CA')."})
 
         # Update DynamoDB table
         response = users_table.update_item(
@@ -78,26 +43,10 @@ def lambda_handler(event, context):
             ReturnValues="UPDATED_NEW"
         )
         updated_lang = response.get("Attributes", {}).get("preferred_language", "")
-        print("update language to: ", updated_lang, "for user ", user_id)
+        # print("update language to: ", updated_lang, "for user ", user_id)
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps(f"Updated language to: {updated_lang} for user {user_id}")
-        }
+        return construct_response(200)
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, 
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": "Internal Server Error"}
+        return construct_response(500, {"error": "Internal Server Error"})

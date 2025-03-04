@@ -1,12 +1,10 @@
 import json
-import os
 import boto3
 from langchain.document_loaders import PyMuPDFLoader
 import fitz  # so we can also get metadata or do direct PyMuPDF calls if needed
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import docx
-# For HTML
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup # For HTML
 import psycopg2
 from datetime import datetime
 import psycopg2.extras
@@ -15,6 +13,7 @@ import utils.get_course_related_stuff
 from utils.get_rds_secret import get_secret, load_db_config
 from utils.create_course_vectors_tables import create_table_if_not_exists
 from utils.retrieve_course_config import retrieve_course_config
+from utils.construct_response import construct_response
 from io import BytesIO
 
 s3_client = boto3.client("s3")
@@ -33,16 +32,7 @@ def lambda_handler(event, context):
     course_id = params.get("course")
 
     if not course_id:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Missing required fields: 'course' is required"})
-        }
+        return construct_response(400, {"error": "Missing required fields: 'course' is required"})
     
     secret = get_secret()
     credentials = json.loads(secret)
@@ -57,34 +47,23 @@ def lambda_handler(event, context):
         "password": password
     }
 
-    ret = create_table_if_not_exists(DB_CONFIG, course_id)
+    create_table_if_not_exists(DB_CONFIG, course_id)
 
     ## first check course config settings
     course_config = retrieve_course_config(course_id)
-    print("course config: ", course_config)
 
     if isinstance(course_config, str):  # If there's an error message
         print("Error:", course_config)
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Error retrieving course configuration"})
-        }
+        return construct_response(500, {"error": "Error retrieving course configuration"})
+    
     # Access fields in the dictionary
     files_enabled = course_config["selectedIncludedCourseContent"].get("FILES", False)
     syllabus_enabled = course_config["selectedIncludedCourseContent"].get("SYLLABUS", False)
-    home_enabled = course_config["selectedIncludedCourseContent"].get("HOME", False)
     announcements_enabled = course_config["selectedIncludedCourseContent"].get("ANNOUNCEMENTS", False)
     assignments_enabled = course_config["selectedIncludedCourseContent"].get("ASSIGNMENTS", False)
     quizzes_enabled = course_config["selectedIncludedCourseContent"].get("QUIZZES", False)
     discussions_enabled = course_config["selectedIncludedCourseContent"].get("DISCUSSIONS", False)
     pages_enabled = course_config["selectedIncludedCourseContent"].get("PAGES", False)
-    modules_enabled = course_config["selectedIncludedCourseContent"].get("MODULES", False) # To be deleted, no longer supported 
     
     prefix = f"{course_id}/"  # Assuming course_id is used as a folder structure
     response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
@@ -92,18 +71,6 @@ def lambda_handler(event, context):
     files_metadata = []
     results = {}
     embeddings = []
-
-    if "Contents" not in response:
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"message": "Bucket is empty or does not exist."})
-        }
 
     if "Contents" in response and files_enabled:
         for obj in response["Contents"]:
@@ -136,15 +103,12 @@ def lambda_handler(event, context):
             document_embeddings = []
             for chunk in results[file_key]:
                 chunk_embeddings = generate_embeddings(chunk)  # Assuming `generate_embeddings` calls your embedding model
-                document_embeddings.append(chunk_embeddings)
-                # response = s3_client.head_object(Bucket=bucket_name, Key=s3_key)
-                # source_url = response["Metadata"].get("source-url", "Unknown source")
-                source_url = metadata.get("original_url", "N/A"),
-                file_name_db = metadata.get("display_name", file_key)
-                retdb = store_embeddings(file_name_db, chunk_embeddings, course_id, DB_CONFIG, source_url, chunk)
+                if chunk_embeddings:
+                    document_embeddings.append(chunk_embeddings)
+                    source_url = metadata.get("original_url", "N/A"),
+                    file_name_db = metadata.get("display_name", file_key)
+                    store_embeddings(file_name_db, chunk_embeddings, course_id, DB_CONFIG, source_url, chunk)
             embeddings.append({file_key: document_embeddings})
-    
-    print("file metadata: ", files_metadata)
 
     # add canvas contents based on instructor configuration
     canvas_secret = utils.get_canvas_secret.get_secret()
@@ -162,18 +126,6 @@ def lambda_handler(event, context):
                 if embedding:
                     embeddings.append(embedding)
                     store_embeddings("Syllabus", embedding, course_id, DB_CONFIG, syllabus_url, chunk)
-
-    if home_enabled:
-        home_url = f"{BASE_URL}/courses/{course_id}"
-        home_text = utils.get_course_related_stuff.fetch_home_from_canvas(TOKEN, BASE_URL, course_id)
-        if home_text:
-            home_chunks = text_splitter.split_text(home_text)
-            embeddings = []
-            for chunk in home_chunks:
-                embedding = generate_embeddings(chunk)
-                if embedding:
-                    embeddings.append(embedding)
-                    store_embeddings("Home", embedding, course_id, DB_CONFIG, home_url, chunk)
 
     if announcements_enabled:
         announcements_url = f"{BASE_URL}/courses/{course_id}/announcements"
@@ -236,17 +188,7 @@ def lambda_handler(event, context):
                     store_embeddings("Pages", embedding, course_id, DB_CONFIG, pages_url, chunk)
 
     # 4. Return the results
-    return {
-        "statusCode": 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        # "body": json.dumps({"pdf_results": results, "embeddings": embeddings, "db":retdb})
-        # "body": json.dumps(results)
-    }
+    return construct_response(200)
     
 def read_pdf_streaming(bucket_name, file_key, text_splitter):
     """Extract text from a large PDF file using S3 streaming."""

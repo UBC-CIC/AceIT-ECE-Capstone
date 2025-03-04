@@ -1,5 +1,6 @@
 import json
 import boto3
+from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -16,33 +17,15 @@ def lambda_handler(event, context):
         
         conversation_id = body.get("conversation_id")
         relevant_source_content = body.get("relevantSourceContent", [])
-        # new_conversation = body.get("newConversation", False)
 
         if not conversation_id:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required field: conversation_id"})
-            }
+            return construct_response(400, {"error": "Missing required fields: 'conversation_id' is required"})
 
         # Fetch conversation details
         conversation = conversations_table.get_item(Key={"conversation_id": conversation_id})
         if "Item" not in conversation:
-            return {
-                "statusCode": 404,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Conversation not found"})
-            }
+            return construct_response(404, {"error": "Conversation not found"})
+        
         conversation_data = conversation["Item"]
 
         # Fetch all messages in the conversation
@@ -56,7 +39,6 @@ def lambda_handler(event, context):
 
         # Sort messages by timestamp
         messages.sort(key=lambda x: x.get("timestamp", ""))
-        print("Messages: ", messages)
 
         # Build the conversation message chain
         # mistral_messages = []
@@ -65,7 +47,6 @@ def lambda_handler(event, context):
 
         for message in messages:
             msg_source = message.get("msg_source")
-            print("a msg_source: ", msg_source)
             content = message.get("content")
             if msg_source == "STUDENT":
                 # mistral_messages.append({"role": "user", "content": content})
@@ -84,27 +65,9 @@ def lambda_handler(event, context):
                             # ai_sources_content += source['documentContent'] + ";\n"
                 # mistral_messages.append({"role": "assistant", "content": complete_content})
                 llama_msg += f"<|start_header_id|>assistant<|end_header_id|>{complete_content}<|eot_id|>"
-            
-        print("Conversation chain now:", llama_msg)
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"prompt": llama_msg})
-        }
+        return construct_response(200, {"prompt": llama_msg})
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, 
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": "Internal Server Error"}
+        return construct_response(500, {"error": "Internal Server Error"})

@@ -1,7 +1,7 @@
-import json
 import boto3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from utils.get_user_info import get_user_info
+from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -14,31 +14,16 @@ def lambda_handler(event, context):
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required Authorization token"})
-            }
+            return construct_response(400, {"error": "Missing required header field: 'Authorization' is required"})
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
         if not user_info:
-            return {
-                "statusCode": 500,
-                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-            }
+            return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
         # Extract Canvas user ID
         student_id = user_info.get("userId")
         if not student_id:
-            return {
-                "statusCode": 500,
-                "body": json.dumps({"error": "User ID not found"})
-            }
+            return construct_response(500, {"error": "User ID not found"})
         student_id = str(student_id)
 
         # TODO: check instructor for course or not
@@ -49,30 +34,12 @@ def lambda_handler(event, context):
         period = query_params.get("period")
 
         if not course_id or not period:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required query parameters: course or period"})
-            }
+            return construct_response(400, {"error": "Missing required query parameters: 'course' and 'period' are required"})
 
         # Determine the time period filter
         time_threshold = calculate_time_threshold(period)
         if time_threshold is None:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
-            }
+            return construct_response(400, {"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
 
         # Query the Conversations table for conversations in the given course
         response = conversations_table.scan(
@@ -136,34 +103,17 @@ def lambda_handler(event, context):
             "uniqueStudents": len(unique_students)  # Unique students engaged
         }
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps(engagement_stats)
-        }
+        return construct_response(200, engagement_stats)
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, 
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": "Internal Server Error"}
-
+        return construct_response(500, {"error": "Internal Server Error"})
 
 def calculate_time_threshold(period):
     """
     Calculates the timestamp threshold for the given period.
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     if period == "WEEK":
         return (now - timedelta(weeks=1)).isoformat()
     elif period == "MONTH":

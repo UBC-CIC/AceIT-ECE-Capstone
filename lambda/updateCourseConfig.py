@@ -1,14 +1,12 @@
 import json
-import os
 import boto3
 import psycopg2
-from datetime import datetime
-import uuid
 import psycopg2.extras
 from utils.create_course_config_table import create_table_if_not_exists
 from utils.get_rds_secret import get_secret
 from utils.get_user_info import get_user_info
 from utils.get_rds_secret import load_db_config
+from utils.construct_response import construct_response
 
 lambda_client = boto3.client("lambda")
 
@@ -18,44 +16,16 @@ def lambda_handler(event, context):
     headers = event.get("headers", {})
     auth_token = headers.get("Authorization", "")
     if not auth_token:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Missing required Authorization token"})
-        }
+        return construct_response(400, {"error": "Missing required header field: 'Authorization' is required"})
 
     # Call Canvas API to get user info
     user_info = get_user_info(auth_token)
     if not user_info:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-        }
+        return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
     # Extract Canvas user ID
     student_id = user_info.get("userId")
     if not student_id:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "User ID not found"})
-        }
-    student_id = str(student_id)
+        return construct_response(500, {"error": "User ID not found"})
 
     # TODO: need to check if this user is an instructor for this course
     
@@ -64,17 +34,7 @@ def lambda_handler(event, context):
     try:
         body = json.loads(event.get("body", "{}"))
     except json.JSONDecodeError:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Invalid JSON in request body"})
-        }
-    
+        return construct_response(400, {"error": "Invalid JSON in request body"})
     required_fields = [
         "course", "studentAccessEnabled", "selectedSupportedQuestions", 
         "selectedIncludedCourseContent", "customResponseFormat"
@@ -82,16 +42,7 @@ def lambda_handler(event, context):
     
     missing_fields = [field for field in required_fields if field not in body]
     if missing_fields:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": f"Missing required fields: {', '.join(missing_fields)}"})
-        }
+        return construct_response(400, {"error": f"Missing required fields: {', '.join(missing_fields)}"})
 
     course_id = body["course"]
     student_access_enabled = body["studentAccessEnabled"]
@@ -114,18 +65,12 @@ def lambda_handler(event, context):
     ret1 = create_table_if_not_exists(DB_CONFIG)
     ret2 = update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_supported_questions, 
                                 selected_included_course_content, custom_response_format, auto_update_on)
-
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        # 'body': json.dumps("Returns the current (updated) course configuration.")
-        'body': json.dumps({"db create": ret1, "db retrieve": ret2,})
+    response_body = {
+        "db create": ret1, 
+        "db retrieve": ret2
     }
+
+    return construct_response(200, response_body)
 
 def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_supported_questions, 
                          selected_included_course_content, custom_response_format, auto_update_on=None):
@@ -134,7 +79,6 @@ def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_
     try:
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
-        print("Connected to DB successfully")
         cursor = connection.cursor()
 
         # Base query for inserting a new course config or updating existing ones
@@ -178,7 +122,6 @@ def update_course_config(DB_CONFIG, course_id, student_access_enabled, selected_
 
         # Invoke prompt update
         invoke_update_system_prompt(system_prompt, course_id)
-        print("Invoked update prompt!")
         return "Course configuration updated successfully"
 
     except Exception as e:
@@ -240,7 +183,6 @@ Do not:
 Respond to all student inquiries in the following style: {custom_response_format}.
 Ensure your responses are always accurate, engaging, and inform students when you have questions unsure or encountering a controversial topic.
 """
-    print(system_prompt.strip())
     return system_prompt.strip()
 
 
@@ -255,7 +197,7 @@ def invoke_update_system_prompt(system_prompt, course_id):
             InvocationType="Event",
             Payload=json.dumps(payload)
         )
-        print(f"Successfully invoked UpdateConversationPrompt for course {course_id}")
+        # print(f"Successfully invoked UpdateConversationPrompt for course {course_id}")
         return
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")

@@ -3,47 +3,22 @@ import utils
 import requests
 import boto3
 import utils.get_canvas_secret
+from utils.construct_response import construct_response
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
 users_table = dynamodb.Table("Users")
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     if not headers:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Header is missing"})
-        }
+        return construct_response(400, {"error": "Header is missing"})
+    
     token  = headers.get("Authorization", {})
     if not token:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Authorization token is required"})
-        }
+        return construct_response(400, {"error": "Missing required fields: 'Authorization' is required"})
     
     user = get_user(token)
     if user is None:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Failed to fetch user info from Canvas API"})
-        }
+        return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
     
     user_name = user["name"]
     user_id = user["id"]
@@ -56,22 +31,13 @@ def lambda_handler(event, context):
         users_table.put_item(Item={"userId": user_id, "preferred_language": ""})
 
     # construct response
-    response = {
+    response_body = {
         "userName": user_name,
         "userId": user_id,
         "preferred_language": preferred_lang
     }
 
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        'body': json.dumps(response)
-    }
+    return construct_response(200, response_body)
 
 def get_user(token):
     """
@@ -81,7 +47,6 @@ def get_user(token):
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
     HEADERS = {"Authorization": f"Bearer {token}"}
-    print("Token: ", token)
 
     url = f"{BASE_URL}/api/v1/users/self"
     try:

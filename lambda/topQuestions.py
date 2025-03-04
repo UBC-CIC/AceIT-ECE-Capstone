@@ -1,8 +1,9 @@
 import json
 import boto3
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import re
 from utils.get_user_info import get_user_info
+from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -16,38 +17,16 @@ def lambda_handler(event, context):
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required Authorization token"})
-            }
+            return construct_response(400, {"error": "Missing required header field: 'Authorization' is required"})
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
         if not user_info:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Failed to fetch user info from Canvas"})
-            }
+            return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
         # Extract Canvas user ID
         student_id = user_info.get("userId")
         if not student_id:
-            return {
-                "statusCode": 500,
-                "body": json.dumps({"error": "User ID not found"})
-            }
-        student_id = str(student_id)
+            return construct_response(500, {"error": "User ID not found"})
 
         # TODO: need to check if this user is an instructor for this course
 
@@ -58,45 +37,18 @@ def lambda_handler(event, context):
         period = query_params.get("period")
 
         if not course_id or not num or not period:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Missing required query parameters: course, num, or period"})
-            }
+            return construct_response(400, {"error": "Missing required query parameters: 'course', 'num', and 'period' are required"})
 
         # Convert num to int
         try:
             num = int(num)
         except ValueError:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Invalid value for num, must be an integer"})
-            }
+            return construct_response(400, {"error": "Invalid value for num, must be an integer"})
 
         # Determine the time period filter
         time_threshold = calculate_time_threshold(period)
         if time_threshold is None:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
-            }
+            return construct_response(400, {"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
 
         # Scan Messages table for the course and filter by timestamp
         response = messages_table.scan(
@@ -125,48 +77,31 @@ def lambda_handler(event, context):
         <|eot_id|>
         <|start_header_id|>assistant<|end_header_id|>
         """
-        print("system prompt: ", formatted_prompt)
+        # print("system prompt: ", formatted_prompt)
 
         # Call the LLM API to generate a response
         llm_response = call_llm(formatted_prompt)
-        print("llm response: ", llm_response)
+        # print("llm response: ", llm_response)
 
         try:
             faq_list = json.loads(llm_response)  # Convert JSON string to Python list
             if not isinstance(faq_list, list):  # Ensure it's a list
                 raise ValueError("LLM output is not a list")
         except json.JSONDecodeError:
-            print("Error: LLM output is not valid JSON:", llm_response)
+            # print("Error: LLM output is not valid JSON:", llm_response)
             faq_list = []  # Fallback empty list
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps(faq_list)
-        }
+        return construct_response(200, faq_list)
 
     except Exception as e:
         print(f"Error: {e}")
-        return {"statusCode": 500, 
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": "Internal Server Error"}
-
+        return construct_response(500, {"error": "Internal Server Error"})
 
 def calculate_time_threshold(period):
     """
     Calculates the timestamp threshold for the given period.
     """
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     if period == "WEEK":
         return (now - timedelta(weeks=1)).isoformat()
     elif period == "MONTH":
@@ -186,11 +121,11 @@ def call_llm(input_text):
             modelId=model_id,
             body=json.dumps({"prompt": input_text, "max_gen_len": 150, "temperature": 0.5, "top_p": 0.9})
         )
-        print("LLM response: ", response)
+        # print("LLM response: ", response)
 
         response_body = response['body'].read().decode('utf-8')
         if not response_body.strip():
-            print("LLM response is empty!")
+            # print("LLM response is empty!")
             return "Summary not available."
         response_json = json.loads(response_body)
         generated_response = response_json.get("generation", "Summary not available")

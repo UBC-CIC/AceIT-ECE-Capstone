@@ -1,11 +1,10 @@
 import json
 import boto3
 import psycopg2
-from psycopg2.extras import Json
 import re
 from utils.get_rds_secret import get_secret, load_db_config
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from utils.translation import translate_text
+from utils.construct_response import construct_response
 
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', 'us-west-2') 
@@ -15,30 +14,17 @@ def lambda_handler(event, context):
     try:
         # Parse the request body
         body = json.loads(event.get("body", "{}"))
-        # course_id = "1"
-        course_id = body.get("course")  # Ensure course_id is extracted
-        course_id = str(course_id)
 
         # Validate required fields
-        message = body.get("message")
-        student_language_pref = body.get("language", "")
-        print("Message got: ", message)
-        if not message:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "'message' is required"})
-            }
+        message = body.get("message", "")
+        course_id = body.get("course", "")
+        course_id = str(course_id)
+        if not message or not course_id:
+            return construct_response(400, {"error": "Missing required fields: 'course' and 'message' are required"})
 
         # Optional fields
+        student_language_pref = body.get("language", "")
         context = body.get("context", "")
-        print("context:", context)
-        # sources = body.get("sources", [])
 
         secret = get_secret()
         credentials = json.loads(secret)
@@ -57,12 +43,10 @@ def lambda_handler(event, context):
 
         # Retrieve relevant context from the database based on embeddings
         relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 8)
-        print("relevant_docs:", relevant_docs)
-        print("document names:", relevant_docs[0]["documentName"])
 
         # Combine context with the input message for the LLM
         final_input = compose_input(message, context, relevant_docs)
-        print("final input:", final_input)
+        # print("final input:", final_input)
 
         # Call the LLM API to generate a response
         llm_response = call_llm(final_input)
@@ -72,31 +56,15 @@ def lambda_handler(event, context):
 
             llm_response = translated_response
 
-        return {
-            "statusCode": 200,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({
-                "response": llm_response,
-                "sources": relevant_docs
-            })
+        response_payload = {
+            "response": llm_response,
+            "sources": relevant_docs
         }
 
+        return construct_response(200, response_payload)
+
     except Exception as e:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": f"An unexpected error occurred: {str(e)}"})
-        }
+        return construct_response(500, {"error": f"An unexpected error occurred: {str(e)}"})
 
 def generate_embeddings(text):
     """Generates embeddings for the input text using Bedrock."""
@@ -184,7 +152,7 @@ Content: {doc.get('documentContent', 'No Content')}"""
         f"\n<|start_header_id|>user<|end_header_id|>\n{message}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>"
     )
 
-    print("final prompt:", final_prompt)   
+    # print("final prompt:", final_prompt)   
     return final_prompt
 
 def call_llm(input_text):
@@ -198,16 +166,13 @@ def call_llm(input_text):
             # contentType="application/json",
             # accept="application/json"
         )
-        print("LLM response: ", response)
 
         response_body = response['body'].read().decode('utf-8')
         if not response_body.strip():
-            print("LLM response is empty!")
             return "Summary not available."
         response_json = json.loads(response_body)
         generated_response = response_json.get("generation", "Summary not available.")
         generated_response = re.sub(r"^(ai:|AI:)\s*", "", generated_response).strip()
-        print("generated response: ", generated_response)
 
         return generated_response
     

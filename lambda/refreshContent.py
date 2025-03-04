@@ -7,7 +7,7 @@ import requests  # to make HTTP requests
 import utils
 import utils.get_canvas_secret
 import utils.get_rds_secret
-from utils.retrieve_course_config import call_get_course_config
+from utils.construct_response import construct_response
 
 s3_client = boto3.client('s3')
 bucket_name = 'bucket-for-course-documents'
@@ -33,54 +33,21 @@ def lambda_handler(event, context):
                 InvocationType="Event",
                 Payload=json.dumps(payload)
                 )
-            return {
-                "statusCode": 202,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"message": "Function is executing asynchronously"})
-            }
+            return construct_response(202, {"message": "Function is executing asynchronously"})
+
         except Exception as e:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"message": "Error invoking function asynchronously", "error": str(e)})
-            }
+            return construct_response(500, {"message": "Error invoking function asynchronously", "error": str(e)})
+        
     else:
         # Synchronous execution
         if not course_id:
-            return {
-                "statusCode": 400,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Course ID is required"})
-            }
+            return construct_response(400, {"error": "Missing required fields: 'course' is required"})
 
         files = get_files(course_id)
 
         if files is None:
-            return {
-                "statusCode": 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                "body": json.dumps({"error": "Failed to fetch files from Canvas API"})
-            }
+            return construct_response(500, {"error": "Failed to fetch files from Canvas API"})
+        
         # Store course documents into S3 buckets
         text_format = {"txt", "md", "c", "cpp", "css", "go", "py", "js", "rtf", "pdf", "docx", "html"}
         for file in files:
@@ -131,39 +98,18 @@ def lambda_handler(event, context):
 
         # delete this course vector
         del_response = delete_vectors_by_course(DB_CONFIG, course_id)
-        print("Delete vector response: ", del_response)
+        if not del_response:
+            return construct_response(500, {"message": f"Error while deleting course vector storage"})
 
         response = call_fetch_read_from_s3(course_id)
-        print("lambda response: ", response)  # Log the response if needed
-        print("lambda response: ", type(response))
 
         # Check if the status is OK
-        if response.get("statusCode") == 200:
+        if response and response.get("statusCode") == 200:
             # Update the last_updated time
             update_course_last_update_time(course_id, DB_CONFIG)
-            print("Status is OK")
-            return {
-                'statusCode': 200,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                'body': json.dumps({"message": f"Refreshed content for course {course_id}"})
-            }
+            return construct_response(200, {"message": f"Refreshed content for course {course_id}"})
         else:
-            print("Status is NOT OK")
-            return {
-                'statusCode': 500,
-                'headers': {
-                    'Access-Control-Allow-Headers': '*',
-                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                    'Access-Control-Allow-Methods': '*',
-                    'Access-Control-Allow-Credentials': 'true'
-                },
-                'body': json.dumps({"message": f"Content for course {course_id} is not refreshed!"})
-            }
+            return construct_response(500, {"message": f"Content for course {course_id} is not refreshed!"})
 
 def get_files(course_id):
     """
@@ -176,13 +122,9 @@ def get_files(course_id):
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
-    print("url: ", url)
-    print("headers: ", HEADERS)
-    print("token: ", TOKEN)
 
     try:
         response = requests.get(url, headers=HEADERS, verify=False)
-        print("response: ", response.json())
         response.raise_for_status()
         return response.json()
     except requests.exceptions.HTTPError as http_err:
@@ -209,6 +151,7 @@ def update_course_last_update_time(course_id, DB_CONFIG):
     connection.commit()
     cursor.close()
     connection.close()
+    return
 
 def delete_vectors_by_course(DB_CONFIG, course_id):
     # Connect to the PostgreSQL database
@@ -225,31 +168,10 @@ def delete_vectors_by_course(DB_CONFIG, course_id):
 
         connection.commit()
         cursor.close()
-        return "Vectors deleted successfully"
-
+        return "Success"
     except Exception as e:
-        print(f"Error during deletion: {e}")
-        return "Error deleting vectors"
-    
-
-def invoke_fetch_from_s3(course_id):
-    payload = {
-        "body": json.dumps({"course": course_id}) 
-    }
-    try:
-        response = lambda_client.invoke(
-            FunctionName="FetchReadFromS3Function",  # Replace with actual function name
-            InvocationType="RequestResponse",  # Use 'Event' for async calls
-            # InvocationType="Event",
-            Payload=json.dumps(payload)
-        )
-        response_payload = json.loads(response["Payload"].read().decode("utf-8"))
-        print(f"Refreshed course {course_id}: {response_payload}")
-        return
-    except Exception as e:
-        print(f"Error invoking Lambda function: {e}")
-        return
-    
+        return None
+        
 def call_fetch_read_from_s3(course_id):
     """
     Calls getcourseconfig.
@@ -266,10 +188,6 @@ def call_fetch_read_from_s3(course_id):
             Payload=json.dumps(payload)
         )
         response_payload = json.loads(response["Payload"].read().decode("utf-8"))
-        print("response_payload: ", response_payload)
-        # body_dict = json.loads(response_payload["body"])
-        # print("Body: ", body_dict, "Type: ", type(body_dict))
-        # Create a LambdaResponse object with status_code and body
         return response_payload
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")

@@ -1,11 +1,8 @@
 import json
-import os
-import boto3
 import psycopg2
-from datetime import datetime
-import uuid
 import psycopg2.extras
 from utils.get_rds_secret import get_secret, load_db_config
+from utils.construct_response import construct_response
 
 
 def lambda_handler(event, context):
@@ -13,16 +10,7 @@ def lambda_handler(event, context):
     course_id = params.get("course")
     # Validate required fields
     if not course_id:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Missing required fields: 'course' is required"})
-        }
+        return construct_response(400, {"error": "Missing required fields: 'course' is required"})
     
     secret = get_secret()
     credentials = json.loads(secret)
@@ -36,18 +24,9 @@ def lambda_handler(event, context):
         "user": username,
         "password": password
     }
-    ret1 = delete_all_from_this_course(DB_CONFIG, course_id)
+    delete_result = delete_all_from_this_course(DB_CONFIG, course_id)
 
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        'body': json.dumps({"delete result": ret1})
-    }
+    return construct_response(200, {"delete result": delete_result})
 
 def delete_all_from_this_course(DB_CONFIG, course_id):
     # Connect to the PostgreSQL database

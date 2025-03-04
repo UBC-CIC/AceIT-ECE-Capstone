@@ -1,12 +1,10 @@
 import json
-import os
 import boto3
 import psycopg2
-from datetime import datetime
-import uuid
 import psycopg2.extras
 from utils.create_course_vectors_tables import create_table_if_not_exists
 from utils.get_rds_secret import get_secret, load_db_config
+from utils.construct_response import construct_response
 
 bedrock = boto3.client("bedrock-runtime",
                        region_name = 'us-west-2')
@@ -19,16 +17,7 @@ def lambda_handler(event, context):
 
     # Validate required fields
     if not course_id or not query:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Missing required fields: 'course' and 'query' are required"})
-        }
+        return construct_response(400, {"error": "Missing required fields: 'course' and 'query' are required"})
     
     secret = get_secret()
     credentials = json.loads(secret)
@@ -42,21 +31,11 @@ def lambda_handler(event, context):
         "password": password
     }
     
-    ret1 = create_table_if_not_exists(DB_CONFIG, course_id)
+    create_table_if_not_exists(DB_CONFIG, course_id)
     query_embedding = generate_embeddings(str(query))
-    ret2 = get_course_vector(DB_CONFIG, query_embedding, course_id, num_max_results)
+    response_body = get_course_vector(DB_CONFIG, query_embedding, course_id, num_max_results)
 
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-        # 'body': json.dumps({"db": ret1, "get_vectors": ret2})
-        'body': json.dumps(ret2)
-    }
+    return construct_response(200, response_body)
 
 def get_course_vector(DB_CONFIG, query, course_id, num_max_results):
     # Connect to the PostgreSQL database

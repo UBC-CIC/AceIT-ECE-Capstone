@@ -62,38 +62,38 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
     print(f"Failed to fetch syllabus: {response.status_code}, {response.text}")
     return None
 
-def fetch_home_from_canvas(auth_token, base_url, course_id):
-    # get default view
-    url = f"{base_url}/api/v1/courses/{course_id}"
-    headers = {"Authorization": f"Bearer {auth_token}"}
-    url_home = f"{base_url}/courses/{course_id}"
-    response = requests.get(url, headers=headers, verify=False)
-    if response.status_code == 200:
-        course_data = response.json()
-        default_view = course_data.get("default_view", "")
-        return_str = ""
-        if default_view == "syllabus":
-            return_str += "Home page has been set to Syllabus\n"
-            # avoid duplicate content fetching
-            # return_str += fetch_syllabus_from_canvas(auth_token, base_url, course_id) + "\n"
-        elif default_view == "assignments":
-            return_str += "Home page has been set to Assignments\n"
-            # avoid duplicate content fetching
-            # return_str += fetch_assignments_from_canvas(auth_token, base_url, course_id)  + "\n"
-        elif default_view == "modules":
-            return_str += "Home page has been set to Modules\n"
-        elif default_view == "wiki":
-            return_str += "Home page has been set to course Front Page. Please refer to the Pages document.\n"
-        elif default_view == "feed":
-            return_str += "Home page has been set to Recent Activity. Please refer to Assignments, Announcements, and Discussions documents.\n"
-        else:
-            print(f"Failed to fetch home: {response.status_code}, {response.text}")
-            return None
+# def fetch_home_from_canvas(auth_token, base_url, course_id):
+#     # get default view
+#     url = f"{base_url}/api/v1/courses/{course_id}"
+#     headers = {"Authorization": f"Bearer {auth_token}"}
+#     url_home = f"{base_url}/courses/{course_id}"
+#     response = requests.get(url, headers=headers, verify=False)
+#     if response.status_code == 200:
+#         course_data = response.json()
+#         default_view = course_data.get("default_view", "")
+#         return_str = ""
+#         if default_view == "syllabus":
+#             return_str += "Home page has been set to Syllabus\n"
+#             # avoid duplicate content fetching
+#             # return_str += fetch_syllabus_from_canvas(auth_token, base_url, course_id) + "\n"
+#         elif default_view == "assignments":
+#             return_str += "Home page has been set to Assignments\n"
+#             # avoid duplicate content fetching
+#             # return_str += fetch_assignments_from_canvas(auth_token, base_url, course_id)  + "\n"
+#         elif default_view == "modules":
+#             return_str += "Home page has been set to Modules\n"
+#         elif default_view == "wiki":
+#             return_str += "Home page has been set to course Front Page. Please refer to the Pages document.\n"
+#         elif default_view == "feed":
+#             return_str += "Home page has been set to Recent Activity. Please refer to Assignments, Announcements, and Discussions documents.\n"
+#         else:
+#             print(f"Failed to fetch home: {response.status_code}, {response.text}")
+#             return None
         
-        return_str += "Home link: " + url_home
-        return return_str
-    print(f"Failed to fetch home: {response.status_code}, {response.text}")
-    return None
+#         return_str += "Home link: " + url_home
+#         return return_str
+#     print(f"Failed to fetch home: {response.status_code}, {response.text}")
+#     return None
 
 def fetch_announcments_from_canvas(auth_token, base_url, course_id):
     end_date = datetime.now().strftime("%Y-%m-%d")

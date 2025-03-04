@@ -1,56 +1,22 @@
 import json
 import requests
 import utils.get_canvas_secret
+from utils.construct_response import construct_response
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     if not headers:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Header is missing"})
-        }
+        return construct_response(400, {"error": "Header is missing"})
+    
     access_token = headers.get("Authorization", {})
     if not access_token:
-        return {
-            "statusCode": 400,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Access token is required"})
-        }
-
+        return construct_response(400, {"error": "Missing required fields: 'Authorization' is required"})
+    
     status = log_out(access_token)
     if status is None:
-        return {
-            "statusCode": 500,
-            'headers': {
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-                'Access-Control-Allow-Methods': '*',
-                'Access-Control-Allow-Credentials': 'true'
-            },
-            "body": json.dumps({"error": "Failed to delete access_token from Canvas"})
-        }
+        return construct_response(500, {"error": "Failed to delete access_token from Canvas"})
     
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
-            'Access-Control-Allow-Methods': '*',
-            'Access-Control-Allow-Credentials': 'true'
-        },
-    }
-
+    return construct_response(200)
 
 def log_out(access_token):
     secret = utils.get_canvas_secret.get_secret()
