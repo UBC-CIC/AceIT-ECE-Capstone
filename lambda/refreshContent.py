@@ -22,22 +22,36 @@ def lambda_handler(event, context):
     is_recursive = body.get("recursive", False)
     if running_async and not is_recursive:
         # Asynchronous execution: Invoke itself asynchronously
-        function_name = os.environ['RefreshContentLambda']
+
         body["recursive"] = True  # Prevent further async invocation
-        invoke_params = {
-            "FunctionName": function_name,
-            "InvocationType": "Event",  # Asynchronous execution
-            "Payload": json.dumps({"body": json.dumps(body)})
+        payload = {
+            "body": json.dumps(body) 
         }
         try:
-            lambda_client.invoke(**invoke_params)
+            response = lambda_client.invoke(
+                FunctionName="RefreshContentLambda",
+                InvocationType="Event",
+                Payload=json.dumps(payload)
+                )
             return {
                 "statusCode": 202,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
                 "body": json.dumps({"message": "Function is executing asynchronously"})
             }
         except Exception as e:
             return {
                 "statusCode": 500,
+                'headers': {
+                    'Access-Control-Allow-Headers': '*',
+                    'Access-Control-Allow-Origin': 'https://d2rs0jk5lfd7j4.cloudfront.net',
+                    'Access-Control-Allow-Methods': '*',
+                    'Access-Control-Allow-Credentials': 'true'
+                },
                 "body": json.dumps({"message": "Error invoking function asynchronously", "error": str(e)})
             }
     else:
