@@ -84,11 +84,9 @@ def retrieve_course_config(course_id):
                     "EXPLANATION": True
                 }),
                 "selected_included_course_content": json.dumps({
-                    "HOME": False,
                     "ANNOUNCEMENTS": False,
                     "SYLLABUS": False,
                     "ASSIGNMENTS": False,
-                    "MODULES": False,
                     "FILES": False,
                     "QUIZZES": False,
                     "DISCUSSIONS": False,
