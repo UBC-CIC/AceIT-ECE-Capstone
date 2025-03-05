@@ -76,7 +76,7 @@ def generate_suggestions(course_config_str, num_suggestions, course_related_stuf
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="InvokeLLMComletionLambda",  # Replace with actual function name
+            FunctionName="InvokeLLMCompletionLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )
