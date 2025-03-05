@@ -27,7 +27,7 @@ def lambda_handler(event, context):
         student_id = user_info.get("userId")
         if not student_id:
             return construct_response(500, {"error": "User ID not found"})
-
+        student_id = str(student_id)
         # Parse input from the request query parameters
         query_params = event.get("queryStringParameters", {})
         course_id = query_params.get("course", "")
@@ -72,7 +72,6 @@ def lambda_handler(event, context):
     except Exception as e:
         print(f"Error: {e}")
         return construct_response(500, {"error": "Internal Server Error"})
-
 
 def generate_summary_input(message_ids_list):
     """
