@@ -59,7 +59,7 @@ def lambda_handler(event, context):
                         ExpressionAttributeValues={":new_content": system_prompt + " Please respond to all messages in markdown format." + preserved_part}
                     )
 
-        return construct_response(200)
+        return construct_response(200, {"message": "success"})
     except Exception as e:
         print(e)
         return construct_response(500, {"error": "failed to update system prompt"})

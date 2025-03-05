@@ -14,4 +14,4 @@ def lambda_handler(event, context):
     if status is None:
         return construct_response(500, {"error": "Failed to delete access_token from Canvas"})
     
-    return construct_response(200)
+    return construct_response(200, {"message": "logout user successfully"})

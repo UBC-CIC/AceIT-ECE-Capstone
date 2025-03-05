@@ -1,6 +1,6 @@
 import json
 
-def construct_response(status_code, body = {}):
+def construct_response(status_code, body):
     return {
             "statusCode": f"{status_code}",
             'headers': {

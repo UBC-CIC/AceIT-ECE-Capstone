@@ -188,7 +188,7 @@ def lambda_handler(event, context):
                     store_embeddings("Pages", embedding, course_id, DB_CONFIG, pages_url, chunk)
 
     # 4. Return the results
-    return construct_response(200)
+    return construct_response(200, {"message": "success"})
     
 def read_pdf_streaming(bucket_name, file_key, text_splitter):
     """Extract text from a large PDF file using S3 streaming."""
