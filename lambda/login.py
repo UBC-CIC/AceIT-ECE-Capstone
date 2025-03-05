@@ -1,18 +1,16 @@
-import json
-import requests
-import utils.get_canvas_secret
 from utils.construct_response import construct_response
+from utils.canvas_api_calls import get_access_token
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     if not headers:
         return construct_response(400, {"error": "Header is missing"})
     
-    jwt = headers.get("Authorization", {})
-    if not jwt:
-        return construct_response(400, {"error": "Missing required fields: 'Authorization' is required"})
+    authorization_code = headers.get("Authorization", {})
+    if not authorization_code:
+        return construct_response(400, {"error": "Missing required field: 'Authorization' is required"})
     
-    canvas_response = get_access_token(jwt)
+    canvas_response = get_access_token(authorization_code)
 
     if canvas_response is None:
         return construct_response(500, {"error": "Failed to fetch access_token from Canvas"})
@@ -20,38 +18,7 @@ def lambda_handler(event, context):
     response_body = {
         "access_token": canvas_response["access_token"],
         "refresh_token": canvas_response["refresh_token"],
-        "expires_in": 3600
+        "expires_in": canvas_response.get("expires_in", 3600)
     }
 
     return construct_response(200, response_body)
-
-def get_access_token(jwt):
-    secret = utils.get_canvas_secret.get_secret()
-    credentials = json.loads(secret)
-    BASE_URL = credentials['baseURL']
-    CLIENT_ID = credentials['ltiKeyId']
-    CLIENT_SECRET = credentials['ltiKey']
-    REDIRECT_URI = credentials['redirectURI']
-
-    url = f"{BASE_URL}/login/oauth2/token"
-
-    data = {
-            "client_id": CLIENT_ID,
-            "client_secret": CLIENT_SECRET,
-            "grant_type": "authorization_code",
-            "redirect_uri": REDIRECT_URI,
-            "code": jwt,
-            "scope": "https://canvas.instructure.com/auth/courses.readonly"
-            }
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-    try:
-        response = requests.post(url, data=data, headers=headers, verify=False)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-        return None
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-        return None

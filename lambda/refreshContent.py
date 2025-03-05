@@ -8,6 +8,7 @@ import utils
 import utils.get_canvas_secret
 import utils.get_rds_secret
 from utils.construct_response import construct_response
+from utils.canvas_api_calls import get_files_by_course_id
 
 s3_client = boto3.client('s3')
 bucket_name = 'bucket-for-course-documents'
@@ -43,7 +44,7 @@ def lambda_handler(event, context):
         if not course_id:
             return construct_response(400, {"error": "Missing required fields: 'course' is required"})
 
-        files = get_files(course_id)
+        files = get_files_by_course_id(course_id)
 
         if files is None:
             return construct_response(500, {"error": "Failed to fetch files from Canvas API"})
@@ -110,29 +111,6 @@ def lambda_handler(event, context):
             return construct_response(200, {"message": f"Refreshed content for course {course_id}"})
         else:
             return construct_response(500, {"message": f"Content for course {course_id} is not refreshed!"})
-
-def get_files(course_id):
-    """
-    Fetch all files from canvas lms.
-    """
-    secret = utils.get_canvas_secret.get_secret()
-    credentials = json.loads(secret)
-    BASE_URL = credentials['baseURL']
-    TOKEN = credentials['adminAccessToken']
-    HEADERS = {"Authorization": f"Bearer {TOKEN}"}
-
-    url = f"{BASE_URL}/api/v1/courses/{course_id}/files"
-
-    try:
-        response = requests.get(url, headers=HEADERS, verify=False)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-        return None
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-        return None
 
 def get_extension(file_name):
     parts = file_name.split(".")

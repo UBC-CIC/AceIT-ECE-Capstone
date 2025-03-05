@@ -1,10 +1,8 @@
 import json
-import utils
-import requests
 import psycopg2
-import utils.get_canvas_secret
 import utils.get_rds_secret
 from utils.construct_response import construct_response
+from utils.canvas_api_calls import get_student_courses, get_instructor_courses
 
 def lambda_handler(event, context):
     headers = event.get("headers", {})
@@ -60,50 +58,6 @@ def lambda_handler(event, context):
     }
 
     return construct_response(200, response_body)
-
-def get_student_courses(token):
-    """
-    Fetch all courses that user enrolled as a student.
-    """
-    secret = utils.get_canvas_secret.get_secret()
-    credentials = json.loads(secret)
-    BASE_URL = credentials['baseURL']
-    HEADERS = {"Authorization": f"Bearer {token}"}
-
-    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=student"
-
-    try:
-        response = requests.get(url, headers=HEADERS, verify=False)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-        return None
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-        return None
-
-def get_instructor_courses(token):
-    """
-    Fetch all courses that user enrolled as a instructor.
-    """
-    secret = utils.get_canvas_secret.get_secret()
-    credentials = json.loads(secret)
-    BASE_URL = credentials['baseURL']
-    HEADERS = {"Authorization": f"Bearer {token}"}
-
-    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=teacher"
-
-    try:
-        response = requests.get(url, headers=HEADERS, verify=False)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-        return None
-    except requests.exceptions.RequestException as req_err:
-        print(f"Request error occurred: {req_err}")
-        return None
 
 def get_availability(course_id):
     secret = utils.get_rds_secret.get_secret()
