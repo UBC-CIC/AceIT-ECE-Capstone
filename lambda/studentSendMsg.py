@@ -256,7 +256,7 @@ def generate_welcome_message(course_config_str, name, course_related_stuff, cour
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="InvokeLLMComletionLambda",  # Replace with actual function name
+            FunctionName="InvokeLLMCompletionLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )
