@@ -67,7 +67,7 @@ def lambda_handler(event, context):
             conversation_id = str(uuid.uuid4())
             # generate a system prompt, add to msg
             message_id = str(uuid.uuid4())
-            timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            timestamp = datetime.datetime.utcnow().isoformat()
             response = call_get_course_config(auth_token, course_id, lambda_client)
             course_config_prompt = response.get("systemPrompt", {})
             # print("Course config prompt: ", course_config_prompt)
@@ -99,7 +99,7 @@ def lambda_handler(event, context):
                 "msg_source": "AI",
                 "references": translated_documents,
                 "references_en": welcome_response_sources,
-                "msg_timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "msg_timestamp": datetime.datetime.utcnow().isoformat(),
             }
             # print("AI response: ", ai_message)
 
@@ -129,7 +129,7 @@ def lambda_handler(event, context):
 
             # Generate a unique message ID and current timestamp
             message_id = str(uuid.uuid4())
-            timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            timestamp = datetime.datetime.utcnow().isoformat()
 
             # Create the new message entry
             new_message = {

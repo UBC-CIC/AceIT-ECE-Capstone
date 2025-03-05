@@ -87,7 +87,7 @@ def calculate_time_threshold(period):
     """
     Calculates the timestamp threshold for the given period.
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     if period == "WEEK":
         return (now - timedelta(weeks=1)).isoformat()
     elif period == "MONTH":
