@@ -105,7 +105,7 @@ def lambda_handler(event, context):
         response = call_fetch_read_from_s3(course_id)
 
         # Check if the status is OK
-        if response.get("statusCode") == "200":
+        if response.get("statusCode") == 200:
             # Update the last_updated time
             update_course_last_update_time(course_id, DB_CONFIG)
             return construct_response(200, {"message": f"Refreshed content for course {course_id}"})
