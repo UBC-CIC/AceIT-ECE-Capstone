@@ -5,7 +5,6 @@ import psycopg2
 import psycopg2.extras
 from .get_rds_secret import get_cached_secret
 from .get_rds_secret import load_db_config
-from updateCourseConfig import create_system_prompt
 
 # Cache for database connection
 DB_CONNECTION = None
@@ -147,3 +146,59 @@ def retrieve_course_config(course_id):
     except Exception as e:
         print(f"Error: {e}")
         return "Cannot connect to db"
+    
+def create_system_prompt(supported_questions, custom_response_format):
+    """
+    Generate a system prompt for the course assistant based on professor's settings,
+    emphasizing both enabled and disabled features.
+    :param settings: A dictionary containing course assistant configuration.
+    :return: A formatted system prompt string.
+    """
+    # Define mappings for question types
+    question_types = {
+        "RECOMMENDATIONS": "provide study recommendations",
+        "PRACTICE_PROBLEMS": "provide practice problems",
+        "SOLUTION_REVIEW": "review solutions",
+        "EXPLANATION": "offer detailed explanations"
+    }
+
+    # Separate enabled and disabled features
+    enabled_features = [
+        phrase for key, phrase in question_types.items() if supported_questions.get(key, False)
+    ]
+    disabled_features = [
+        phrase for key, phrase in question_types.items() if not supported_questions.get(key, False)
+    ]
+
+    # Format the enabled features into a readable list
+    enabled_features_list = ", ".join(enabled_features[:-1])
+    if len(enabled_features) > 1:
+        enabled_features_list += f", and {enabled_features[-1]}"  # Add "and" before the last item
+    elif enabled_features:
+        enabled_features_list = enabled_features[0]
+
+    # Format the disabled features into a readable list (if any)
+    disabled_features_list = ", ".join(disabled_features[:-1])
+    if len(disabled_features) > 1:
+        disabled_features_list += f", and {disabled_features[-1]}"
+    elif disabled_features:
+        disabled_features_list = disabled_features[0]
+
+    # Construct the system prompt
+    system_prompt = f"""
+You are a course assistant on designed to help students in their learning journey. Your role is to:
+{enabled_features_list}.
+"""
+    # Add the "Do not" section only if there are disabled features
+    if disabled_features:
+        system_prompt += f"""
+Do not:
+{disabled_features_list}.
+"""
+
+    # Add the custom response format
+    system_prompt += f"""
+Respond to all student inquiries in the following style: {custom_response_format}.
+Ensure your responses are always accurate, engaging, and inform students when you have questions unsure or encountering a controversial topic.
+"""
+    return system_prompt.strip()
