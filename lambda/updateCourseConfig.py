@@ -185,7 +185,6 @@ Ensure your responses are always accurate, engaging, and inform students when yo
 """
     return system_prompt.strip()
 
-
 def invoke_update_system_prompt(system_prompt, course_id):
     payload = {
         "body": json.dumps({"course": course_id, "system_prompt":system_prompt}) 

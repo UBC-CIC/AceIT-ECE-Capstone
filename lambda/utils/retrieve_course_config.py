@@ -5,6 +5,7 @@ import psycopg2
 import psycopg2.extras
 from .get_rds_secret import get_cached_secret
 from .get_rds_secret import load_db_config
+from updateCourseConfig import create_system_prompt
 
 # Cache for database connection
 DB_CONNECTION = None
@@ -93,11 +94,11 @@ def retrieve_course_config(course_id):
                     "PAGES": False
                 }),
                 "custom_response_format": "",
-                "system_prompt": "",
                 "material_last_updated_time": "1970-01-01 00:00:00",
                 "auto_update_on": False
                 }
             
+            default_config["system_prompt"] = create_system_prompt(default_config["selected_supported_questions"], default_config["custom_response_format"])
 
             insert_query = """
             INSERT INTO course_configuration (course_id, student_access_enabled, selected_supported_questions, 
