@@ -92,20 +92,27 @@ def retrieve_course_config(course_id):
                     "DISCUSSIONS": False,
                     "PAGES": False
                 }),
-                "custom_response_format": ""
+                "custom_response_format": "",
+                "system_prompt": "",
+                "material_last_updated_time": "1970-01-01 00:00:00",
+                "auto_update_on": False
                 }
+            
 
             insert_query = """
             INSERT INTO course_configuration (course_id, student_access_enabled, selected_supported_questions, 
-                selected_included_course_content, custom_response_format)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                selected_included_course_content, custom_response_format, system_prompt, material_last_updated_time, auto_update_on)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(insert_query, (
                 default_config["course_id"],
                 default_config["student_access_enabled"],
                 default_config["selected_supported_questions"],
                 default_config["selected_included_course_content"],
-                default_config["custom_response_format"]
+                default_config["custom_response_format"],
+                default_config["system_prompt"],
+                default_config["material_last_updated_time"],
+                default_config["auto_update_on"]
             ))
 
             connection.commit()
@@ -116,9 +123,9 @@ def retrieve_course_config(course_id):
                 "selectedSupportedQuestions": json.loads(default_config["selected_supported_questions"]),
                 "selectedIncludedCourseContent": json.loads(default_config["selected_included_course_content"]),
                 "customResponseFormat": default_config["custom_response_format"],
-                "systemPrompt": "",
-                "materialLastUpdatedTime": '1970-01-01 00:00:00',
-                "autoUpdateOn": False
+                "systemPrompt": default_config["system_prompt"],
+                "materialLastUpdatedTime": default_config["material_last_updated_time"],
+                "autoUpdateOn": default_config["auto_update_on"]
             }
         else: 
             response_body = {
