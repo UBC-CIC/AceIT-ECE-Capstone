@@ -7,19 +7,30 @@ credentials = json.loads(secret)
 
 def make_canvas_api_call(url, request_type, headers, data={}, params={}):
     try:
-        response = {}
-
+        result = {}
         if request_type == "get":
             response = requests.get(url, headers=headers, data=data, params=params, verify=False)
+            response.raise_for_status()
+
+            # deal with pagination
+            result = response.json()
+            while 'next' in response.links:
+                response = requests.get(response.links['next']['url'], headers=headers)
+                response.raise_for_status()
+                result.extend(response.json())
         elif request_type == "post":
             response = requests.post(url, headers=headers, data=data, params=params, verify=False)
+            response.raise_for_status()
+            result = response.json()
         elif request_type == "delete":
             response = requests.delete(url, headers=headers, data=data, params=params, verify=False)
+            response.raise_for_status()
+            result = response.json()
         else:
             print(f"Invalid request_type: {request_type}")
             return None
-        response.raise_for_status()
-        return response.json()
+        
+        return result
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
         return None
