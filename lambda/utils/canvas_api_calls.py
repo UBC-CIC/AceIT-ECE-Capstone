@@ -15,7 +15,7 @@ def make_canvas_api_call(url, request_type, headers, data={}, params={}):
             # deal with pagination
             result = response.json()
             while 'next' in response.links:
-                response = requests.get(response.links['next']['url'], headers=headers)
+                response = requests.get(response.links['next']['url'], headers=headers, data=data, params=params, verify=False)
                 response.raise_for_status()
                 result.extend(response.json())
         elif request_type == "post":
