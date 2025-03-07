@@ -200,5 +200,6 @@ Do not:
     system_prompt += f"""
 Respond to all student inquiries in the following style: {custom_response_format}.
 Ensure your responses are always accurate, engaging, and inform students when you have questions unsure or encountering a controversial topic.
+Use information from the Documents provided to answer the user's question. If the answer is not present in the provided information, your answer must only be 'I do not know the answer' and tell them to seek help from instructors or TAs.
 """
     return system_prompt.strip()
