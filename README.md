@@ -129,7 +129,44 @@ Deploying Ace It on your AWS account requires minor configuration in several are
 
 #### Canvas LMS Configuration
 
-TODO (e.g. API and app keys)
+To integrate this project with **Canvas LMS**, follow these steps:
+
+## 1. AceIt Canvas Account creation
+- It is recommended to create a Canvas Admin Account for AceIt integration use only.
+1. Login to **Admin** > **Site Admin** > **Settings** > **Admins**
+
+## 2. Access Token generation
+An access token is required to retrieve course content from Canvas.
+
+1. Log in to your **Canvas LMS** instance as an **Admin**.
+2. Navigate to **Account** > **Settings**.
+3. Scroll down to the **Approved Integrations** section.
+4. Click **+ New Access Token**.
+5. Enter a purpose (e.g., "AceIt Integration") and click **Generate Token**.
+6. Copy the generated token and store it securely (this token will not be shown again).
+
+## 3. Developer Key Generation
+To allow authentication with the Canvas account, create a **Developer Key**.
+
+1. Navigate to **Admin** > **Developer Keys**.
+2. Click **+ Developer Key** > **API Key**.
+3. Fill in the required details:
+   - **Key Name**: (e.g., "AceIt Key")
+   - **Redirect URIs**: Add the callback URL for authentication.
+   - **Scopes**: Select appropriate API permissions for accessing course data.
+4. Click **Save Key** and toggle it **ON**.
+5. Copy the **Client ID** and **Client Secret** (these will be needed for authentication).
+
+## 4. Store Credentials in a Secret Manager
+To enhance security, manually store the Canvas authentication details in a **Secret Manager**:
+
+- Store the following credentials under a specific name:
+  - **Admin Account Information**
+  - **Access Token**
+  - **Developer Key Credentials** (Client ID & Client Secret)
+- Ensure that only authorized backend services can access these secrets.
+
+TODO: (screenshots)
 
 #### AWS Configuration
 

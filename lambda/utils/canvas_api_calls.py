@@ -44,11 +44,10 @@ def get_all_courses():
     """
     BASE_URL = credentials['baseURL']
     TOKEN = credentials['adminAccessToken']
-    ACCOUNT_ID = credentials['adminAccountID']
     
     HEADERS = {"Authorization": f"Bearer {TOKEN}"}
 
-    url = f"{BASE_URL}/api/v1/accounts/{ACCOUNT_ID}/courses"
+    url = f"{BASE_URL}/api/v1/accounts/1/courses"
     return make_canvas_api_call(url=url, request_type="get", headers=HEADERS)
 
 def get_files_by_course_id(course_id):
