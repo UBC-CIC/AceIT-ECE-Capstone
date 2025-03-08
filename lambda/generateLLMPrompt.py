@@ -16,7 +16,6 @@ def lambda_handler(event, context):
             body = json.loads(body)
         
         conversation_id = body.get("conversation_id")
-        relevant_source_content = body.get("relevantSourceContent", [])
 
         if not conversation_id:
             return construct_response(400, {"error": "Missing required fields: 'conversation_id' is required"})

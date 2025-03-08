@@ -8,6 +8,7 @@ from utils.get_rds_secret import get_secret
 from utils.get_user_info import get_user_info
 from utils.get_rds_secret import load_db_config
 from utils.construct_response import construct_response
+from utils.canvas_api_calls import get_instructor_courses
 
 lambda_client = boto3.client("lambda")
 
@@ -28,7 +29,12 @@ def lambda_handler(event, context):
     if not student_id:
         return construct_response(500, {"error": "User ID not found"})
 
-    # TODO: need to check if this user is an instructor for this course
+    courses_as_instructor = get_instructor_courses(auth_token)
+    if courses_as_instructor is None:
+        return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
+    
+    list_of_courses_as_instructor = [course["id"] for course in courses_as_instructor]
+    print("List of courses as instructor: ", list_of_courses_as_instructor)
     
     # Parse and validate the request body
     body = ""
@@ -51,6 +57,9 @@ def lambda_handler(event, context):
     selected_included_course_content = body["selectedIncludedCourseContent"]
     auto_update_on = body.get("autoUpdateOn")
     custom_response_format = body.get("customResponseFormat", "Provide clear and helpful responses.")  # Nullable field
+
+    if int(course_id) not in list_of_courses_as_instructor:
+        return construct_response(400, {"error": "You are not the instructor for this course."})
 
     secret = get_secret()
     credentials = json.loads(secret)

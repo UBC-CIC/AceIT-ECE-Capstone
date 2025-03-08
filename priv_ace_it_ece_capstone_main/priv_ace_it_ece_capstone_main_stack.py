@@ -276,7 +276,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="topQuestions.lambda_handler",
-            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
@@ -292,7 +292,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="topMaterials.lambda_handler",
-            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
@@ -308,7 +308,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="studentEngagement.lambda_handler",
-            layers=[langchain_layer, boto3_layer, psycopg_layer],
+            layers=[langchain_layer, boto3_layer, psycopg_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(
@@ -340,7 +340,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="updateCourseConfig.lambda_handler",
-            layers=[boto3_layer, psycopg_layer],
+            layers=[boto3_layer, psycopg_layer, requests_layer],
             vpc=my_vpc,
             security_groups=[lambda_sg],
             vpc_subnets=ec2.SubnetSelection(

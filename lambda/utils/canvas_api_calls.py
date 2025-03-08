@@ -148,3 +148,14 @@ def get_instructor_courses(token):
     url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=teacher"
 
     return make_canvas_api_call(url=url, request_type="get", headers=HEADERS)
+
+def get_ta_courses(token):
+    """
+    Fetch all courses that user enrolled as a ta.
+    """
+    BASE_URL = credentials['baseURL']
+    HEADERS = {"Authorization": f"Bearer {token}"}
+
+    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=ta"
+
+    return make_canvas_api_call(url=url, request_type="get", headers=HEADERS)

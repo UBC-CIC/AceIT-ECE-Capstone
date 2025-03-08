@@ -2,6 +2,7 @@ import boto3
 from datetime import datetime, timedelta, timezone
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
+from utils.canvas_api_calls import get_instructor_courses
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
@@ -24,7 +25,12 @@ def lambda_handler(event, context):
         if not student_id:
             return construct_response(500, {"error": "User ID not found"})
 
-        # TODO: check instructor for course or not
+        courses_as_instructor = get_instructor_courses(auth_token)
+        if courses_as_instructor is None:
+            return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
+        
+        list_of_courses_as_instructor = [course["id"] for course in courses_as_instructor]
+        print("List of courses as instructor: ", list_of_courses_as_instructor)
 
         # Extract query parameters
         query_params = event.get("queryStringParameters", {})
@@ -34,6 +40,9 @@ def lambda_handler(event, context):
 
         if not course_id or not num or not period:
             return construct_response(400, {"error": "Missing required query parameters: 'course', 'num', and 'period' are required"})
+
+        if int(course_id) not in list_of_courses_as_instructor:
+            return construct_response(400, {"error": "You are not the instructor for this course."})
 
         # Convert num to int
         try:
