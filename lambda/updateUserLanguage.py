@@ -45,7 +45,7 @@ def lambda_handler(event, context):
         updated_lang = response.get("Attributes", {}).get("preferred_language", "")
         # print("update language to: ", updated_lang, "for user ", user_id)
 
-        return construct_response(200, {"message: user language update successfully"})
+        return construct_response(200, {"message": "user language update successfully"})
 
     except Exception as e:
         print(f"Error: {e}")
