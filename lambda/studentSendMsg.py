@@ -57,7 +57,6 @@ def lambda_handler(event, context):
                 conversation = conversations_table.get_item(Key={"conversation_id": conversation_id})
                 if "Item" not in conversation:
                     return construct_response(404, {"error": "Conversation not found"})
-                conversation_data = conversation["Item"]
             except Exception as e:
                 print(f"Error checking conversation: {e}")
                 return construct_response(404, {"error": "Conversation not found"})
@@ -87,7 +86,7 @@ def lambda_handler(event, context):
             }
             # print("new system message: ", new_message)
             
-            # Create an AI response (mocked here, replace with real AI logic)
+            # Create an welcoming AI message
             welcome_message_id = str(uuid.uuid4())
             welcome_response_content = welcome_response.get('response')
             welcome_response_sources = welcome_response.get("sources")
@@ -141,7 +140,7 @@ def lambda_handler(event, context):
                 "course_id": course_id
             }
 
-            # Create an AI response (mocked here, replace with real AI logic)
+            # Create an AI response
             ai_message_id = str(uuid.uuid4())
             ai_response_dict = generate_ai_response(message_content, past_conversation, course_id, student_language_pref)
             ai_response_content = ai_response_dict.get('response')
@@ -219,8 +218,7 @@ def update_conversation(conversation_id, course_id, student_id, message_id, time
 
 def generate_ai_response(message_content, past_conversation, course_id, student_language_pref):
     """
-    Mocked AI response generation logic.
-    Replace with real AI engine integration.
+    AI response generation logic using Invoke LLM Completion Lambda function.
     """
     payload = {
         "body": json.dumps({"message": message_content, "context":past_conversation, "course":course_id, "language": student_language_pref})
@@ -240,8 +238,7 @@ def generate_ai_response(message_content, past_conversation, course_id, student_
 
 def generate_welcome_message(course_config_str, name, course_related_stuff, course_id, student_language_pref):
     """
-    Mocked AI response generation logic.
-    Replace with real AI engine integration.
+    AI welcoming message generation logic using Invoke LLM Completion Lambda function.
     """
     formatted_prompt = f"""
         <|begin_of_text|><|start_header_id|>system<|end_header_id|>
