@@ -21,6 +21,13 @@ def lambda_handler(event, context):
         course_id = str(course_id)
         if not message or not course_id:
             return construct_response(400, {"error": "Missing required fields: 'course' and 'message' are required"})
+        
+        grading_keywords = {
+            'grading', 'marks', 'score', 'percentage',
+            'participation', 'attendance', 'bonus'
+        }
+        if any(kw in message.lower() for kw in grading_keywords):
+            message += ". This message includes grading keywords, check syllabus grading section."
 
         # Optional fields
         student_language_pref = body.get("language", "")
