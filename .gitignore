@@ -1,5 +1,8 @@
+### CDK-specific ignores ###
 *.swp
+cdk.context.json
 package-lock.json
+yarn.lock
 __pycache__
 .pytest_cache
 .venv
@@ -11,3 +14,4 @@ cdk.out
 
 *.DS_Store
 config.json
+
