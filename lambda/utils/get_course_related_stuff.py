@@ -107,7 +107,7 @@ def fetch_discussions_from_canvas(auth_token, base_url, course_id):
         counter = 0
         for discussion in discussion_list:
             counter += 1
-            dicussion_str = f"  Discussion {counter}: \n"
+            dicussion_str = f"Discussion post number {counter}: \n"
             # get instructor_message
             instructor_message = discussion.get("message", "")
             str_to_indent = "Instructor message: \n" + instructor_message + "\n"
@@ -121,7 +121,7 @@ def fetch_discussions_from_canvas(auth_token, base_url, course_id):
                 discussion_info = view_response.json()
                 discussion_threads = discussion_info.get("view", "")
                 student_discussions = extract_messages(discussion_threads)
-                str_to_indent = "Student discussions: \n" + student_discussions + "\n"
+                str_to_indent = "Student reply to discussions: \n" + student_discussions + "\n"
                 dicussion_str += indent_string(str_to_indent, 2)
             # add dicussion link
             url_discussion = discussion.get("html_url", "")

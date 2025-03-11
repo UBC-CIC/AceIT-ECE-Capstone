@@ -123,7 +123,7 @@ def calculate_time_threshold(period):
 
 def call_llm(input_text):
     """Invokes the LLM for completion."""
-    model_id = "arn:aws:bedrock:us-west-2:842676002045:inference-profile/us.meta.llama3-3-70b-instruct-v1:0"  # Make sure this is the correct model ID for generation
+    model_id = "us.meta.llama3-3-70b-instruct-v1:0"
 
     try:
         response = bedrock.invoke_model(

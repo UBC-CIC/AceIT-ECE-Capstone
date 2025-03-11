@@ -98,8 +98,13 @@ export const App = () => {
         }
 
         setUserInfo(user);
-        setLocale(user.preferred_language);
         setCourses(fetchedCourses.sort((a, b) => a.name.localeCompare(b.name)));
+
+        if (!user.preferred_language || user.preferred_language === "") {
+          setLocale("en");
+        } else {
+          setLocale(user.preferred_language);
+        }
       } catch (error) {
         toast.error(
           "Failed to get your info from Canvas. Please refresh and try again later."

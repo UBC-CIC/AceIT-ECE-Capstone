@@ -21,6 +21,13 @@ def lambda_handler(event, context):
         course_id = str(course_id)
         if not message or not course_id:
             return construct_response(400, {"error": "Missing required fields: 'course' and 'message' are required"})
+        
+        grading_keywords = {
+            'grading', 'marks', 'score', 'percentage',
+            'participation', 'attendance', 'bonus'
+        }
+        if any(kw in message.lower() for kw in grading_keywords):
+            message += ". This message includes grading keywords, check syllabus grading section."
 
         # Optional fields
         student_language_pref = body.get("language", "")
@@ -42,7 +49,7 @@ def lambda_handler(event, context):
         query_embedding = generate_embeddings(message)
 
         # Retrieve relevant context from the database based on embeddings
-        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 5)
+        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 10)
 
         # Combine context with the input message for the LLM
         final_input = compose_input(message, context, relevant_docs)
@@ -157,7 +164,7 @@ Content: {doc.get('documentContent', 'No Content')}"""
 
 def call_llm(input_text):
     """Invokes the LLM for completion."""
-    model_id = "arn:aws:bedrock:us-west-2:842676002045:inference-profile/us.meta.llama3-3-70b-instruct-v1:0"  # Make sure this is the correct model ID for generation
+    model_id = "us.meta.llama3-3-70b-instruct-v1:0"
 
     try:
         response = bedrock.invoke_model(

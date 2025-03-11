@@ -15,6 +15,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Load AWS Account ID from Config
+        working-directory: .
+        run: |
+          ACCOUNT_ID=$(jq -r '.AWS_ACCOUNT_ID' config.json)
+          REGION=$(jq -r '.AWS_REGION' config.json)
+          echo "AWS_ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
+          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
       
       - name: Clean npm cache and remove node_modules
         working-directory: ./frontend
@@ -41,8 +49,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::842676002045:role/permissions_lots
-          aws-region: ca-central-1
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/permissions_lots
+          aws-region: ${{ env.AWS_REGION }}
       
       - name: CDK Bootstrap
         run: npx cdk bootstrap

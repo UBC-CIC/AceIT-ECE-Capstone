@@ -77,7 +77,24 @@ Ace It leverages the following key technologies:
 
 Built with a Serverless architecture, Ace It is designed to be highly scalable and performant. The following diagram depicts the high-level AWS architecture:
 
-TODO: Add diagram image here
+![AWS architecture Diagram](./docs/aws_architecture_diagram_aceit.png)
+
+---
+1. The user communicates with the web application hosted on AWS Cloudfront.
+2. Redirects to Canvas LTI for authentication, returns an authorization token when access is granted.
+3. The frontend app communicates with Amazon API Gateway for backend interactions.
+4. A Lambda function will periodically be triggered to retrieve course documents from Canvas API.
+5. To retrieve documents from Canvas API, use the token passed from Amazon API Gateway.
+6. The retrieved documents are stored in Amazon S3, which initiates a data ingestion workflow.
+7. A lambda function, integrated with LangChain, extracts text and metadata (size, date uploaded) from the stored documents in S3.
+8. The extracted data is embedded using Amazon Bedrock, specifically leveraging the Amazon Titan Text Embeddings v2 model to generate vector embeddings.
+9. These vector embeddings are stored in a PostgreSQL database. If users have a preferred language, it will be translated using Amazon Translate.
+10. Course management/assistant access can be configured by sending an API request which invokes a lambda function. The course configuration settings are restricted to instructors of that course.
+11. This lambda function interacts with Amazon RDS database.
+12. This lambda function generates an LLM response when students chat with the assistant and sends a query.
+13. Conversations and chat data are stored in Amazon RDS PostgreSQL.
+14. The assistant employs a Retrieval-Augmented Generation (RAG) architecture, combining with relevant course specific data to generate a response from the LLM.
+15. CloudFront fetches the frontend files from S3 bucket, and Serves cached frontend content globally.
 
 ### Repository Structure
 
