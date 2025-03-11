@@ -148,7 +148,7 @@ Deploying Ace It on your AWS account requires minor configuration in several are
 
 To integrate this project with **Canvas LMS**, follow these steps:
 
-## 1. AceIt Canvas Account creation
+##### 1. AceIt Canvas Account creation
 - It is recommended to create a Canvas Admin Account for AceIt integration use only.
 1. Log in to your **Canvas LMS** instance as an **Admin**.
 2. Navigate through **Admin** > **Site Admin** > **Settings** > **Admins**
@@ -156,7 +156,7 @@ To integrate this project with **Canvas LMS**, follow these steps:
 4. Fill in your account info. 
 5. Confirm the account details and Click **Continue** > **OK**
 
-## 2. Access Token generation
+##### 2. Access Token generation
 An access token is required to retrieve course content from Canvas.
 
 1. Log in to your **AceIt** Canvas Admin Account
@@ -166,7 +166,7 @@ An access token is required to retrieve course content from Canvas.
 5. Enter a purpose (e.g., "AceIt Integration") and click **Generate Token**.
 6. Copy the generated token and store it securely (this token will not be shown again).
 
-## 3. Developer Key Generation
+##### 3. Developer Key Generation
 To allow authentication with the Canvas account, create a **Developer Key**.
 
 1. Navigate to **Admin** > **Developer Keys**.
