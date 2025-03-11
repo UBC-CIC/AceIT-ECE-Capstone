@@ -156,11 +156,10 @@ To allow authentication with the Canvas account, create a **Developer Key**.
 2. Click **+ Developer Key** > **API Key**.
 3. Fill in the required details:
    - **Key Name**: (e.g., "AceIt Key")
-   - **Redirect URIs**: Add the callback URL for authentication.
-   - **Scopes**: Select appropriate API permissions for accessing course data.
+   - **Redirect URIs**: The CloudFront Distribution domain name set up in AWS Configuration steps.
+   - **Scopes**: Select appropriate API permissions for accessing course data. (Disable scope to allow access to all endpoints)
 4. Click **Save Key** and toggle it **ON**.
-5. Copy the **Client ID** and **Client Secret** (these will be needed for authentication).
-TODO: (screenshots)
+5. Copy the **Client ID** and **Client Secret**.
 
 #### AWS Configuration
 
