@@ -15,8 +15,10 @@ def create_table_if_not_exists(DB_CONFIG, course_id):
         cursor = connection.cursor()
 
         # Dynamically construct table creation query
+        # Ensure the extension is created
+        cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+
         create_embeddings_query = f"""
-        CREATE EXTENSION IF NOT EXISTS vector;
         CREATE TABLE IF NOT EXISTS course_vectors_{course_id} (
             id SERIAL PRIMARY KEY,
             document_name TEXT NOT NULL,

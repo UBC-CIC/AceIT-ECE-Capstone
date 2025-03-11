@@ -24,8 +24,8 @@ def lambda_handler(event, context):
     bucket_name = "bucket-for-course-documents"
 
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=100
+        chunk_size=1000,
+        chunk_overlap=50
     )
 
     params = event.get("queryStringParameters", {})

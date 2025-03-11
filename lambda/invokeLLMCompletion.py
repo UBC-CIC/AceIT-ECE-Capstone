@@ -49,7 +49,7 @@ def lambda_handler(event, context):
         query_embedding = generate_embeddings(message)
 
         # Retrieve relevant context from the database based on embeddings
-        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 5)
+        relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 10)
 
         # Combine context with the input message for the LLM
         final_input = compose_input(message, context, relevant_docs)
