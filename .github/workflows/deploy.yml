@@ -41,7 +41,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::842676002045:role/permissions_lots
+          role-to-assume: arn:aws:iam::$(aws sts get-caller-identity --query Account --output text):role/permissions_lots
           aws-region: ca-central-1
       
       - name: CDK Bootstrap
