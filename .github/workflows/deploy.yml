@@ -16,10 +16,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Debug Directory Structure
-        working-directory: .
-        run: ls -R ..
-
       - name: Load AWS Account ID from Config
         working-directory: .
         run: |
@@ -55,10 +51,6 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/permissions_lots
           aws-region: ${{ env.AWS_REGION }}
-        
-      - name: Echo
-        run: |
-          echo "Using AWS Account ID: $AWS_ACCOUNT_ID"
       
       - name: CDK Bootstrap
         run: npx cdk bootstrap
