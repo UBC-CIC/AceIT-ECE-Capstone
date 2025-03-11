@@ -1,3 +1,4 @@
+import os
 import boto3
 from datetime import datetime, timedelta, timezone
 from utils.get_user_info import get_user_info
@@ -5,7 +6,7 @@ from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_ta_courses, get_instructor_courses
 
 # Initialize DynamoDB client
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 messages_table = dynamodb.Table('Messages')  # Replace with your table name
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
 dynamodb_client = boto3.client('dynamodb')  # Client needed for batch_get_item

@@ -23,7 +23,6 @@ PrivAceItEceCapstoneMainStack(app, "PrivAceItEceCapstoneMainStack",
     #env=cdk.Environment(account='123456789012', region='us-east-1'),
 
     # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
-    # env=cdk.Environment(account='842676002045', region='us-west-2')
     )
 
 app.synth()
