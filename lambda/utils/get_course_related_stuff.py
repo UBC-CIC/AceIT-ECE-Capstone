@@ -120,9 +120,13 @@ def fetch_discussions_from_canvas(auth_token, base_url, course_id):
             if view_response.status_code == 200:
                 discussion_info = view_response.json()
                 discussion_threads = discussion_info.get("view", "")
-                student_discussions = extract_messages(discussion_threads)
-                str_to_indent = "Student reply to discussions: \n" + student_discussions + "\n"
-                dicussion_str += indent_string(str_to_indent, 2)
+                student_discussions_html = extract_messages(discussion_threads)
+                if student_discussions_html:
+                    # Convert HTML to plain text
+                    soup = BeautifulSoup(student_discussions_html, "html.parser")
+                    student_discussions = soup.get_text(separator="\n").strip()
+                    str_to_indent = "Student reply to discussions: \n" + student_discussions + "\n"
+                    dicussion_str += indent_string(str_to_indent, 2)
             # add dicussion link
             url_discussion = discussion.get("html_url", "")
             dicussion_str += f"  Discussion {counter} link: " + url_discussion + "\n"
