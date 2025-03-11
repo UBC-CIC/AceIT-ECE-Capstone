@@ -1,3 +1,4 @@
+import os
 import json
 import re
 import boto3
@@ -6,9 +7,9 @@ from utils.construct_response import construct_response
 
 lambda_client = boto3.client('lambda')
 session = boto3.Session()
-bedrock = session.client('bedrock-runtime', 'us-west-2') 
+bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION')) 
 # Initialize DynamoDB client
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
 messages_table = dynamodb.Table('Messages')
 

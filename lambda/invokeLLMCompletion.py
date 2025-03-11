@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import psycopg2
@@ -7,8 +8,8 @@ from utils.translation import translate_text
 from utils.construct_response import construct_response
 
 session = boto3.Session()
-bedrock = session.client('bedrock-runtime', 'us-west-2') 
-translate_client = boto3.client("translate", region_name="us-west-2")
+bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION')) 
+translate_client = boto3.client("translate", region_name=os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
     try:

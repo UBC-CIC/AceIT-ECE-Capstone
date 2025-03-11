@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import re
@@ -5,7 +6,7 @@ from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 users_table = dynamodb.Table("Users")
 
 # Regex to validate language codes (ISO 639-1 or RFC 5646 with country variants)

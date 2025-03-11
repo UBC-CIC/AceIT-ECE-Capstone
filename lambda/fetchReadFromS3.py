@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import fitz  # so we can also get metadata or do direct PyMuPDF calls if needed
@@ -16,8 +17,7 @@ from utils.construct_response import construct_response
 from io import BytesIO
 
 s3_client = boto3.client("s3")
-bedrock = boto3.client("bedrock-runtime",
-                       region_name = 'us-west-2')
+bedrock = boto3.client("bedrock-runtime", region_name = os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
     bucket_name = "bucket-for-course-documents"

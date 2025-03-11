@@ -1,8 +1,9 @@
+import os
 import json
 import boto3
 from utils.construct_response import construct_response
 
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 messages_table = dynamodb.Table('Messages')  # Replace with your table name
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
 

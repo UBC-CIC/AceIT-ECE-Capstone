@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import uuid
@@ -9,10 +10,10 @@ from utils.translation import translate_document_names
 from utils.construct_response import construct_response
 
 lambda_client = boto3.client('lambda')
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 messages_table = dynamodb.Table('Messages')  # Replace with your table name
 conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
-translate_client = boto3.client("translate", region_name="us-west-2")
+translate_client = boto3.client("translate", region_name=os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
     try:

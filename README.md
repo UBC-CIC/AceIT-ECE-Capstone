@@ -278,10 +278,10 @@ To deploy Ace It on AWS, you'll need an AWS account with the appropriate permiss
 
 | Secret key       | Secret value                                                              |
 | ---------------- | ------------------------------------------------------------------------- |
-| apiKey           | The API Developer Key obtained from Canvas                                |
-| redirectURI      | The CloudFront Distribution domain name set up in AWS Configuration steps |
-| baseURL          | The base URL of the Canvas server                                         |
 | apiKeyId         | The API Developer Key Id displayed on Canvas                              |
+| apiKey           | The API Developer Key obtained from Canvas                                |
+| baseURL          | The base URL of the Canvas server                                         |
+| redirectURI      | The CloudFront Distribution domain name set up in AWS Configuration steps |
 | adminAccessToken | The Canvas Admin Access Token                                             |
 
 2. Give this Secret a name. If the name is other than "

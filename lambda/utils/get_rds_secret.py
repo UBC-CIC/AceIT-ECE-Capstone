@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 
@@ -12,7 +13,7 @@ def get_cached_secret():
 
 def get_secret():
     secret_name = "MyRdsSecret"
-    region_name = "us-west-2"
+    region_name = os.getenv('AWS_REGION')
     session = boto3.session.Session()
     client = session.client(
         service_name='secretsmanager',

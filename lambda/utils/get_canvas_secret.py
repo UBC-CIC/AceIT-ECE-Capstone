@@ -1,8 +1,9 @@
+import os
 import boto3
 
 def get_secret():
     secret_name = "CanvasSecrets"
-    region_name = "us-west-2"
+    region_name = os.getenv('AWS_REGION')
 
     # Create a Secrets Manager client
     session = boto3.session.Session()

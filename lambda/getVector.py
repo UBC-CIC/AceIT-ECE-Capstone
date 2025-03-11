@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import psycopg2
@@ -6,8 +7,7 @@ from utils.create_course_vectors_tables import create_table_if_not_exists
 from utils.get_rds_secret import get_secret, load_db_config
 from utils.construct_response import construct_response
 
-bedrock = boto3.client("bedrock-runtime",
-                       region_name = 'us-west-2')
+bedrock = boto3.client("bedrock-runtime", region_name = os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
     params = event.get("queryStringParameters", {})

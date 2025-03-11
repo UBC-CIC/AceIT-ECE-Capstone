@@ -1,8 +1,9 @@
+import os
 import boto3
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_user_info
 
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 users_table = dynamodb.Table("Users")
 def lambda_handler(event, context):
     headers = event.get("headers", {})

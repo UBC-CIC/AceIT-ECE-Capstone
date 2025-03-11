@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 import re
@@ -7,7 +8,7 @@ from utils.retrieve_course_config import call_get_course_config
 from utils.construct_response import construct_response
 
 lambda_client = boto3.client('lambda')
-translate_client = boto3.client("translate", region_name="us-west-2")
+translate_client = boto3.client("translate", region_name=os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
     try:

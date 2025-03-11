@@ -1,3 +1,4 @@
+import os
 import json
 import boto3
 from datetime import datetime, timedelta
@@ -7,10 +8,10 @@ from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_instructor_courses
 
 # Initialize DynamoDB client
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 messages_table = dynamodb.Table('Messages')  # Replace with your table name
 session = boto3.Session()
-bedrock = session.client('bedrock-runtime', 'us-west-2') 
+bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION')) 
 
 
 def lambda_handler(event, context):
