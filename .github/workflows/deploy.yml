@@ -15,8 +15,8 @@ jobs:
     steps:
       - name: Load AWS Account ID from Config
         run: |
-          ACCOUNT_ID=$(jq -r '.AWS_ACCOUNT_ID' config.json)
-          REGION=$(jq -r '.AWS_REGION' config.json)
+          ACCOUNT_ID=$(jq -r '.AWS_ACCOUNT_ID' ../config.json)
+          REGION=$(jq -r '.AWS_REGION' ../config.json)
           echo "AWS_ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
           echo "AWS_REGION=$REGION" >> $GITHUB_ENV
 
