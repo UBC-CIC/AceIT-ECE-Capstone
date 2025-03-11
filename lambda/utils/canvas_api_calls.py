@@ -64,8 +64,8 @@ def get_files_by_course_id(course_id):
 
 def refresh_token(refresh_token):
     BASE_URL = credentials['baseURL']
-    CLIENT_ID = credentials['ltiKeyId']
-    CLIENT_SECRET = credentials['ltiKey']
+    CLIENT_ID = credentials['apiKeyId']
+    CLIENT_SECRET = credentials['apiKey']
     REDIRECT_URI = credentials['redirectURI']
 
     url = f"{BASE_URL}/login/oauth2/token"
@@ -97,8 +97,8 @@ def log_out(access_token):
 
 def get_access_token(authorization_code):
     BASE_URL = credentials['baseURL']
-    CLIENT_ID = credentials['ltiKeyId']
-    CLIENT_SECRET = credentials['ltiKey']
+    CLIENT_ID = credentials['apiKeyId']
+    CLIENT_SECRET = credentials['apiKey']
     REDIRECT_URI = credentials['redirectURI']
 
     url = f"{BASE_URL}/login/oauth2/token"

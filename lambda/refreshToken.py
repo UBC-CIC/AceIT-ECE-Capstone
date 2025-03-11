@@ -1,6 +1,3 @@
-import json
-import requests
-import utils.get_canvas_secret
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import refresh_token
 

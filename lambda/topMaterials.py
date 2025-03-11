@@ -1,5 +1,5 @@
 import boto3
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_instructor_courses

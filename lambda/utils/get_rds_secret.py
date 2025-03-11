@@ -1,10 +1,5 @@
 import json
-import os
 import boto3
-import psycopg2
-from datetime import datetime
-import uuid
-import psycopg2.extras
 
 # Caching secrets and DB connection
 SECRET_CACHE = None

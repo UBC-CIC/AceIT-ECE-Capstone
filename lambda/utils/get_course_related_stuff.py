@@ -1,6 +1,5 @@
 import json
 import boto3
-import uuid
 from datetime import datetime 
 from .get_canvas_secret import get_secret
 import requests
@@ -15,7 +14,7 @@ def call_course_activity_stream(auth_token, course_id):
     credentials = json.loads(secret)
     BASE_URL = credentials['baseURL']
     HEADERS = {"Authorization": f"Bearer {auth_token}"}
-    print("Token: ", auth_token)
+    # print("Token: ", auth_token)
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/activity_stream"
     try:
@@ -27,8 +26,8 @@ def call_course_activity_stream(auth_token, course_id):
             [f"Type: {entry['type']}\nTitle: {entry['title']}\nMessage: {clean_html(entry['message'])}\n" for entry in entries]
         )
         result = format_data(response)
-        print("format Result: ", result)
-        print("result type", type(result))
+        # print("format Result: ", result)
+        # print("result type", type(result))
         return result
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
@@ -53,47 +52,14 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
 
         if syllabus_body:
             # Convert HTML to plain text
-            print("syllabus body: ", syllabus_body)
+            # print("syllabus body: ", syllabus_body)
             soup = BeautifulSoup(syllabus_body, "html.parser")
-            print("soup: ", soup.get_text(separator="\n").strip())
+            # print("soup: ", soup.get_text(separator="\n").strip())
             str_syllabus = "syllabus: " + soup.get_text(separator="\n").strip() + "; syllabus link: " + url_syllabus
             return str_syllabus
     
     print(f"Failed to fetch syllabus: {response.status_code}, {response.text}")
     return None
-
-# def fetch_home_from_canvas(auth_token, base_url, course_id):
-#     # get default view
-#     url = f"{base_url}/api/v1/courses/{course_id}"
-#     headers = {"Authorization": f"Bearer {auth_token}"}
-#     url_home = f"{base_url}/courses/{course_id}"
-#     response = requests.get(url, headers=headers, verify=False)
-#     if response.status_code == 200:
-#         course_data = response.json()
-#         default_view = course_data.get("default_view", "")
-#         return_str = ""
-#         if default_view == "syllabus":
-#             return_str += "Home page has been set to Syllabus\n"
-#             # avoid duplicate content fetching
-#             # return_str += fetch_syllabus_from_canvas(auth_token, base_url, course_id) + "\n"
-#         elif default_view == "assignments":
-#             return_str += "Home page has been set to Assignments\n"
-#             # avoid duplicate content fetching
-#             # return_str += fetch_assignments_from_canvas(auth_token, base_url, course_id)  + "\n"
-#         elif default_view == "modules":
-#             return_str += "Home page has been set to Modules\n"
-#         elif default_view == "wiki":
-#             return_str += "Home page has been set to course Front Page. Please refer to the Pages document.\n"
-#         elif default_view == "feed":
-#             return_str += "Home page has been set to Recent Activity. Please refer to Assignments, Announcements, and Discussions documents.\n"
-#         else:
-#             print(f"Failed to fetch home: {response.status_code}, {response.text}")
-#             return None
-        
-#         return_str += "Home link: " + url_home
-#         return return_str
-#     print(f"Failed to fetch home: {response.status_code}, {response.text}")
-#     return None
 
 def fetch_announcments_from_canvas(auth_token, base_url, course_id):
     end_date = datetime.now().strftime("%Y-%m-%d")
@@ -384,8 +350,3 @@ def fetch_pages_from_canvas(auth_token, base_url, course_id):
         return return_str
     print(f"Failed to fetch pages: {response.status_code}, {response.text}")
     return None
-
-
-# if __name__ == "__main__":
-#     a = fetch_syllabus_from_canvas("CXekV2e68mxaNx2vB2kWDhAwQ4vXHY63QFXDe6KyePrG7kQMZEaMQ3PxKkrFWfr6", 4)
-#     print(type(a))

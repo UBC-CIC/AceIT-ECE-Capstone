@@ -133,12 +133,16 @@ To integrate this project with **Canvas LMS**, follow these steps:
 
 ## 1. AceIt Canvas Account creation
 - It is recommended to create a Canvas Admin Account for AceIt integration use only.
-1. Login to **Admin** > **Site Admin** > **Settings** > **Admins**
+1. Log in to your **Canvas LMS** instance as an **Admin**.
+2. Navigate through **Admin** > **Site Admin** > **Settings** > **Admins**
+3. Click **+ Account Admins**
+4. Fill in your account info. 
+5. Confirm the account details and Click **Continue** > **OK**
 
 ## 2. Access Token generation
 An access token is required to retrieve course content from Canvas.
 
-1. Log in to your **Canvas LMS** instance as an **Admin**.
+1. Log in to your **AceIt** Canvas Admin Account
 2. Navigate to **Account** > **Settings**.
 3. Scroll down to the **Approved Integrations** section.
 4. Click **+ New Access Token**.
@@ -156,16 +160,6 @@ To allow authentication with the Canvas account, create a **Developer Key**.
    - **Scopes**: Select appropriate API permissions for accessing course data.
 4. Click **Save Key** and toggle it **ON**.
 5. Copy the **Client ID** and **Client Secret** (these will be needed for authentication).
-
-## 4. Store Credentials in a Secret Manager
-To enhance security, manually store the Canvas authentication details in a **Secret Manager**:
-
-- Store the following credentials under a specific name:
-  - **Admin Account Information**
-  - **Access Token**
-  - **Developer Key Credentials** (Client ID & Client Secret)
-- Ensure that only authorized backend services can access these secrets.
-
 TODO: (screenshots)
 
 #### AWS Configuration
@@ -268,16 +262,11 @@ To deploy Ace It on AWS, you'll need an AWS account with the appropriate permiss
 
 | Secret key       | Secret value                                                              |
 | ---------------- | ------------------------------------------------------------------------- |
-| ltiKey           | The LTI Key obtained from Canvas                                          |
+| apiKey           | The API Developer Key obtained from Canvas                                |
 | redirectURI      | The CloudFront Distribution domain name set up in AWS Configuration steps |
-| jwkPrivateKey    | The JWK PrivateKey issued by the Canvas server                            |
 | baseURL          | The base URL of the Canvas server                                         |
-| ltiKeyId         | The LTI Key Id displayed on Canvas                                        |
-| serverKey        | The server Key Id of Canvas                                               |
-| kid              | The ID associated with the key                                            |
+| apiKeyId         | The API Developer Key Id displayed on Canvas                              |
 | adminAccessToken | The Canvas Admin Access Token                                             |
-| adminAccountID   | The Canvas Admin Account ID                                               |
-| serverKeyId      | The Canvas Server key ID                                                  |
 
 2. Give this Secret a name. If the name is other than "
    CanvasSecrets", please also change the secret name in get_canvas_secret.py. Replace `secret_name` with the name of your secret (e.g. "CanvasSecrets")

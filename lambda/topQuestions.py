@@ -1,6 +1,6 @@
 import json
 import boto3
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 import re
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response

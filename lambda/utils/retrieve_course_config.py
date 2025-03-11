@@ -1,6 +1,4 @@
 import json
-import os
-import boto3
 import psycopg2
 import psycopg2.extras
 from .get_rds_secret import get_cached_secret

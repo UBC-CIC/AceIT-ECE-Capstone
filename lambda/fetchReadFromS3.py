@@ -1,6 +1,5 @@
 import json
 import boto3
-from langchain.document_loaders import PyMuPDFLoader
 import fitz  # so we can also get metadata or do direct PyMuPDF calls if needed
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import docx

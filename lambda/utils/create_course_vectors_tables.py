@@ -1,9 +1,4 @@
-import json
-import os
-import boto3
 import psycopg2
-from datetime import datetime
-import uuid
 import psycopg2.extras
 def create_table_if_not_exists(DB_CONFIG, course_id):
     """

@@ -1,9 +1,5 @@
 import json
 import boto3
-from datetime import datetime
-from utils.create_course_config_table import create_table_if_not_exists
-from utils.get_rds_secret import get_secret
-from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
