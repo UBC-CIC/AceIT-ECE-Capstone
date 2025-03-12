@@ -23,8 +23,8 @@ def lambda_handler(event, context):
     bucket_name = "bucket-for-course-documents"
 
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1000,
-        chunk_overlap=50
+        chunk_size=2000,
+        chunk_overlap=100
     )
 
     params = event.get("queryStringParameters", {})
@@ -101,11 +101,11 @@ def lambda_handler(event, context):
 
             document_embeddings = []
             for chunk in results[file_key]:
-                chunk_embeddings = generate_embeddings(chunk)  # Assuming `generate_embeddings` calls your embedding model
+                file_name_db = metadata.get("display_name", file_key)
+                chunk_embeddings = generate_embeddings(chunk, file_name_db)  # Assuming `generate_embeddings` calls your embedding model
                 if chunk_embeddings:
                     document_embeddings.append(chunk_embeddings)
                     source_url = metadata.get("original_url", "N/A"),
-                    file_name_db = metadata.get("display_name", file_key)
                     store_embeddings(file_name_db, chunk_embeddings, course_id, DB_CONFIG, source_url, chunk)
             embeddings.append({file_key: document_embeddings})
 
@@ -253,14 +253,14 @@ def read_text_streaming(bucket_name, file_key, text_splitter):
     except Exception as e:
         return f"Error processing text file: {str(e)}"
 
-def generate_embeddings(chunk):
+def generate_embeddings(chunk, doc_name=""):
     model_id = "amazon.titan-embed-text-v2:0"  # Or whatever the correct model ID
     accept = "application/json"
     content_type = "application/json"
 
     # The Bedrock model likely expects 'inputText' or similarly named key
     payload = {
-        "inputText": chunk
+        "inputText": doc_name+" "+chunk
     }
 
     json_payload = json.dumps(payload)
