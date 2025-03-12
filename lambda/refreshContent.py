@@ -19,6 +19,8 @@ def lambda_handler(event, context):
     course_id = str(course_id)
     running_async = body.get("async", False)
 
+    empty_s3_course_folder(bucket_name, course_id)
+
     is_recursive = body.get("recursive", False)
     if running_async and not is_recursive:
         # Asynchronous execution: Invoke itself asynchronously
@@ -169,3 +171,19 @@ def call_fetch_read_from_s3(course_id):
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
         return None
+
+def empty_s3_course_folder(bucket_name, course_id):
+    """
+    Deletes all files in the S3 bucket that belong to a specific course.
+    """
+    prefix = f"{course_id}/"  # Folder for the course
+    try:
+        objects_to_delete = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+
+        if "Contents" in objects_to_delete:
+            delete_keys = [{"Key": obj["Key"]} for obj in objects_to_delete["Contents"]]
+            s3_client.delete_objects(Bucket=bucket_name, Delete={"Objects": delete_keys})
+            print(f"Deleted all files under {prefix} in S3.")
+
+    except Exception as e:
+        print(f"Error deleting files from S3: {e}")
