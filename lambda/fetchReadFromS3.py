@@ -102,7 +102,8 @@ def lambda_handler(event, context):
             document_embeddings = []
             for chunk in results[file_key]:
                 file_name_db = metadata.get("display_name", file_key)
-                chunk_embeddings = generate_embeddings(chunk, file_name_db)  # Assuming `generate_embeddings` calls your embedding model
+                chunk = file_name_db + ": " + chunk
+                chunk_embeddings = generate_embeddings(chunk)  # Assuming `generate_embeddings` calls your embedding model
                 if chunk_embeddings:
                     document_embeddings.append(chunk_embeddings)
                     source_url = metadata.get("original_url", "N/A"),
@@ -121,6 +122,7 @@ def lambda_handler(event, context):
             syllabus_chunks = text_splitter.split_text(syllabus_text)
             embeddings = []
             for chunk in syllabus_chunks:
+                chunk = "syllabus: "+ chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -133,6 +135,7 @@ def lambda_handler(event, context):
             announcements_chunks = text_splitter.split_text(announcements_text)
             embeddings = []
             for chunk in announcements_chunks:
+                chunk = "Announcements" + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -145,6 +148,7 @@ def lambda_handler(event, context):
             assignments_chunks = text_splitter.split_text(assignments_text)
             embeddings = []
             for chunk in assignments_chunks:
+                chunk = "Assignments" + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -157,6 +161,7 @@ def lambda_handler(event, context):
             quizzes_chunks = text_splitter.split_text(quizzes_text)
             embeddings = []
             for chunk in quizzes_chunks:
+                chunk = "Quizzes" + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -169,6 +174,7 @@ def lambda_handler(event, context):
             discussions_chunks = text_splitter.split_text(discussions_text)
             embeddings = []
             for chunk in discussions_chunks:
+                chunk = "Student Discussions posts: " + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -253,14 +259,14 @@ def read_text_streaming(bucket_name, file_key, text_splitter):
     except Exception as e:
         return f"Error processing text file: {str(e)}"
 
-def generate_embeddings(chunk, doc_name=""):
+def generate_embeddings(chunk):
     model_id = "amazon.titan-embed-text-v2:0"  # Or whatever the correct model ID
     accept = "application/json"
     content_type = "application/json"
 
     # The Bedrock model likely expects 'inputText' or similarly named key
     payload = {
-        "inputText": doc_name+" "+chunk
+        "inputText": chunk
     }
 
     json_payload = json.dumps(payload)
