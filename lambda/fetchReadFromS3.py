@@ -122,7 +122,6 @@ def lambda_handler(event, context):
             syllabus_chunks = text_splitter.split_text(syllabus_text)
             embeddings = []
             for chunk in syllabus_chunks:
-                chunk = "syllabus: "+ chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -135,7 +134,6 @@ def lambda_handler(event, context):
             announcements_chunks = text_splitter.split_text(announcements_text)
             embeddings = []
             for chunk in announcements_chunks:
-                chunk = "Announcements" + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -148,7 +146,6 @@ def lambda_handler(event, context):
             assignments_chunks = text_splitter.split_text(assignments_text)
             embeddings = []
             for chunk in assignments_chunks:
-                chunk = "Assignments" + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -161,7 +158,6 @@ def lambda_handler(event, context):
             quizzes_chunks = text_splitter.split_text(quizzes_text)
             embeddings = []
             for chunk in quizzes_chunks:
-                chunk = "Quizzes" + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
@@ -174,7 +170,6 @@ def lambda_handler(event, context):
             discussions_chunks = text_splitter.split_text(discussions_text)
             embeddings = []
             for chunk in discussions_chunks:
-                chunk = "Student Discussions posts: " + chunk
                 embedding = generate_embeddings(chunk)
                 if embedding:
                     embeddings.append(embedding)
