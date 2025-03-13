@@ -1,6 +1,7 @@
 import os
 import json
 import boto3
+import gzip
 import fitz  # so we can also get metadata or do direct PyMuPDF calls if needed
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import docx
@@ -95,14 +96,17 @@ def lambda_handler(event, context):
             elif file_key.lower().endswith(".html"):
                 results[file_key] = read_html_streaming(bucket_name, file_key, text_splitter)
             elif file_key.lower().endswith((".txt", ".md", ".c", ".cpp", ".css", ".go", ".py", ".js", ".rtf")):
+                # print("filekey: ", file_key.lower())
                 results[file_key] = read_text_streaming(bucket_name, file_key, text_splitter)
+                # print("results: ", results[file_key])
             else:
                 print(f"Unsupported file type: {file_key}")
 
             document_embeddings = []
             for chunk in results[file_key]:
+                # print(f"Storing chunk: {chunk}...")  
                 file_name_db = metadata.get("display_name", file_key)
-                chunk = file_name_db + ": " + chunk
+                chunk = chunk
                 chunk_embeddings = generate_embeddings(chunk)  # Assuming `generate_embeddings` calls your embedding model
                 if chunk_embeddings:
                     document_embeddings.append(chunk_embeddings)
@@ -239,18 +243,27 @@ def read_html_streaming(bucket_name, file_key, text_splitter):
 
 def read_text_streaming(bucket_name, file_key, text_splitter):
     """Extract text from a large text file using chunk streaming."""
-    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
-    
-    extracted_text = []
-    chunk_size = 8192  # 8KB chunks to process large files efficiently
-    
     try:
-        # Read file in chunks
-        for chunk in response["Body"].iter_chunks(chunk_size=chunk_size):
-            extracted_text.append(chunk.decode("utf-8"))  # Decode bytes to string
+        # Get file from S3
+        response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+        file_body = response["Body"].read()
+
+        # Attempt to detect if the file is compressed
+        if file_body[:2] == b'\x1f\x8b':  # Gzip magic number
+            print("Detected gzip-compressed file. Decompressing...")
+            file_content = gzip.decompress(file_body).decode("utf-8")
+        else:
+            file_content = file_body.decode("utf-8")
         
-        chunks = text_splitter.split_text("\n".join(extracted_text))
+        clean_text = file_content.replace("\r", "").lstrip("\ufeff")
+        print("File content loaded successfully.")
+
+        # Split text into chunks
+        chunks = text_splitter.split_text(clean_text)
+        
         return chunks
+    except UnicodeDecodeError:
+        return "Error: File is not a UTF-8 encoded text file."
     except Exception as e:
         return f"Error processing text file: {str(e)}"
 
@@ -287,26 +300,36 @@ def generate_embeddings(chunk):
 
 def store_embeddings(document_name, embeddings, course_id, DB_CONFIG, source_url, document_content):
     """
-    Store embeddings into the PostgreSQL database.
+    Store embeddings into the PostgreSQL database only if the document content is unique.
     """
     connection = None
-    # sanitized_course_id = course_id.replace("-", "_")  # Replace hyphens with underscores
     try:
         # Connect to the PostgreSQL database
         connection = psycopg2.connect(**DB_CONFIG)
         cursor = connection.cursor()
 
-        # Dynamically construct insertion query
+        # Check if the document content already exists in the table
+        check_query = f"""
+        SELECT COUNT(*) FROM course_vectors_{course_id} WHERE document_content = %s;
+        """
+        cursor.execute(check_query, (document_content,))
+        result = cursor.fetchone()
+
+        if result and result[0] > 0:
+            print("Duplicate content detected. Skipping insertion.", document_content[:50])
+            return "Duplicate content detected. Skipping insertion."
+
+        # If no duplicate is found, insert the new record
         insert_query = f"""
         INSERT INTO course_vectors_{course_id} (document_name, embeddings, created_at, sourceURL, document_content)
         VALUES (%s, %s, %s, %s, %s);
         """
         cursor.execute(insert_query, (document_name, embeddings, datetime.now(), source_url, document_content))
-
+        
         # Commit the transaction
         connection.commit()
         cursor.close()
-        print("SQL SUCCESS")
+        print("SQL SUCCESS: Embedding stored successfully")
         return "Embedding stored successfully"
     except Exception as e:
         print(f"Error inserting embeddings: {e}")
