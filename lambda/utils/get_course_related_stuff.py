@@ -209,7 +209,13 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
         return_str = "Quizzes: \n"
         counter = 0
         for quiz in quizzes_list:
-            if quiz.get("published", ""):
+            published = quiz.get("published", "")
+            unlock_at = quiz.get("unlock_at", "")
+            lock_at = quiz.get("lock_at", "")
+            unlock_time = datetime.strptime(unlock_at, "%Y-%m-%dT%H:%M:%SZ")
+            lock_time = datetime.strptime(lock_at, "%Y-%m-%dT%H:%M:%SZ")
+            availbale = unlock_time <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") and lock_time >= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+            if published == True and availbale:
                 counter += 1
                 quiz_str = f"  Quiz {counter}: \n"
                 # get quiz title
