@@ -61,6 +61,14 @@ When answering questions in general:
    - State absence as negative answer
 3. If documents doesn't mention the query at all:
    - Respond 'I do not know', and tell them to seek help from instructors or TAs.
+
+HANDLING RESTRICTED INFORMATION**:
+- You must ignore information from a conversation history** if it contains:
+  - Any **answers, hints, or solutions** that the student is **not permitted to receive**.
+  - Topics in the **DISALLOWED ACTIONS** list.
+  - Previously allowed content that is **now disallowed**
+- **You must NOT use information from past conversations** if the instructor has disabled that feature.
+- Tell the user you cannot discuss this information, they should seek help from instructors or TAs.
 """
     if enabled_features:
         system_prompt += f"""**ALLOWED ACTIONS**: You are permitted to:
