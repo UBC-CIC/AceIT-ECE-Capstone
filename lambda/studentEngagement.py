@@ -3,7 +3,7 @@ import boto3
 from datetime import datetime, timedelta, timezone
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
-from utils.canvas_api_calls import get_ta_courses, get_instructor_courses
+from utils.canvas_api_calls import get_instructor_courses
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
@@ -29,6 +29,7 @@ def lambda_handler(event, context):
         student_id = str(student_id)
 
         courses_as_instructor = get_instructor_courses(auth_token)
+        print("courses_as_instructor", courses_as_instructor)
         if courses_as_instructor is None:
             return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
         
@@ -111,7 +112,7 @@ def lambda_handler(event, context):
         engagement_stats = {
             "questionsAsked": total_user_messages,  # Total messages from all conversations
             "studentSessions": num_valid_conversations,  # Unique conversations > 2
-            "uniqueStudents": len(unique_students)  # Unique students engaged
+            "uniqueStudents": len(unique_students)  # Unique students engaged,
         }
 
         return construct_response(200, engagement_stats)

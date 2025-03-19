@@ -144,17 +144,16 @@ def get_instructor_courses(token):
     BASE_URL = credentials['baseURL']
     HEADERS = {"Authorization": f"Bearer {token}"}
 
-    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=teacher"
+    instructor_url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=teacher"
+    result_instructor = make_canvas_api_call(url=instructor_url, request_type="get", headers=HEADERS)
+    ta_url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=ta"
+    result_ta = make_canvas_api_call(url=ta_url, request_type="get", headers=HEADERS)
 
-    return make_canvas_api_call(url=url, request_type="get", headers=HEADERS)
+    # Combine both lists (avoiding duplicates)
+    all_courses = {course["id"]: course for course in result_instructor} 
+    for course in result_ta:
+        if course["id"] not in all_courses:
+            all_courses[course["id"]] = course
 
-def get_ta_courses(token):
-    """
-    Fetch all courses that user enrolled as a ta.
-    """
-    BASE_URL = credentials['baseURL']
-    HEADERS = {"Authorization": f"Bearer {token}"}
 
-    url = f"{BASE_URL}/api/v1/courses?enrollment_state=active&enrollment_type=ta"
-
-    return make_canvas_api_call(url=url, request_type="get", headers=HEADERS)
+    return list(all_courses.values())
