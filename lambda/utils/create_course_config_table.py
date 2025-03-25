@@ -19,7 +19,8 @@ def create_table_if_not_exists(DB_CONFIG):
             selected_included_course_content JSONB NOT NULL,     -- Included content as JSON -- controlled from s3 buckets download
             custom_response_format TEXT,                          -- Instruction for LLM -- controlled from system msg
             system_prompt TEXT,                                  -- Auto-generated system prompt for the assistant
-            material_last_updated_time TIMESTAMP DEFAULT '1970-01-01 00:00:00'
+            material_last_updated_time TIMESTAMP DEFAULT '1970-01-01 00:00:00',
+            auto_update_on BOOLEAN DEFAULT FALSE
         );
         """
         cursor.execute(create_course_config_query)

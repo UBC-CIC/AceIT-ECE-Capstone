@@ -52,6 +52,7 @@ def load_db_config():
     """
     env_prefix = os.environ.get("ENV_PREFIX")
     proxy_name = f"{env_prefix}RdsProxySG"
+    proxy_name = f"{env_prefix}RdsProxy"
     endpoint = get_rds_proxy_endpoint(proxy_name)
     
     if not endpoint:
