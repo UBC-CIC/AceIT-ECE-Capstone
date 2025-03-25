@@ -51,7 +51,6 @@ def load_db_config():
     Loads the static database configuration and dynamically fetches the RDS proxy endpoint.
     """
     env_prefix = os.environ.get("ENV_PREFIX")
-    proxy_name = f"{env_prefix}RdsProxySG"
     proxy_name = f"{env_prefix}RdsProxy"
     endpoint = get_rds_proxy_endpoint(proxy_name)
     

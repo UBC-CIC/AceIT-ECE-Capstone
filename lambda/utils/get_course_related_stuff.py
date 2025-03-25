@@ -212,10 +212,24 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
             published = quiz.get("published", "")
             unlock_at = quiz.get("unlock_at", "")
             lock_at = quiz.get("lock_at", "")
-            unlock_time = datetime.strptime(unlock_at, "%Y-%m-%dT%H:%M:%SZ")
-            lock_time = datetime.strptime(lock_at, "%Y-%m-%dT%H:%M:%SZ")
-            availbale = unlock_time <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") and lock_time >= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-            if published == True and availbale:
+            # unlock_time = datetime.strptime(unlock_at, "%Y-%m-%dT%H:%M:%SZ")
+            # lock_time = datetime.strptime(lock_at, "%Y-%m-%dT%H:%M:%SZ")
+            # availbale = unlock_time <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") and lock_time >= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+            now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+            # If unlock_at/lock_at is missing, treat them as always available
+            try:
+                unlock_time = datetime.strptime(unlock_at, "%Y-%m-%dT%H:%M:%SZ") if unlock_at else None
+                lock_time = datetime.strptime(lock_at, "%Y-%m-%dT%H:%M:%SZ") if lock_at else None
+
+                # Default to True if times are missing
+                available = True
+                if unlock_time and lock_time:
+                    now = datetime.strptime(now_str, "%Y-%m-%dT%H:%M:%SZ")
+                    available = unlock_time <= now <= lock_time
+            except Exception as e:
+                print(f"Error parsing quiz time: {e}")
+                available = True  # Fail-safe
+            if published and availbale:
                 counter += 1
                 quiz_str = f"  Quiz {counter}: \n"
                 # get quiz title
