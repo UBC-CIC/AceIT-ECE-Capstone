@@ -112,6 +112,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         rds_proxy_sg = ec2.SecurityGroup(
             self,
             f"{env_prefix}RdsProxySG",
+            security_group_name=f"{env_prefix}RdsProxySG",
             vpc=my_vpc,
             description="Security group for RDS Proxy"
         )
