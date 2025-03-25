@@ -9,7 +9,8 @@ from utils.canvas_api_calls import get_instructor_courses
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
-messages_table = dynamodb.Table('Messages')  # Replace with your table name
+env_prefix = os.environ.get("ENV_PREFIX")
+messages_table = dynamodb.Table(f"{env_prefix}Messages")
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION')) 
 

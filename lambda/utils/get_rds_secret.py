@@ -12,7 +12,8 @@ def get_cached_secret():
     return json.loads(SECRET_CACHE)
 
 def get_secret():
-    secret_name = "MyRdsSecret"
+    env_prefix = os.environ.get("ENV_PREFIX")
+    secret_name = f"{env_prefix}RdsDBSecret"
     region_name = os.getenv('AWS_REGION')
     session = boto3.session.Session()
     client = session.client(
@@ -49,7 +50,8 @@ def load_db_config():
     """
     Loads the static database configuration and dynamically fetches the RDS proxy endpoint.
     """
-    proxy_name = "MyRdsProxy"  # Use the actual name of your RDS Proxy
+    env_prefix = os.environ.get("ENV_PREFIX")
+    proxy_name = f"{env_prefix}RdsProxySG"
     endpoint = get_rds_proxy_endpoint(proxy_name)
     
     if not endpoint:

@@ -8,6 +8,7 @@ from utils.retrieve_course_config import call_get_course_config
 from utils.construct_response import construct_response
 
 lambda_client = boto3.client('lambda')
+env_prefix = os.environ.get("ENV_PREFIX")
 translate_client = boto3.client("translate", region_name=os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
@@ -77,7 +78,7 @@ def generate_suggestions(course_config_str, num_suggestions, course_related_stuf
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="InvokeLLMCompletionLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}InvokeLLMCompletionLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )

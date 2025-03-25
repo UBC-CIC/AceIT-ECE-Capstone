@@ -7,7 +7,8 @@ from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
-users_table = dynamodb.Table("Users")
+env_prefix = os.environ.get("ENV_PREFIX")
+users_table = dynamodb.Table(f"{env_prefix}Users")
 
 # Regex to validate language codes (ISO 639-1 or RFC 5646 with country variants)
 LANGUAGE_CODE_PATTERN = r"^[a-z]{2}(-[A-Z]{2})?$"

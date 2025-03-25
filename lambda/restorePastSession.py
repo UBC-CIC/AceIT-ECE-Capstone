@@ -5,8 +5,9 @@ from utils.construct_response import construct_response
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
-messages_table = dynamodb.Table('Messages')  # Replace with your table name
-conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
+env_prefix = os.environ.get("ENV_PREFIX")
+messages_table = dynamodb.Table(f"{env_prefix}Messages")
+conversations_table = dynamodb.Table(f"{env_prefix}Conversations")
 
 
 def lambda_handler(event, context):

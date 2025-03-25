@@ -4,7 +4,8 @@ from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_user_info
 
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
-users_table = dynamodb.Table("Users")
+env_prefix = os.environ.get("ENV_PREFIX")
+users_table = dynamodb.Table(f"{env_prefix}Users")
 def lambda_handler(event, context):
     headers = event.get("headers", {})
     if not headers:

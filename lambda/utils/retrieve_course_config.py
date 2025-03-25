@@ -3,9 +3,11 @@ import psycopg2
 import psycopg2.extras
 from .get_rds_secret import get_cached_secret
 from .get_rds_secret import load_db_config
+import os
 
 # Cache for database connection
 DB_CONNECTION = None
+env_prefix = os.environ.get("ENV_PREFIX")
 
 def get_db_connection():
     """Establishes or retrieves a cached database connection."""
@@ -38,7 +40,7 @@ def call_get_course_config(auth_token, course_id, lambda_client):
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="GetCourseConfigLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}GetCourseConfigLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )

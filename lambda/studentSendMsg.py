@@ -11,8 +11,9 @@ from utils.construct_response import construct_response
 
 lambda_client = boto3.client('lambda')
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
-messages_table = dynamodb.Table('Messages')  # Replace with your table name
-conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
+env_prefix = os.environ.get("ENV_PREFIX")
+messages_table = dynamodb.Table(f"{env_prefix}Messages")
+conversations_table = dynamodb.Table(f"{env_prefix}Conversations")
 translate_client = boto3.client("translate", region_name=os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
@@ -226,7 +227,7 @@ def generate_ai_response(message_content, past_conversation, course_id, student_
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="InvokeLLMCompletionLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}InvokeLLMCompletionLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )
@@ -254,7 +255,7 @@ def generate_welcome_message(course_config_str, name, course_related_stuff, cour
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="InvokeLLMCompletionLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}InvokeLLMCompletionLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )
@@ -275,7 +276,7 @@ def call_generate_llm_prompt(conversation_id, course_id):
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="GenerateLLMPromptLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}GenerateLLMPromptLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )

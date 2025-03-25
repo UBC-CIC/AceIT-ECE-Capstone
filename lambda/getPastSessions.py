@@ -9,9 +9,10 @@ lambda_client = boto3.client('lambda')
 session = boto3.Session()
 bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION')) 
 # Initialize DynamoDB client
+env_prefix = os.environ.get("ENV_PREFIX")
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
-conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
-messages_table = dynamodb.Table('Messages')
+conversations_table = dynamodb.Table(f"{env_prefix}Conversations")   # Replace with your table name
+messages_table = dynamodb.Table(f"{env_prefix}Messages")
 
 def lambda_handler(event, context):
     try:

@@ -23,13 +23,15 @@ import json
 
 class PrivAceItEceCapstoneMainStack(Stack):
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, construct_id: str, env_prefix, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Create an S3 Bucket
         course_doc_bucket = s3.Bucket(
-            self, "CourseDocumentsBucket",
-            bucket_name="bucket-for-course-documents",
+            self,
+            # "CourseDocumentsBucket",
+            f"{env_prefix}CourseDocumentsBucket",
+            bucket_name=f"{env_prefix}bucket-for-course-documents",
             versioned=True,  # Enable versioning
             removal_policy=RemovalPolicy.DESTROY,  # Delete on stack removal
             auto_delete_objects=True
@@ -38,17 +40,17 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # 1. Create a new VPC with 1 NAT Gateway
         my_vpc = ec2.Vpc(
             self,
-            "MyVpc",
+            f"{env_prefix}MyVpc",
             max_azs=2,  # Creates subnets in 2 Availability Zones
             nat_gateways=1,  # Only 1 NAT gateway for cost savings
             subnet_configuration=[
                 ec2.SubnetConfiguration(
-                    name="PublicSubnet",
+                    name=f"{env_prefix}PublicSubnet",
                     subnet_type=ec2.SubnetType.PUBLIC,
                     cidr_mask=24,
                 ),
                 ec2.SubnetConfiguration(
-                    name="PrivateSubnet",
+                    name=f"{env_prefix}PrivateSubnet",
                     subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS,
                     cidr_mask=24,
                 )
@@ -58,7 +60,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # 2. Create a Security Group for the Lambda
         lambda_sg = ec2.SecurityGroup(
             self,
-            "LambdaSG",
+            f"{env_prefix}LambdaSG",
             vpc=my_vpc,
             description="Security group for my Lambda function",
             allow_all_outbound=True  # let it call external services
@@ -66,7 +68,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         my_rds_sg = ec2.SecurityGroup(
             self,
-            "MyRdsSG",
+            f"{env_prefix}MyRdsSG",
             vpc=my_vpc,
             description="Security group for RDS"
         )
@@ -81,8 +83,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # Create the secret in Secrets Manager for DB credentials
         db_secret = secretsmanager.Secret(
             self,
-            "MyRdsSecret",
-            secret_name="MyRdsSecret",
+            f"{env_prefix}RdsDBSecret",
+            secret_name=f"{env_prefix}RdsDBSecret",
             generate_secret_string=secretsmanager.SecretStringGenerator(
                 secret_string_template=json.dumps(secret_template),  # Pass the structure of the secret as a JSON string
                 generate_string_key="password",  # Key in the template to generate the password for
@@ -93,8 +95,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         my_rds = rds.DatabaseInstance(
             self,
-            "t4gRDSdb",
-            database_name="t4gRDSdb",
+            f"{env_prefix}t4gRDSdb",
+            database_name=f"{env_prefix}t4gRDSdb",
             engine=rds.DatabaseInstanceEngine.postgres(
                 version=rds.PostgresEngineVersion.VER_16_3
             ),
@@ -109,7 +111,7 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # Security Group for RDS Proxy
         rds_proxy_sg = ec2.SecurityGroup(
             self,
-            "RdsProxySG",
+            f"{env_prefix}RdsProxySG",
             vpc=my_vpc,
             description="Security group for RDS Proxy"
         )
@@ -119,8 +121,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # RDS Proxy
         rds_proxy = rds.DatabaseProxy(
             self,
-            "MyRdsProxy",
-            db_proxy_name="MyRdsProxy",
+            f"{env_prefix}RdsProxy",
+            db_proxy_name=f"{env_prefix}RdsProxy",
             proxy_target=rds.ProxyTarget.from_instance(my_rds),
             secrets=[db_secret],
             vpc=my_vpc,
@@ -135,8 +137,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         # Create the Messages Table
         messages_table = dynamodb.Table(
-            self, "MessagesTable",
-            table_name="Messages",  # Custom name for the table
+            self, f"{env_prefix}MessagesTable",
+            table_name=f"{env_prefix}Messages",  # Custom name for the table
             partition_key=dynamodb.Attribute(
                 name="message_id",
                 type=dynamodb.AttributeType.STRING
@@ -158,8 +160,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         # Create the Conversations Table
         conversations_table = dynamodb.Table(
-            self, "ConversationsTable",
-            table_name="Conversations",  # Custom name for the table
+            self, f"{env_prefix}ConversationsTable",
+            table_name=f"{env_prefix}Conversations",  # Custom name for the table
             partition_key=dynamodb.Attribute(
                 name="conversation_id",
                 type=dynamodb.AttributeType.STRING
@@ -181,8 +183,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         # Create the User Table
         users_table = dynamodb.Table(
-            self, "UserTable",
-            table_name="Users",  # Custom name for the table
+            self, f"{env_prefix}UserTable",
+            table_name=f"{env_prefix}Users",  # Custom name for the table
             partition_key=dynamodb.Attribute(
                 name="userId",
                 type=dynamodb.AttributeType.NUMBER
@@ -244,9 +246,9 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # Define the Lambda function resources
         fetchReadFromS3 = _lambda.Function(
             self,
-            "FetchReadFromS3Function",
+            f"{env_prefix}FetchReadFromS3Function",
             runtime=_lambda.Runtime.PYTHON_3_9,  # Use a Python runtime (e.g., Python 3.9)
-            function_name="FetchReadFromS3Function",
+            function_name=f"{env_prefix}FetchReadFromS3Function",
             code=_lambda.Code.from_asset("lambda"),  # Points to the 'lambda' directory
             handler="fetchReadFromS3.lambda_handler",  # Points to the 'hello.py' file and 'handler' function
             layers=[langchain_layer, pymupdf_layer, other_text_related_layer, boto3_layer, psycopg_layer],
@@ -257,22 +259,28 @@ class PrivAceItEceCapstoneMainStack(Stack):
             ),
             timeout=Duration.minutes(15),
             memory_size=1024,  # Increase from 128MB to 512MB/1024MB/1536MB as needed
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         recent_course_data_analysis = _lambda.Function(
             self,
-            "RecentCourseDataAnalysisFunction",
-            function_name="RecentCourseDataAnalysisFunction",
+            f"{env_prefix}RecentCourseDataAnalysisFunction",
+            function_name=f"{env_prefix}RecentCourseDataAnalysisFunction",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),  # Points to the lambda directory
             handler="recentCourseData.lambda_handler",
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         top_questions_lambda = _lambda.Function(
             self,
-            "TopQuestionsLambda",
-            function_name="TopQuestionsLambda",
+            f"{env_prefix}TopQuestionsLambda",
+            function_name=f"{env_prefix}TopQuestionsLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="topQuestions.lambda_handler",
@@ -283,12 +291,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         top_materials_lambda = _lambda.Function(
             self,
-            "TopMaterialsLambda",
-            function_name="TopMaterialsLambda",
+            f"{env_prefix}TopMaterialsLambda",
+            function_name=f"{env_prefix}TopMaterialsLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="topMaterials.lambda_handler",
@@ -299,12 +310,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         student_engagement_lambda = _lambda.Function(
             self,
-            "StudentEngagementLambda",
-            function_name="StudentEngagementLambda",
+            f"{env_prefix}StudentEngagementLambda",
+            function_name=f"{env_prefix}StudentEngagementLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="studentEngagement.lambda_handler",
@@ -315,12 +329,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         get_course_configuration_lambda = _lambda.Function(
             self,
-            "GetCourseConfigLambda",
-            function_name="GetCourseConfigLambda",
+            f"{env_prefix}GetCourseConfigLambda",
+            function_name=f"{env_prefix}GetCourseConfigLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getCourseConfig.lambda_handler",
@@ -331,12 +348,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         update_course_configuration_lambda = _lambda.Function(
             self,
-            "UpdateCourseConfigLambda",
-            function_name="UpdateCourseConfigLambda",
+            f"{env_prefix}UpdateCourseConfigLambda",
+            function_name=f"{env_prefix}UpdateCourseConfigLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="updateCourseConfig.lambda_handler",
@@ -347,12 +367,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         update_conversation_prompts_lambda = _lambda.Function(
             self,
-            "UpdateConversationPromptLambda",
-            function_name="UpdateConversationPromptLambda",
+            f"{env_prefix}UpdateConversationPromptLambda",
+            function_name=f"{env_prefix}UpdateConversationPromptLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="updateConversationPrompts.lambda_handler",
@@ -363,12 +386,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         student_send_msg_lambda = _lambda.Function(
             self,
-            "StudentSendMsgLambda",
-            function_name="StudentSendMsgLambda",
+            f"{env_prefix}StudentSendMsgLambda",
+            function_name=f"{env_prefix}StudentSendMsgLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="studentSendMsg.lambda_handler",
@@ -379,12 +405,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         get_user_info_lambda = _lambda.Function(
             self,
-            "GetUserInfoLambda",
-            function_name="GetUserInfoLambda",
+            f"{env_prefix}GetUserInfoLambda",
+            function_name=f"{env_prefix}GetUserInfoLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getUserInfo.lambda_handler",
@@ -395,12 +424,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         update_user_language_lambda = _lambda.Function(
             self,
-            "UpdateUserLanguageLambda",
-            function_name="UpdateUserLanguageLambda",
+            f"{env_prefix}UpdateUserLanguageLambda",
+            function_name=f"{env_prefix}UpdateUserLanguageLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="updateUserLanguage.lambda_handler",
@@ -411,12 +443,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         get_user_courses_lambda = _lambda.Function(
             self,
-            "GetUserCoursesLambda",
-            function_name="GetUserCoursesLambda",
+            f"{env_prefix}GetUserCoursesLambda",
+            function_name=f"{env_prefix}GetUserCoursesLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getUserCourses.lambda_handler",
@@ -427,12 +462,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         login_lambda = _lambda.Function(
             self,
-            "LoginLambda",
-            function_name="LoginLambda",
+            f"{env_prefix}LoginLambda",
+            function_name=f"{env_prefix}LoginLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="login.lambda_handler",
@@ -443,12 +481,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         refresh_token_lambda = _lambda.Function(
             self,
-            "RefreshTokenLambda",
-            function_name="RefreshTokenLambda",
+            f"{env_prefix}RefreshTokenLambda",
+            function_name=f"{env_prefix}RefreshTokenLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="refreshToken.lambda_handler",
@@ -459,12 +500,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         logout_lambda = _lambda.Function(
             self,
-            "LogoutLambda",
-            function_name="LogoutLambda",
+            f"{env_prefix}LogoutLambda",
+            function_name=f"{env_prefix}LogoutLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="logout.lambda_handler",
@@ -475,12 +519,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         get_vector_lambda = _lambda.Function(
             self,
-            "GetVectorLambda",
-            function_name="GetVectorLambda",
+            f"{env_prefix}GetVectorLambda",
+            function_name=f"{env_prefix}GetVectorLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="getVector.lambda_handler",
@@ -491,12 +538,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         add_vector_lambda = _lambda.Function(
             self,
-            "AddVectorLambda",
-            function_name="AddVectorLambda",
+            f"{env_prefix}AddVectorLambda",
+            function_name=f"{env_prefix}AddVectorLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="addVector.lambda_handler",
@@ -507,12 +557,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         delete_vector_lambda = _lambda.Function(
             self,
-            "DeleteVectorLambda",
-            function_name="DeleteVectorLambda",
+            f"{env_prefix}DeleteVectorLambda",
+            function_name=f"{env_prefix}DeleteVectorLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="deleteVector.lambda_handler",
@@ -523,12 +576,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         refresh_content_lambda = _lambda.Function(
             self,
-            "RefreshContentLambda",
-            function_name="RefreshContentLambda",
+            f"{env_prefix}RefreshContentLambda",
+            function_name=f"{env_prefix}RefreshContentLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="refreshContent.lambda_handler",
@@ -539,12 +595,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         delete_all_course_data_lambda = _lambda.Function(
             self,
-            "DeleteAllCourseLambda",
-            function_name="DeleteAllCourseLambda",
+            f"{env_prefix}DeleteAllCourseLambda",
+            function_name=f"{env_prefix}DeleteAllCourseLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="deleteAllCourseData.lambda_handler",
@@ -555,12 +614,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         refresh_all_existing_courses_lambda = _lambda.Function(
             self,
-            "RefreshAllCoursesLambda",
-            function_name="RefreshAllCoursesLambda",
+            f"{env_prefix}RefreshAllCoursesLambda",
+            function_name=f"{env_prefix}RefreshAllCoursesLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="refreshAllCourses.lambda_handler",
@@ -571,12 +633,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         generate_llm_prompt_lambda = _lambda.Function(
             self,
-            "GenerateLLMPromptLambda",
-            function_name="GenerateLLMPromptLambda",
+            f"{env_prefix}GenerateLLMPromptLambda",
+            function_name=f"{env_prefix}GenerateLLMPromptLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="generateLLMPrompt.lambda_handler",
@@ -587,12 +652,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         invoke_llm_completion_lambda = _lambda.Function(
             self,
-            "InvokeLLMCompletionLambda",
-            function_name="InvokeLLMCompletionLambda",
+            f"{env_prefix}InvokeLLMCompletionLambda",
+            function_name=f"{env_prefix}InvokeLLMCompletionLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="invokeLLMCompletion.lambda_handler",
@@ -604,12 +672,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
             ),
             timeout=Duration.minutes(15),
             memory_size=1024,
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         generate_llm_analysis_lambda = _lambda.Function(
             self,
-            "GenerateLLMAnaysisLambda",
-            function_name="GenerateLLMAnaysisLambda",
+            f"{env_prefix}GenerateLLMAnaysisLambda",
+            function_name=f"{env_prefix}GenerateLLMAnaysisLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="generateLLMAnalysis.lambda_handler",
@@ -620,12 +691,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         generate_suggestions_lambda = _lambda.Function(
             self,
-            "GenerateSuggestionsLambda",
-            function_name="GenerateSuggestionsLambda",
+            f"{env_prefix}GenerateSuggestionsLambda",
+            function_name=f"{env_prefix}GenerateSuggestionsLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),
             handler="generateSuggestions.lambda_handler",
@@ -637,12 +711,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
             ),
             timeout=Duration.minutes(15),
             memory_size=256,
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         get_past_sessions_lambda = _lambda.Function(
             self,
-            "GetPastSessionsLambda",
-            function_name="GetPastSessionsLambda",
+            f"{env_prefix}GetPastSessionsLambda",
+            function_name=f"{env_prefix}GetPastSessionsLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),  # Points to the lambda directory
             handler="getPastSessions.lambda_handler",
@@ -653,12 +730,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         restore_past_session_lambda = _lambda.Function(
             self,
-            "RestorePastSessionLambda",
-            function_name="RestorePastSessionLambda",
+            f"{env_prefix}RestorePastSessionLambda",
+            function_name=f"{env_prefix}RestorePastSessionLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),  # Points to the lambda directory
             handler="restorePastSession.lambda_handler",
@@ -669,12 +749,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         get_all_materials_lambda = _lambda.Function(
             self,
-            "GetAllMaterialsLambda",
-            function_name="GetAllMaterialsLambda",
+            f"{env_prefix}GetAllMaterialsLambda",
+            function_name=f"{env_prefix}GetAllMaterialsLambda",
             runtime=_lambda.Runtime.PYTHON_3_9,
             code=_lambda.Code.from_asset("lambda"),  # Points to the lambda directory
             handler="getAllMaterials.lambda_handler",
@@ -685,12 +768,15 @@ class PrivAceItEceCapstoneMainStack(Stack):
                 subnet_type=ec2.SubnetType.PRIVATE_WITH_EGRESS
             ),
             timeout=Duration.minutes(15),
+            environment={
+                "ENV_PREFIX": env_prefix
+            },
         )
 
         # Define the shared IAM role
         shared_policy_for_lambda = iam.Policy(
             self,
-            "SharedPolicyForLambda",
+            f"{env_prefix}SharedPolicyForLambda",
             statements=[
                 iam.PolicyStatement(
                     actions=[
@@ -747,8 +833,8 @@ class PrivAceItEceCapstoneMainStack(Stack):
         # Define the API Gateway resource
         api = apigateway.RestApi(
             self,
-            "CourseAPI",
-            rest_api_name="CourseAPI",
+            f"{env_prefix}CourseAPI",
+            rest_api_name=f"{env_prefix}CourseAPI",
             description="API to handle course-related data",
             endpoint_configuration={
                 "types": [apigateway.EndpointType.REGIONAL]  # Ensures timeout increase works
@@ -1788,15 +1874,9 @@ class PrivAceItEceCapstoneMainStack(Stack):
 
         # Create an EventBridge rule that runs every 24 hours
         rule = events.Rule(
-            self, "DailyTrigger",
+            self, f"{env_prefix}DailyTrigger",
             schedule=events.Schedule.rate(Duration.hours(24))  # Run every 24 hours
         )
 
         # Set the Lambda as the target for the rule
         rule.add_target(targets.LambdaFunction(refresh_all_existing_courses_lambda))
-
-        # Add S3 Event Notification (Trigger Lambda when a new file is uploaded)
-        # course_doc_bucket.add_event_notification(
-        #     s3.EventType.OBJECT_CREATED,
-        #     s3_notifications.LambdaDestination(fetchReadFromS3)
-        # )

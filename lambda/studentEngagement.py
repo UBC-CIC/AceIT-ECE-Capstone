@@ -7,8 +7,9 @@ from utils.canvas_api_calls import get_instructor_courses
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
-messages_table = dynamodb.Table('Messages')  # Replace with your table name
-conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
+env_prefix = os.environ.get("ENV_PREFIX")
+messages_table = dynamodb.Table(f"{env_prefix}Messages")
+conversations_table = dynamodb.Table(f"{env_prefix}Conversations")
 dynamodb_client = boto3.client('dynamodb')  # Client needed for batch_get_item
 
 def lambda_handler(event, context):

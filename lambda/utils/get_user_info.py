@@ -1,7 +1,9 @@
 import json
 import boto3
+import os
 
 lambda_client = boto3.client('lambda')
+env_prefix = os.environ.get("ENV_PREFIX")
 def get_user_info(auth_token):
     """
     Calls getuser info to get the user info based on the provided authentication token.
@@ -23,7 +25,7 @@ def get_user_info(auth_token):
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="GetUserInfoLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}GetUserInfoLambda",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )

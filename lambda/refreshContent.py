@@ -4,13 +4,15 @@ import psycopg2.extras
 import psycopg2
 import requests  # to make HTTP requests
 import utils
+import os
 import utils.get_canvas_secret
 import utils.get_rds_secret
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_files_by_course_id
 
 s3_client = boto3.client('s3')
-bucket_name = 'bucket-for-course-documents'
+env_prefix = os.environ.get("ENV_PREFIX")
+bucket_name = f"{env_prefix}bucket-for-course-documents"
 lambda_client = boto3.client("lambda")
 
 def lambda_handler(event, context):
@@ -31,7 +33,7 @@ def lambda_handler(event, context):
         }
         try:
             response = lambda_client.invoke(
-                FunctionName="RefreshContentLambda",
+                FunctionName=f"{env_prefix}RefreshContentLambda",
                 InvocationType="Event",
                 Payload=json.dumps(payload)
                 )
@@ -162,7 +164,7 @@ def call_fetch_read_from_s3(course_id):
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="FetchReadFromS3Function",  # Replace with actual function name
+            FunctionName=f"{env_prefix}FetchReadFromS3Function",  # Replace with actual function name
             InvocationType="RequestResponse",  # Use 'Event' for async calls
             Payload=json.dumps(payload)
         )

@@ -1,4 +1,5 @@
 import json
+import os
 import boto3
 import utils.get_canvas_secret
 import utils.get_rds_secret
@@ -9,7 +10,7 @@ from utils.create_course_vectors_tables import create_table_if_not_exists as cre
 from utils.create_course_config_table import create_table_if_not_exists as create_config_table
 
 lambda_client = boto3.client("lambda")
-
+env_prefix = os.environ.get("ENV_PREFIX")
 def lambda_handler(event, context):
     courses = get_all_courses()
     if courses is None:
@@ -54,7 +55,7 @@ def invoke_refresh_course(course_id):
     }
     try:
         response = lambda_client.invoke(
-            FunctionName="RefreshContentLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}RefreshContentLambda",  # Replace with actual function name
             # InvocationType="RequestResponse",  # Use 'Event' for async calls
             InvocationType="Event",
             Payload=json.dumps(payload)

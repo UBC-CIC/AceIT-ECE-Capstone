@@ -1,10 +1,12 @@
 import json
 import boto3
+import os
 from utils.construct_response import construct_response
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
-messages_table = dynamodb.Table('Messages')  # Replace with your table name
-conversations_table = dynamodb.Table('Conversations')  # Replace with your table name
+env_prefix = os.environ.get("ENV_PREFIX")
+messages_table = dynamodb.Table(f"{env_prefix}Messages")  # Replace with your table name
+conversations_table = dynamodb.Table(f"{env_prefix}Conversations")  # Replace with your table name
 
 def lambda_handler(event, context):
     try:

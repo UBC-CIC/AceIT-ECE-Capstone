@@ -7,7 +7,8 @@ from priv_ace_it_ece_capstone_main.priv_ace_it_ece_capstone_main_stack import Pr
 
 
 app = cdk.App()
-PrivAceItEceCapstoneMainStack(app, "PrivAceItEceCapstoneMainStack",
+env_prefix = app.node.try_get_context("env_prefix") or "aceitdev"
+PrivAceItEceCapstoneMainStack(app, f"{env_prefix}-MainStack", env_prefix=env_prefix,
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.

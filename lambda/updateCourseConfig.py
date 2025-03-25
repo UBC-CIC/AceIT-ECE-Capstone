@@ -2,6 +2,7 @@ import json
 import boto3
 import psycopg2
 import psycopg2.extras
+import os
 from utils.create_course_config_table import create_table_if_not_exists
 from utils.retrieve_course_config import create_system_prompt
 from utils.get_rds_secret import get_secret
@@ -11,6 +12,7 @@ from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_instructor_courses
 
 lambda_client = boto3.client("lambda")
+env_prefix = os.environ.get("ENV_PREFIX")
 
 def lambda_handler(event, context):
     
@@ -145,7 +147,7 @@ def invoke_update_system_prompt(system_prompt, course_id):
     }
     try:
         lambda_client.invoke(
-            FunctionName="UpdateConversationPromptLambda",  # Replace with actual function name
+            FunctionName=f"{env_prefix}UpdateConversationPromptLambda",  # Replace with actual function name
             # InvocationType="RequestResponse",  # Use 'Event' for async calls
             InvocationType="Event",
             Payload=json.dumps(payload)

@@ -21,7 +21,8 @@ s3_client = boto3.client("s3")
 bedrock = boto3.client("bedrock-runtime", region_name = os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
-    bucket_name = "bucket-for-course-documents"
+    env_prefix = os.environ.get("ENV_PREFIX")
+    bucket_name = f"{env_prefix}bucket-for-course-documents"
 
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=2000,
