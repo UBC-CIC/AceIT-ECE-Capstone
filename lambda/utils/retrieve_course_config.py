@@ -73,31 +73,34 @@ def retrieve_course_config(course_id):
         row = cursor.fetchone()
 
         if not row:
-        # Course configuration does not exist, insert default values
+            print("no course config available")
+            # Course configuration does not exist, insert default values
+            default_supported_questions = {
+                "RECOMMENDATIONS": True,
+                "PRACTICE_PROBLEMS": True,
+                "SOLUTION_REVIEW": True,
+                "EXPLANATION": True
+            }
+            default_included_course_content = {
+                "ANNOUNCEMENTS": False,
+                "SYLLABUS": False,
+                "ASSIGNMENTS": False,
+                "FILES": False,
+                "QUIZZES": False,
+                "DISCUSSIONS": False,
+                "PAGES": False
+            }
             default_config = {
                 "course_id": course_id,
                 "student_access_enabled": False,
-                "selected_supported_questions": json.dumps({
-                    "RECOMMENDATIONS": True,
-                    "PRACTICE_PROBLEMS": True,
-                    "SOLUTION_REVIEW": True,
-                    "EXPLANATION": True
-                }),
-                "selected_included_course_content": json.dumps({
-                    "ANNOUNCEMENTS": False,
-                    "SYLLABUS": False,
-                    "ASSIGNMENTS": False,
-                    "FILES": False,
-                    "QUIZZES": False,
-                    "DISCUSSIONS": False,
-                    "PAGES": False
-                }),
+                "selected_supported_questions": json.dumps(default_supported_questions),
+                "selected_included_course_content": json.dumps(default_included_course_content),
                 "custom_response_format": "",
+                "system_prompt": "",
                 "material_last_updated_time": "1970-01-01 00:00:00",
                 "auto_update_on": False
                 }
-            
-            default_config["system_prompt"] = create_system_prompt(default_config["selected_supported_questions"], default_config["custom_response_format"])
+            default_config["system_prompt"] = create_system_prompt(default_supported_questions, default_included_course_content)
 
             insert_query = """
             INSERT INTO course_configuration (course_id, student_access_enabled, selected_supported_questions, 
@@ -114,7 +117,6 @@ def retrieve_course_config(course_id):
                 default_config["material_last_updated_time"],
                 default_config["auto_update_on"]
             ))
-
             connection.commit()
 
             response_body = {
