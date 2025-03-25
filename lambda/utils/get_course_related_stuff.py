@@ -214,7 +214,7 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
             lock_at = quiz.get("lock_at", "")
             # unlock_time = datetime.strptime(unlock_at, "%Y-%m-%dT%H:%M:%SZ")
             # lock_time = datetime.strptime(lock_at, "%Y-%m-%dT%H:%M:%SZ")
-            # availbale = unlock_time <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") and lock_time >= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+            # available = unlock_time <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ") and lock_time >= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
             now_str = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             # If unlock_at/lock_at is missing, treat them as always available
             try:
@@ -229,7 +229,7 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
             except Exception as e:
                 print(f"Error parsing quiz time: {e}")
                 available = True  # Fail-safe
-            if published and availbale:
+            if published and available:
                 counter += 1
                 quiz_str = f"  Quiz {counter}: \n"
                 # get quiz title
@@ -267,7 +267,7 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
                             
                             # question points
                             points_possible = question.get("points_possible", "")
-                            str_to_indent = f"Available points for Question {question_position}: " + points_possible + "\n"
+                            str_to_indent = f"Available points for Question {question_position}: " + f"{points_possible}" + "\n"
                             quiz_str += indent_string(str_to_indent, 4)
 
                             # name
