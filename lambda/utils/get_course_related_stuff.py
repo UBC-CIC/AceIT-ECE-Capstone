@@ -292,8 +292,11 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
                             # add question answers if available
                             show_correct_answers = quiz.get("show_correct_answers", "") # boolean
                             answers_list = quiz.get("answers", "") # json list
-                            due_date = datetime.strptime(quiz_due_date, "%Y-%m-%dT%H:%M:%SZ")
-                            past_due = due_date <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+                            past_due = False
+                            if quiz_due_date:
+                                due_date = datetime.strptime(quiz_due_date, "%Y-%m-%dT%H:%M:%SZ")
+                                past_due = due_date <= datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
                             has_answer = (quiz_type == "practice_quiz") or (quiz_type == "assignment")
 
                             if answers_list and show_correct_answers and past_due and has_answer:
