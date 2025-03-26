@@ -295,13 +295,23 @@ To deploy Ace It on AWS, you'll need an AWS account with the appropriate permiss
   3.1.3 Ensure that GitHub Secrets are properly set up in AWS Configuration step
   3.1.4 Trigger the GitHub Actions deployment - Push any changes to main to trigger the deployment workflow
   3.1.5 If successful, the backend Lambda functions and infrastructure should be deployed. You can check the deployed stack url in GitHub Repository > Actions > Select the latest deployment workflow.
+  3.1.6 To prefix the deployed resources the github actions will deploy, simply modify the github action workflow file `deploy.yml` line 59 to be 
+  ```npx cdk deploy --require-approval never --context env_prefix=prefixlikedev```
 
 - Method II. Manual Deployment Without GitHub Actions
   3.2.1 If you prefer not to use GitHub Actions, follow these steps to deploy the backend manually using AWS CDK.
   3.2.2 Install AWS CDK, python dependencies by running `npm install -g aws-cdk`, `pip install -r requirements.txt` and `pip install -r requirements-dev.txt`in terminal and make sure the working directory is at the root, i.e. ACEIT-ECE-CAPSTONE.
   3.2.3 Make sure you've completed steps in AWS Configuration Method II to set up your AWS Credentials
-  3.2.4 Type in terminal `cdk bootstrap`, then type `cdk deploy --require-approval never`
-  3.2.5 If successful, there will be a deployed stack url displayed in your terminal. these will be your backend function urls.
+  3.2.4 Type in terminal `cdk bootstrap`, then type `cdk deploy --require-approval never`. If you want to prefix resources for development and production, simply type `cdk deploy --require-approval never --context env_prefix=prefixlikedev` in the terminal instead.
+  3.2.5 If successful, there will be a deployed stack url displayed in your terminal.  these will be your backend function urls.
+
+4. After deployment is successful, record the stack url (e.g. https://something.execute-api.us-west-2.amazonaws.com/prod/). This can be obtained by checking the `Deploy Stack` step if deploying using github action, or by checking the result of step 3.2.5 for no github action method. Replace the `VITE_REACT_APP_API_URL`'s value in frontend/.env with your actual stack url. Also modify the `VITE_REACT_APP_HOST_URI`to your cloud distribution domain name, and `VITE_REACT_APP_CANVAS_URL` to be your canvas url. Then, modify the `lambda/utils/construct_response.py`'s  `Access-Control-Allow-Origin` value to be your cloud distribution domain name.
+Save and deploy again.
+Now if you visit the Distribution domain name from cloudfront, you can visit AceIt!
+
+- Important:
+  > Please note that due to aws resource name constraints, the prefix should only contain lowercase letters.
+  > First time deploying will take ~25 minutes, please be patient.
 
 #### Frontend Configuration
 
