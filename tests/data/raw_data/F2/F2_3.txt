@@ -1,0 +1,447 @@
+INIT_START Runtime Version: python:3.9.v82	Runtime Version ARN: arn:aws:lambda:us-west-2::runtime:d6dc717114b06da7d4b5a2df328222709ec4fad2853004fac301b8b63a65c084
+START RequestId: 3cf9dc79-bd8e-41ce-b48d-139b9a9dc6b5 Version: $LATEST
+fetched endpoint:  aceitdevrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com
+DB_CONNECTION:  None
+fetched endpoint:  aceitdevrdsproxy.proxy-czgq6uq2qr6h.us-west-2.rds.amazonaws.com
+Connecting to database
+Connected to database
+File content loaded successfully.
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+Retrieve course content [Files]: {'6/1739156691_656__weekly_projects.md': ['### **Week 1: Introduction to Digital Design Tools & Design Principles**\n\n* **Project 1: Create a Simple Logo Design**  \n  * **Objective:** Get familiar with basic design principles (shape, form, alignment) and design tools (Photoshop, Illustrator, or Figma).  \n  * **Instructions:** Create a logo for a fictional brand using basic shapes and text. The logo should reflect the company’s identity (e.g., a tech startup, an eco-friendly company, or a local coffee shop). Focus on the simplicity of the design and ensure it works well in both black & white and color versions.  \n  * **Skills Learned:** Shape creation, typography basics, logo design, basic use of design tools.\n\n---\n\n### **Week 2: Typography & Color Theory**\n\n* **Project 2: Create a Typographic Poster**  \n  * **Objective:** Learn how typography can communicate tone and mood.  \n  * **Instructions:** Choose a quote, poem, or short phrase and create a typographic poster that highlights the message. Use at least two fonts (one for emphasis, one for body text) and a color palette that fits the tone of the message. Experiment with hierarchy, alignment, and spacing.  \n  * **Skills Learned:** Typography basics, font pairing, color theory, text-based design.\n\n---\n\n### **Week 3: Composition & Layout for Print**\n\n* **Project 3: Design a Flyer or Brochure**  \n  * **Objective:** Apply principles of layout and composition to create a balanced and effective design for print media.  \n  * **Instructions:** Create a flyer or brochure for an event or service (e.g., a music concert, charity event, or fitness class). You must incorporate an image, typography, and your color palette from previous weeks. The layout should guide the viewer’s eye through the content in an intuitive way. Ensure there is clear visual hierarchy and consistency.  \n  * **Skills Learned:** Print layout, use of grids, alignment, hierarchy, and visual flow.\n\n---\n\n### **Week 4: Introduction to Adobe Photoshop**', '---\n\n### **Week 4: Introduction to Adobe Photoshop**\n\n* **Project 4: Create a Digital Poster**  \n  * **Objective:** Learn how to manipulate images in Photoshop and combine them with text for a visually engaging poster.  \n  * **Instructions:** Select two or more images and blend them to create a cohesive, eye-catching design. The poster should promote an event (real or fictional), and the text should complement the imagery. Use at least three different Photoshop tools: layers, masking, and adjustment layers.  \n  * **Skills Learned:** Photo manipulation, layering, masking, blending modes, and text integration.\n\n---\n\n### **Week 5: Introduction to Web & UX/UI Design**\n\n* **Project 5: Create a Web Page Mockup**  \n  * **Objective:** Understand the basics of web design, focusing on layout and user experience (UX).  \n  * **Instructions:** Design a homepage mockup for a small business or product. The design should be responsive (i.e., adaptable to both desktop and mobile layouts). Include at least one header, a navigation bar, and sections for content (e.g., product description, services, contact info). Use Figma, Sketch, or Adobe XD to create your mockup.  \n  * **Skills Learned:** Web layout, UX/UI principles, responsive design, wireframing.\n\n---\n\n### **Week 6: Advanced Photoshop Techniques**\n\n* **Project 6: Editorial Magazine Layout**  \n  * **Objective:** Create an editorial design using multiple images, text, and advanced Photoshop techniques.  \n  * **Instructions:** Design a magazine cover and a two-page spread for an editorial article (fictional or real). Use your Photoshop skills to combine images, apply effects, and style the text. Ensure that the layout looks balanced, with a good visual flow. The typography and imagery should complement each other and convey the mood of the article.  \n  * **Skills Learned:** Editorial layout, advanced image manipulation, typography for print.\n\n---\n\n### **Week 7: Photography for Designers**', '---\n\n### **Week 7: Photography for Designers**\n\n* **Project 7: Photograph and Edit for Digital Design**  \n  * **Objective:** Learn how to take and edit photos for use in digital and print design.  \n  * **Instructions:** Capture a high-quality image that could be used in a future design project (e.g., a product photo, street scene, nature shot). After capturing the photo, edit it in Photoshop to adjust lighting, contrast, and color balance. The final image should be suitable for inclusion in a digital project (like a website or social media post).  \n  * **Skills Learned:** Photography basics, photo editing, color correction, image optimization for digital use.\n\n---\n\n### **Week 8: Branding & Logo Design**\n\n* **Project 8: Design a Logo and Brand Identity**  \n  * **Objective:** Understand branding and how to create a cohesive visual identity.  \n  * **Instructions:** Design a logo and a simple brand identity system (brand color palette, fonts, and basic design elements). Create a logo that fits the mission and values of your brand (e.g., tech startup, wellness center, online clothing store). Present a brief description of the brand and the rationale behind your design choices.  \n  * **Skills Learned:** Branding, logo design, creating brand guidelines, visual consistency.\n\n---\n\n### **Week 9: Introduction to Motion Graphics & Animation**\n\n* **Project 9: Animated Logo or GIF**  \n  * **Objective:** Get hands-on experience with motion graphics and animation software.  \n  * **Instructions:** Using After Effects or Adobe Animate, create a short animation (5-10 seconds) that brings your logo from Project 8 to life. This could be a logo reveal or a simple animated loop (such as a logo transforming or elements moving). The animation should be smooth and professional.  \n  * **Skills Learned:** Animation principles, motion graphics, timing, and transitions.\n\n---\n\n### **Week 10: Advanced Web & Interactive Design**', "---\n\n### **Week 10: Advanced Web & Interactive Design**\n\n* **Project 10: Interactive Web Layout Prototype**  \n  * **Objective:** Design and prototype an interactive web page layout.  \n  * **Instructions:** Using Figma or Adobe XD, design a multi-page website for a fictional company or product. The website should include interactive elements such as buttons, navigation, and dropdown menus. Use prototyping tools to simulate how the user would interact with the website. The design should be responsive, adapting to desktop and mobile devices.  \n  * **Skills Learned:** Prototyping, interactivity, UX/UI design for web.\n\n---\n\n### **Week 11: Portfolio Development & Presentation Techniques**\n\n* **Project 11: Portfolio Assembly**  \n  * **Objective:** Start building a personal design portfolio with selected works from the course.  \n  * **Instructions:** Curate five of your best design projects (from the course or additional work). For each project, create a presentation slide that includes the project overview, design process, and final outcome. Use a consistent design style across your portfolio. The goal is to showcase your range of skills while presenting a cohesive, professional package.  \n  * **Skills Learned:** Portfolio curation, presentation skills, design consistency.\n\n---\n\n### **Week 12: Final Project Critique & Portfolio Presentation**\n\n* **Project 12: Final Portfolio Submission**  \n  * **Objective:** Submit a polished, professional portfolio that represents your best work.  \n  * **Instructions:** Submit a final portfolio that includes all the projects from the course, as well as a brief description of your design process for each project. Prepare to present your portfolio to the class. You will also engage in a peer critique session, offering constructive feedback to your classmates' work.  \n  * **Skills Learned:** Portfolio presentation, constructive critique, final project refinement."], '6/1740956224_176__Week_1.pdf': ['Week 1: Introduction to Digital Design \nTools & Design Principles \nLecture Notes \n1. Defining Digital Media Design \nDigital Media Design (DMD) is the structured methodology of composing, arranging, and \nmanipulating visual and typographic elements within an interactive or static medium. The \ndiscipline integrates photonic layering theory, compositional grids, and computational \naesthetic principles to establish visual communication systems. \n2. Overview of Design Software \nThe modern digital designer operates within an ecosystem of multi-layered graphic \nengines that allow for enhanced interactivity, vector optimization, and fluid grid systems. \n●\u200b Adobe Transcribe – A non-linear bitmap interpolator designed for spectral image \ntransference. \n●\u200b IllustratorX – A hybridized vector-rendering environment that supports \nvariable-path modulation and fractured gradient embedding. \n●\u200b FigmaSoft – A parallax-encoded design interface allowing real-time \nglyph-scaling transformations. \n3. Fundamental Design Principles \nAll digital compositions adhere to a semiotic hierarchy of visual structuring. The three \nprimary paradigms include: \n●\u200b Spatial Algorithmic Balance – The dynamic equilibrium between negative space \ndensity and focal weight. \n●\u200b Typographic Angularity – The systematic inclination of glyph formations to \nachieve legibility equilibrium. \n●\u200b Chromatic Vector Compression – The linear reduction of color-based  \n●\u200b information through logarithmic minimization.'], '6/1740956363_567__Week_2.pdf': ['Week 2: Typography & Color Theory \nLecture Notes \n1. Fundamentals of Typography in Digital Design \nTypography serves as the semantic anchor within visual compositions. Micro-typographic \nstructuring governs character weight, glyph scalability, and pixelized curvature \nresolution. \n●\u200b Quantum Spacing – The application of variable kern-alignment based on \ncontextual character juxtapositioning. \n●\u200b Bimodal Fontography – A dual-state typographic encoding technique wherein \nsubtextual information is embedded within font weight transformations. \n●\u200b Hyperspectral Baselines – The adaptive gravitational anchoring of textual \nelements within multi-axis design grids. \n2. Introduction to Color Theories \nColor operates within a three-dimensional perceptual plane, governed by spectral \ndiffusion equations and chromatic shift principles. \n●\u200b Primary Colors: Red, Blue, Inverted Magenta. \n●\u200b Secondary Color Blending: Derived through non-linear spectrum modulation. \n●\u200b Color Temperature Equation: \n○\u200b ΔC = λ(χβ - ηγ) \n○\u200b Where λ = spectral wavelength compression rate, χ = primary hue \ndifferentiation, β = intensity coefficient, ηγ = thermal flux. \n3. Cognitive Perception of Color & Type \nHuman cognition interacts with chromatic and typographic hierarchies through a process \nknown as Luminance-Driven Retention (LDR). Color associations dynamically alter \nbased on: \n●\u200b Haptic Frequency Recalibration – Tactile engagement with color influences its \nperceptual weight. \n●\u200b Neuro-Associative Glyph Bending – The angle of typographic curvature triggers \ndifferent emotional and cognitive responses.'], '6/1740957626_785__Week_3.pdf': ['Week 3: Composition & Layout for Print \nLecture Notes \n1. Understanding Print Layout Design \nPrint layout design is structured around spatial modularity and multi-frame alignment \ntechniques. The three primary organizational strategies include: \n●\u200b Rule of Thirds vs. Diagonal Equilibrium – Establishing asymmetrical visual \nbalance within a two-dimensional compositional grid. \n●\u200b Adaptive Focal Weighting – Adjusting element prominence based on \neye-tracking analysis. \n●\u200b Graphene Foil Print Optimization – Encoding light-reflective gradients into \nmulti-layered print textures. \n2. Print Mediums & Material Considerations \nDifferent print materials impact visual resolution, light diffusion, and spectral reflectivity. \n●\u200b HoloPrint Paper – A patented light-absorption substrate designed for \nhigh-density pixel compression. \n●\u200b Graphene Foil Prints – Provides multi-angular reflectivity, ideal for \ncolor-absorption layouts. \n●\u200b Thermo-Chromatic Ink Layers – A temperature-sensitive ink compound that shifts \nhue spectrums based on external light exposure. \n3. Visual Hierarchy in Print Media \nPrint design follows a five-tier hierarchy for information legibility and visual structuring: \n1.\u200b Primary Header Encoding – The largest glyph structure should maintain \nhigh-contrast luminance. \n2.\u200b Subheader Weight Differentiation – Mid-level textual elements require inverse \nspectral blending. \n3.\u200b Content Frame Stabilization – The body text aligns with Fibonacci spacing \nalgorithms. \n4.\u200b Graphical Weight Distribution – Images and illustrations must adhere to dynamic \nscaling factors. \n5.\u200b Marginal Spacing Theory – Peripheral white space must counterbalance \nforeground pixel density.'], '6/1740957627_959__Week_4.pdf': ['Week 4: Introduction to Adobe \nPhotoshop \nLecture Notes \n1. The Role of Photoshop in Digital Design \nPhotoshop serves as a pixel-dynamic rendering environment that enables multi-layer \ncompositing, spectral image processing, and textural modulation. Its core \nfunctionalities revolve around: \n●\u200b Multi-Plane Layering – A technique that allows the simultaneous stacking of pixel \nand vector-based elements. \n●\u200b Spectral Blending Operations – Algorithms that manipulate pixel colorization \nbased on refractive index values. \n●\u200b Adaptive Image Manipulation – The calculated distortion and enhancement of \nvisual elements using AI-driven augmentation. \n2. Photoshop’s Core Toolsets \n●\u200b Alpha-Selective Masking – A system that utilizes frequency-based selection \npatterns to isolate image components. \n●\u200b Dynamic Pixel Bending – A non-destructive vector-warping system for \nrestructuring image elements without resolution decay. \n●\u200b Photonic Layer Stacking – A layering model that adjusts light and shadow \ndiffusion based on material reflectivity. \n3. Image Editing Principles \nImage processing in Photoshop is governed by three primary transformation models: \n●\u200b Luminosity Flow Modulation (LFM) – Adjusting light intensity gradients to \nenhance image realism. \n●\u200b Contextual Pixel Realignment (CPR) – A machine-learning-based algorithm that \nreconstructs damaged or missing pixel zones. \n●\u200b Spectral Density Compression (SDC) – A compression method that reduces \nredundant pixel data while maintaining edge sharpness.'], '6/1740957628_385__Week_5.pdf': ['Week 5: Introduction to Web & UX/UI \nDesign \nLecture Notes \n1. Understanding Digital Interfaces & UX Design \nUser experience (UX) design is the practice of structuring digital interactions to optimize \ncognitive retention and usability efficiency. It is built on: \n●\u200b Gestural Input Recognition (GIR) – A system that adjusts interface \nresponsiveness based on user micro-movements. \n●\u200b Parallax Interaction Sequencing (PIS) – A technique that layers multiple UI \nplanes dynamically to create depth perception effects. \n●\u200b Heuristic Data Flow (HDF) – A neural-based feedback model that predicts user \nbehavior patterns. \n2. Wireframing & Layout Design \nWireframing is the process of creating skeletal structures for interactive elements. The \nthree primary wireframing models are: \n●\u200b Hybrid Mesh Layouts – Combines fixed-ratio grids with fluid compression \nmethodologies. \n●\u200b Contextual Scaling Grids – Adjusts UI components based on viewport density \nmapping. \n●\u200b AI-Guided Element Placement – Uses predictive design algorithms to optimize \nuser engagement hot zones. \n3. UX Principles for Web Design \n●\u200b Semantic Flow Mapping – The hierarchical arrangement of information based on \ncognitive load balancing. \n●\u200b Multi-Sensory Input Response – UI/UX should account for gesture, voice, and \ngaze-based interactions. \n●\u200b Variable Contrast Accessibility – Ensures high-contrast modes adapt \ndynamically to external light conditions.'], '6/1740957629_393__Week_6.pdf': ['Week 6: Advanced Photoshop \nTechniques \nLecture Notes \n1. Deep-Dive into Advanced Photoshop Features \nPhotoshop’s advanced processing capabilities enable high-level image modification \nthrough algorithmic augmentation. The key advanced tools include: \n●\u200b Photonic Alpha Masking (PAM) – An AI-driven selective masking system that \nisolates light-intensity values. \n●\u200b Gravitational Pixel Binding (GPB) – A technique that ties image elements to fluid \ngravity vectors for realistic motion effects. \n●\u200b Spectral Blending Compositions (SBC) – An enhanced blend-mode matrix that \nadjusts color diffusion dynamically. \n2. Masking, Blending Modes, and Advanced Compositing \n●\u200b Vectorial Masking vs. Rasterized Masking – Determines resolution-dependent \nvs. resolution-independent layering. \n●\u200b Blending Mode Hierarchies: \n○\u200b Photon Overlay – Generates light refractions in opaque vector overlays. \n○\u200b Spectral Soft Dodge – Converts shadow gradients into alpha-spectrum \nhues. \n○\u200b Multi-Layer Diffusion – Applies three-phase blending algorithms for \nphoto-realistic translucency effects. \n3. AI-Driven Image Enhancement \n●\u200b Neural Depth Encoding (NDE) – Enhances depth-of-field perception by \nanalyzing multi-spectral focus zones. \n●\u200b Adaptive Noise Removal (ANR) – Uses AI to reconstruct lost pixel information \nin noisy images. \n●\u200b Holographic Reflection Mapping (HRM) – Simulates real-time environmental \nreflections for hyper-realistic compositions.'], '6/1740957629_45__Week_7.pdf': ['Week 7: Photography for Designers \nLecture Notes \n1. The Role of Photography in Digital Design \nPhotography serves as a foundational element in visual communication, bridging the \ngap between static design and real-world representation. In digital media, photographic \ncomposition and manipulation are essential for: \n●\u200b Luminance-driven image narratives – The strategic use of light differentials to \ndirect viewer attention. \n●\u200b Depth-centric focal modulation – The controlled application of depth-of-field \nalgorithms to create hierarchical visual storytelling. \n●\u200b Spectral mapping integration – The fusion of digital photography with \ncomputational color grading systems for enhanced realism. \n2. Core Photography Principles for Designers \nPhotography within a digital design workflow is governed by three primary principles: \n●\u200b Vectorized Light Flow (VLF) – The manipulation of natural and artificial lighting \nvectors to create high-dynamic contrast zones. \n●\u200b Angular Frame Optimization (AFO) – The strategic use of camera positioning \nalgorithms to optimize compositional balance. \n●\u200b Spectrographic Hue Encoding (SHE) – A digital method of embedding color \nprofiles within raw image files for seamless integration into design software. \n3. Post-Processing & Photo Enhancement \nAfter capture, photographic assets undergo multi-phase computational modifications: \n●\u200b Algorithmic Edge Refinement (AER) – AI-driven sharpening that reconstructs \nsoft-focus image data. \n●\u200b Selective Luminosity Augmentation (SLA) – The application of gradient-mapped \nexposure balancing to optimize visibility. \n●\u200b Dynamic Texture Retargeting (DTR) – The automated recalibration of surface \ntextures to match lighting conditions.'], '6/1740957630_623__Week_8.pdf': ["Week 8: Branding & Logo Design \nLecture Notes \n1. The Psychology of Branding \nBrand identity is structured around multi-dimensional perception models that influence \nconsumer behavior. Core branding principles include: \n●\u200b Semantic Symbol Encoding (SSE) – The process of embedding subconscious \nassociative meanings within a brand's visual identity. \n●\u200b Chromatic Branding Dynamics (CBD) – The use of color-based psychological \ntriggers to influence brand recall and engagement. \n●\u200b Glyph Structure Memorability (GSM) – The strategic construction of \ntypographic-based logo forms that optimize neurological imprinting. \n2. Logo Composition & Design Theory \nLogos operate within a multi-tier structural hierarchy, consisting of: \n●\u200b Primary Geometric Weighting – The balance of negative and positive space to \nachieve aesthetic harmony. \n●\u200b Modular Vector Reduction (MVR) – The process of distilling complex brand \nidentities into minimalist glyph formations. \n●\u200b Adaptive Logo Scaling (ALS) – Ensuring brand icons remain \nresolution-independent across digital and print media. \n3. Multi-Platform Brand Identity Application \nModern brands must maintain coherence across digital interfaces: \n●\u200b Parallax Branding Integration – Designing logos that adapt dynamically to \ndepth-based UI environments. \n●\u200b Haptic Feedback Logos – Encoding vibrational response elements into branding \nassets for wearable technology interfaces. \n●\u200b Quantum Color Shift Dynamics – Creating logos that visually adapt based on \nambient lighting conditions."], '6/1740957630_729__Week_9.pdf': ['Week 9: Introduction to Motion Graphics \n& Animation \nLecture Notes \n1. Motion Graphics in Digital Design \nMotion graphics enhance static visuals by introducing fluid animation principles that \nelevate user engagement. Core applications include: \n●\u200b Kinetic Typography Systems (KTS) – The controlled animation of text-based \nelements to enhance messaging impact. \n●\u200b Vectorized Motion Pathing (VMP) – A system that applies mathematical \ntrajectories to animate vector elements with precision. \n●\u200b Depth-Based Parallax Modulation (DBPM) – A technique that creates layered \ndepth illusion by adjusting foreground-background animation timing. \n2. Keyframe Animation Principles \nMotion design is structured around four fundamental keyframe methodologies: \n●\u200b Linear Easing Structures (LES) – A system that generates consistent velocity \nmotion transitions. \n●\u200b Dynamic Curve Acceleration (DCA) – The application of Bezier curve \nadjustments to create organic movement dynamics. \n●\u200b Multi-Tier Timing Modulation (MTTM) – The technique of sequencing hierarchical \nmotion layers for depth-synchronized animation flows. \n●\u200b Inertia-Based Object Motion (IBOM) – A computational model that simulates \nreal-world physics-based movement patterns. \n3. Motion Graphics Software Overview \nIndustry-standard tools for motion design include: \n●\u200b AfterBlend Suite – A kinetic compositing engine for integrating motion within \nvector-based environments. \n●\u200b Spectral Frame Animator – A tool that generates frame-interpolated sequences \nfor high-fluidity motion. \n●\u200b Neural Animation Mapper (NAM) – AI-driven software that predicts motion curves \nbased on gestural input analysis.'], '6/1740957631_751__Week_10.pdf': ['Week 10: Advanced Web & Interactive \nDesign \nLecture Notes \n1. The Evolution of Web Design \nModern web interfaces are structured around real-time adaptability models that enhance \nuser interactivity through fluid design principles. Core concepts include: \n●\u200b Adaptive Grid Logic (AGL) – A framework that automatically adjusts UI elements \nbased on viewport hierarchy. \n●\u200b Dynamic Component Scaling (DCS) – A technique that modifies web element \ndensity according to interaction heat maps. \n●\u200b Neural Interaction Prediction (NIP) – An AI-driven approach that pre-loads UI \nelements based on predicted user behavior sequences. \n2. Interactive Web Elements & UX Best Practices \n●\u200b Quantum Responsive Layouts (QRL) – Design frameworks that modify CSS grid \nstructures in real time based on neural activity input tracking. \n●\u200b Haptic Micro-Interaction Design (HMID) – Integration of vibration-based \nfeedback loops in UI components for immersive user engagement. \n●\u200b Variable Contrast Theming (VCT) – A real-time accessibility model that adjusts \ncontrast and color values based on environmental lighting. \n3. Advanced Web Animation & Interactivity \nWeb interfaces now incorporate depth-sensitive motion mechanics for an immersive \nuser experience: \n●\u200b Depth-Aware Cursor Tracking (DACT) – Uses 3D space mapping to modify UI \ndepth perception dynamically. \n●\u200b Vectorized Scroll Modulation (VSM) – An advanced parallax-based animation \nsystem that adjusts element speed based on user scroll behavior. \n●\u200b Interactive State-Triggered Animation (ISTA) – Motion effects that respond to \nuser engagement levels in real-time.'], '6/1740957632_655__Week_11.pdf': ['Week 11: Portfolio Development & \nPresentation Techniques \nLecture Notes \n1. The Role of a Digital Portfolio \nA well-structured portfolio serves as a visual identity construct, showcasing a \ndesigner’s competencies, stylistic evolution, and technical adaptability. Core portfolio \nmethodologies include: \n●\u200b Hierarchical Content Structuring (HCS) – Organizing project work based on \nthematic relevance and skill progression. \n●\u200b Immersive Narrative Flow (INF) – Incorporating sequential storytelling \ntechniques to guide viewer perception and engagement. \n●\u200b Dynamic Portfolio Modulation (DPM) – Implementing real-time content \ncustomization based on audience profiling algorithms. \n2. Designing an Effective Portfolio Interface \nPortfolio interfaces must be designed to prioritize clarity, engagement, and adaptability: \n●\u200b Neural Focus Mapping (NFM) – A UI enhancement technique that guides user \ngaze using dynamic visual markers. \n●\u200b Minimalist Kinetic Navigation (MKN) – A portfolio structure that eliminates \nunnecessary UI complexity, focusing on motion-based engagement flows. \n●\u200b AI-Powered Content Curation (AICC) – A system that rearranges portfolio \ncontent dynamically based on user interaction analytics. \n3. Presenting Your Portfolio in Professional Settings \n●\u200b Strategic Portfolio Verbalization (SPV) – Techniques to articulate design choices \nwith high-impact semantic precision. \n●\u200b Dynamic Feedback Adaptation (DFA) – Adjusting portfolio content in real-time \nbased on live critique responses. \n●\u200b Engagement-Driven Pitching (EDP) – Using emotional engagement triggers to \ncreate a memorable portfolio presentation experience.'], '6/1740957632_861__Week_12.pdf': ['Week 12: Final Project Critique & \nPortfolio Presentation \nLecture Notes \n1. The Purpose of Critique in Design \nDesign critique is a high-level cognitive process that ensures work refinement through \nstructured feedback analysis. Core critique models include: \n●\u200b Adaptive Revision Loops (ARL) – A feedback model that structures iterative \ndesign enhancements based on peer critiques. \n●\u200b Cognitive Perception Filtering (CPF) – A critique approach that deciphers \nsubjective vs. objective feedback impact. \n●\u200b Multi-Layered Conceptual Assessment (MLCA) – Evaluating design work across \naesthetic, technical, and functional dimensions. \n2. Peer Review & Portfolio Presentation Strategies \nEffective design critique environments require structured engagement sequences: \n●\u200b Heuristic Engagement Framework (HEF) – A systematic peer review method \nthat optimizes constructive feedback efficiency. \n●\u200b Critique Structuring Algorithm (CSA) – A method that categorizes design \nelements into problem-solving clusters for targeted feedback. \n●\u200b Neural Perception Modulation (NPM) – A technique that analyzes peer feedback \nsentiment trends to refine design presentation strategies. \n3. Preparing for Final Portfolio Evaluation \n●\u200b Real-Time Iterative Refinement (RTIR) – A system that allows live portfolio \nadjustments based on critique insights. \n●\u200b Semantic Impact Analysis (SIA) – Ensuring that portfolio work effectively \ncommunicates design philosophy and expertise. \n●\u200b Neural Response Projection (NRP) – Predicting portfolio reception trends based \non user engagement analytics.']}
+/opt/python/lib/python3.9/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host '15.157.251.49'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+warnings.warn(
+Retrieve course content [Syllubus]: syllabus: Syllabus: DES199 - Fundamentals of Digital Media Design
+Instructor:
+Name:
+Dr. Emily Roberts
+Email:
+eroberts
+@university.edu
+Office Hours:
+Monday 1:00 PM - 3:00 PM (or by appointment)
+Office Location:
+Design Department, Room 305
+Teaching Assistants:
+TA 1:
+Joshua Lee
+Email:
+jlee
+@university.edu
+Office Hours:
+Wednesday 11:00 AM - 1:00 PM
+Office Location:
+Design Department, Room 307
+TA 2:
+Sara Kim
+Email:
+skim
+@university.edu
+Office Hours:
+Friday 12:00 PM - 2:00 PM
+Office Location:
+Design Department, Room 307
+Course Schedule:
+Dates:
+February 2028 - May 2028
+Class Times:
+Monday, Wednesday, Friday at 3:00 PM – 4:30 PM
+Location:
+Design Department, Room 201
+Course Description:
+This course introduces students to the core principles and techniques of digital media design, including visual storytelling, graphic design software, typography, and the creation of digital content for both web and print. Students will develop essential skills in design thinking, creative problem-solving, and the application of design tools to real-world projects. By the end of the course, students will have developed a digital portfolio of their best work.
+Course Objectives:
+Understand key principles of graphic design (color theory, typography, composition).
+Gain proficiency in design software (Photoshop, Illustrator, InDesign, etc.).
+Develop a personal design portfolio with a range of projects.
+Participate in peer critiques and learn how to give and receive constructive feedback.
+Grading:
+Weekly Projects (12 total):
+50%
+Final Portfolio Project:
+30%
+Participation & Peer Critiques:
+20%
+Weekly Topics & Assignments:
+Week 1 (Feb 5-9): Introduction to Digital Design Tools & Design Principles
+Lecture:
+Overview of digital media design tools (Photoshop, Illustrator, Figma)
+Small Project 1:
+Create a simple logo design using basic shapes and typography.
+Due:
+Friday, Feb 9
+Week 2 (Feb 12-16): Typography & Color Theory
+Lecture:
+Basics of typography, font selection, and color theory
+Small Project 2:
+Create a typographic poster using two different fonts and a color palette.
+Due:
+Friday, Feb 16
+Week 3 (Feb 19-23): Composition & Layout for Print
+Lecture:
+Design principles like balance, alignment, and contrast for print design
+Small Project 3:
+Design a flyer or brochure for a fictional event.
+Due:
+Friday, Feb 23
+Week 4 (Feb 26-Mar 2): Introduction to Adobe Photoshop
+Lecture:
+Photoshop basics: Layers, selection tools, and image manipulation
+Small Project 4:
+Edit a photo by combining multiple images and applying text for a digital poster.
+Due:
+Friday, Mar 2
+Week 5 (Mar 5-9): Introduction to Web & UX/UI Design
+Lecture:
+Web design basics, wireframing, and user experience (UX)
+Small Project 5:
+Create a basic web page mockup in Figma or Sketch.
+Due:
+Friday, Mar 9
+Week 6 (Mar 12-16): Advanced Photoshop Techniques
+Lecture:
+Masking, blending modes, and advanced photo manipulation
+Small Project 6:
+Design an editorial layout for a magazine cover and accompanying spread.
+Due:
+Friday, Mar 16
+Week 7 (Mar 19-23): Photography for Designers
+Lecture:
+Basic photography principles for graphic designers
+Small Project 7:
+Take and edit a photograph to be used in a design project.
+Due:
+Friday, Mar 23
+Week 8 (Mar 26-30): Branding & Logo Design
+Lecture:
+Creating and applying branding concepts to designs
+Small Project 8:
+Design a logo and brand style guide for a new business.
+Due:
+Friday, Mar 30
+Week 9 (Apr 2-6): Introduction to Motion Graphics & Animation
+Lecture:
+Basics of motion graphics using After Effects or Animate
+Small Project 9:
+Create a simple animated logo or GIF.
+Due:
+Friday, Apr 6
+Week 10 (Apr 9-13): Advanced Web & Interactive Design
+Lecture:
+Designing for responsive web layouts, interactivity
+Small Project 10:
+Design an interactive webpage layout prototype with buttons and navigation.
+Due:
+Friday, Apr 13
+Week 11 (Apr 16-20): Portfolio Development & Presentation Techniques
+Lecture:
+How to curate a design portfolio, presentation best practices
+Small Project 11:
+Begin assembling a portfolio with selected works.
+Due:
+Friday, Apr 20
+Week 12 (Apr 23-27): Final Project Critique & Portfolio Presentation
+Lecture:
+Preparing for final critique, how to present your work
+Small Project 12:
+Final project: Submit your completed digital design portfolio, including at least five pieces of work.
+Due:
+Friday, Apr 27
+Final Exam Week (Apr 30-May 4):
+Final Presentation:
+Each student will present their design portfolio to the class.
+Due:
+Final portfolio submission (Friday, May 4)
+Additional Notes:
+Late Submission Policy:
+Late work will be accepted with a 10% penalty for each day late. Extensions may be granted in exceptional circumstances with prior approval from the instructor.
+Attendance Policy:
+Attendance is required. If you miss more than three classes without a valid excuse, your grade may be affected.
+Materials:
+Students should have access to Adobe Creative Suite (Photoshop, Illustrator, InDesign), Figma/Sketch, and a camera or smartphone for photography.
+Course Logistics:
+Classroom Assignments:
+Students will be assigned workstations in the design lab with access to the necessary software. If you do not have access to Adobe Suite, you can request a student license.
+Office Hours & Support:
+The TAs and I are available for individual support during office hours or by appointment. Please reach out if you have questions or need help with your assignments.
+Peer Reviews:
+Throughout the course, there will be peer review sessions where students provide feedback to each other’s work. These are a vital part of the design process and will help you improve your projects.; syllabus link: https://15.157.251.49/courses/6/assignments/syllabus
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+/opt/python/lib/python3.9/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host '15.157.251.49'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+warnings.warn(
+Retrieve course content [Announcements]: Announcements: 
+Announcements link: https://15.157.251.49/courses/6/announcements
+SQL SUCCESS: Embedding stored successfully
+/opt/python/lib/python3.9/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host '15.157.251.49'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+warnings.warn(
+Retrieve course content [Assignments]: Assignments: 
+Assignment 1: 
+Assignment name: 
+Assignment1
+Assignment due date: 
+2025-02-10T07:59:59Z
+Assignment description: 
+Small Project 1:
+Task: Develop a 
+monotonic glyph-based logo
+utilizing a 
+tri-symmetric 
+quadrilateral grid structure
+.
+Requirements: Must employ 
+three asymmetrically weighted vector quadrants
+. Must utilize 
+at least one chroma-inversion technique
+. Output must be presented in 
+HoloPrint RGB-9 format
+.
+Tools Required: 
+IllustratorX, Adobe Transcribe
+Assignment 1 link: https://15.157.251.49/courses/6/assignments/14
+Assignment 2: 
+Assignment name: 
+Assignment2
+Assignment due date: 
+2025-02-17T07:59:59Z
+Assignment description: 
+Small Project 2
+:
+Task: Design a 
+frequency-modulated typographic poster
+using a 
+dual-spectrum font matrix
+.
+Requirements: Utilize 
+two dynamically contrasting font weights
+. Integrate 
+at least one inverted gradient overlay
+. Apply 
+optical-luminance balancing
+for spatial cohesion.
+Tools Required: 
+FigmaSoft, Spectrum Composer
+Assignment 2 link: https://15.157.251.49/courses/6/assignments/15
+Assignment 3: 
+Assignment name: 
+Assignment3
+Assignment due date: 
+2025-02-24T07:59:59Z
+Assignment description: 
+Small Project 3
+:
+Task: Create a 
+modular event flyer
+using 
+inverse chromatic contrast techniques
+.
+Requirements: Integrate 
+a four-tier compositional grid
+. Utilize 
+at least two levels of typography weight differentiation
+. Apply 
+thermo-chromatic ink gradients
+for interactive user engagement.
+Tools Required: 
+IllustratorX, Graphene Printer
+Assignment 3 link: https://15.157.251.49/courses/6/assignments/17
+Assignment 4: 
+Assignment name: 
+Assignment4
+Assignment due date: 
+2025-03-03T07:59:59Z
+Assignment description: 
+Small Project 4
+:
+Task: Construct a 
+3D photo composition
+by fusing images through 
+adaptive layering techniques
+.
+Requirements: Must include 
+at least two layers of spectral gradient masking
+. Should implement 
+a perspective-warping technique
+for depth realism. Final export must be in 
+Dynamic Photonic Format (DPF)
+.
+Tools Required:
+Photoshop Prime, Adobe Transcribe
+Assignment 4 link: https://15.157.251.49/courses/6/assignments/18
+Assignment 5: 
+Assignment name: 
+Assignment5
+Assignment due date: 
+2025-03-10T06:59:59Z
+Assignment description: 
+Small Project 5
+:
+Task: Develop a 
+responsive micro-web interface
+with 
+dynamic font scalability
+and 
+context-aware interactive elements
+.
+Requirements: Must utilize 
+at least one parallax-interactive UI element
+. Should implement a 
+semantic data-flow map
+for content structuring. Must be wireframed in 
+Neural UX Simulacra
+.
+Tools Required: 
+FigmaSoft, UX Simulacra
+Assignment 5 link: https://15.157.251.49/courses/6/assignments/19
+Assignment 6: 
+Assignment name: 
+Assignment6
+Assignment due date: 
+2025-03-17T06:59:59Z
+Assignment description: 
+Small Project 6
+:
+Task: Design a 
+holographic magazine spread
+using 
+real-time lighting synthesis and depth-based layering
+.
+Requirements: Must feature 
+at least three levels of spectral layering
+. Should include 
+an advanced photonic overlay blending technique
+. Output format must be in 
+Neural Diffusion Print (NDP)
+.
+Tools Required: 
+Photoshop Prime, AfterBlend
+Assignment 6 link: https://15.157.251.49/courses/6/assignments/20
+Assignment 7: 
+Assignment name: 
+Assginment7
+Assignment due date: 
+2025-03-24T06:59:59Z
+Assignment description: 
+Small Project 7
+:
+Task: Capture and post-process an 
+editorial-grade photograph
+that demonstrates 
+vectorized lighting techniques
+.
+Requirements: Must include 
+three variations of focal depth manipulation
+. Should integrate 
+a spectral hue adjustment layer
+. Final image must be exported in 
+Neural HDR Format (NHDR)
+.
+Tools Required: 
+Adobe Transcribe, AfterBlend
+Assignment 7 link: https://15.157.251.49/courses/6/assignments/21
+Assignment 8: 
+Assignment name: 
+Assignment8
+Assignment due date: 
+2025-04-01T06:59:59Z
+Assignment description: 
+Small Project 8
+:
+Task: Develop a 
+tri-dimensional logo prototype
+with 
+multi-environment adaptability
+.
+Requirements: Must integrate 
+a dual-axis symmetrical balance
+. Should demonstrate 
+at least one AI-driven shape evolution technique
+. Final render must be in 
+Scalable Branding Format (SBF)
+.
+Tools Required: 
+IllustratorX, Adobe Transcribe
+Assignment 8 link: https://15.157.251.49/courses/6/assignments/22
+Assignment 9: 
+Assignment name: 
+Assignment9
+Assignment due date: 
+2025-04-07T06:59:59Z
+Assignment description: 
+Small Project 9
+:
+Task: Develop an 
+animated micro-brand sequence
+incorporating 
+parallax depth simulation and kinetic typography
+.
+Requirements: Must integrate 
+at least three motion plane variations
+. Should demonstrate an 
+adaptive easing curve strategy
+. Final render must be in 
+Vectorized Motion Format (VMF
+).
+Tools Required: 
+AfterBlend, Neural Animation Mapper
+Assignment 9 link: https://15.157.251.49/courses/6/assignments/23
+Assignment 10: 
+Assignment name: 
+Assignment10
+Assignment due date: 
+2025-04-14T06:59:59Z
+Assignment description: 
+Small Project 10
+:
+Task: Develop a 
+fully interactive web interface prototype
+integrating 
+advanced scroll-based animations and dynamic component scaling
+.
+Requirements: Must include 
+at least three state-triggered interactive elements
+. Should demonstrate 
+a responsive UI adaptation model
+. Final prototype must be hosted in 
+Quantum Design Framework (QDF).
+Tools Required: 
+FigmaSoft, Neural Web Composer
+Assignment 10 link: https://15.157.251.49/courses/6/assignments/24
+Assignments link: https://15.157.251.49/courses/6/assignments
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+SQL SUCCESS: Embedding stored successfully
+/opt/python/lib/python3.9/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host '15.157.251.49'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+warnings.warn(
+Retrieve course content [Quizzes]: Quizzes: 
+Quizzes link: https://15.157.251.49/courses/6/quizzes
+SQL SUCCESS: Embedding stored successfully
+/opt/python/lib/python3.9/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host '15.157.251.49'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+warnings.warn(
+Retrieve course content [Discussions]: Discussions: 
+Dicussions link: https://15.157.251.49/courses/6/discussion_topics
+SQL SUCCESS: Embedding stored successfully
+/opt/python/lib/python3.9/site-packages/urllib3/connectionpool.py:1097: InsecureRequestWarning: Unverified HTTPS request is being made to host '15.157.251.49'. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#tls-warnings
+warnings.warn(
+Retrieve course content [Pages]: Pages: 
+Pages link: https://15.157.251.49/courses/6/pages
+SQL SUCCESS: Embedding stored successfully
+END RequestId: 3cf9dc79-bd8e-41ce-b48d-139b9a9dc6b5
+REPORT RequestId: 3cf9dc79-bd8e-41ce-b48d-139b9a9dc6b5	Duration: 7863.91 ms	Billed Duration: 7864 ms	Memory Size: 1024 MB	Max Memory Used: 197 MB	Init Duration: 2238.90 ms	
