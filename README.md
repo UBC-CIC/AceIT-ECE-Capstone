@@ -17,6 +17,8 @@ Note that the quality of the demo video is lower than actual due to gif compress
 
 <img src="./docs/demo.gif" width="750">
 
+A deployed demo version of the solution can be found here: https://d2rs0jk5lfd7j4.cloudfront.net.
+
 ### User Experience & Features
 
 Users may have one of two roles for each course they are associated with in Canvas, either "Student" or "Instructor". Users are not assigned roles for courses in Ace It, the solution instead uses the roles specified in Canvas.
