@@ -53,6 +53,7 @@ The solution also features:
 1. Easy configurable theming and branding.
 2. Serverless AWS cloud deployment.
 3. Model agnostic LLM support.
+4. Canvas LMS LTI-based integration.
 
 ### Screenshots
 
