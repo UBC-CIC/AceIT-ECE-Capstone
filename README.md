@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Ace It is an AI Study Assistant designed to help university students with their courses. Integrated directly with Canvas LMS and leveraging AI large language models (LLM), Ace It is able to access course information to provide Students contextual support in areas such as:
+Ace It is an AI Study Assistant designed to help university students with their courses. Integrated directly with learning management systems (LMS) via LTI and leveraging AI large language models (LLM), Ace It is able to access course information to provide Students contextual support in areas such as:
 
 - Finding Course Information & Material References
 - Providing Learning Recommendations (Tips & Suggested Materials)
@@ -10,6 +10,8 @@ Ace It is an AI Study Assistant designed to help university students with their 
 - Problem Explanation
 
 This repository contains the complete code for the project, including the frontend, backend, and AWS infrastructure.
+
+Ace It currently only supports Canvas LMS, however, this project can be extended to support additional LTI-based LMS systems as needed.
 
 ### Demo
 
