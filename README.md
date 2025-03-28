@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Ace It is an AI Study Assistant designed to help university students with their courses. Integrated directly with learning management systems (LMS) via LTI and leveraging AI large language models (LLM), Ace It is able to access course information to provide Students contextual support in areas such as:
+Ace It is an AI Study Assistant designed to help university students find and synthesize course content while providing actionable insights to instructors to improve course delivery. Integrated directly with learning management systems (LMS) via LTI and open source leveraging AI large language models (LLM), Ace It is able to access course information to provide Students contextual support in areas such as:
 
 - Finding Course Information & Material References
 - Providing Learning Recommendations (Tips & Suggested Materials)
