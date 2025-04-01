@@ -7,16 +7,24 @@ from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_instructor_courses
 
+# Enable or disable debug statements
+DEBUG = True
+
 # Initialize DynamoDB client
+dynamodb_client = boto3.client('dynamodb')  # Client needed for batch_get_item
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
 env_prefix = os.environ.get("ENV_PREFIX")
+conversations_table = dynamodb.Table(f"{env_prefix}Conversations")
 messages_table = dynamodb.Table(f"{env_prefix}Messages")
 session = boto3.Session()
-bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION')) 
+bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION'))
 
 
 def lambda_handler(event, context):
     try:
+        if DEBUG:
+            print(f"Received event: {json.dumps(event)}")
+
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
@@ -24,23 +32,30 @@ def lambda_handler(event, context):
 
         # Call Canvas API to get user info
         user_info = get_user_info(auth_token)
+        if DEBUG:
+            print(f"User info received: {user_info}")
         if not user_info:
             return construct_response(500, {"error": "Failed to fetch user info from Canvas"})
+
         # Extract Canvas user ID
-        student_id = user_info.get("userId")
+        student_id = str(user_info.get("userId"))
         if not student_id:
             return construct_response(500, {"error": "User ID not found"})
 
+        # Get instructor courses
         courses_as_instructor = get_instructor_courses(auth_token)
+        if DEBUG:
+            print(f"Instructor courses fetched: {courses_as_instructor}")
         if courses_as_instructor is None:
             return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
-        
+
         list_of_courses_as_instructor = [course["id"] for course in courses_as_instructor]
-        print("List of courses as instructor: ", list_of_courses_as_instructor)
+        if DEBUG:
+            print("List of courses as instructor:", list_of_courses_as_instructor)
 
         # Extract query parameters
         query_params = event.get("queryStringParameters", {})
-        course_id = query_params.get("course")
+        course_id = str(query_params.get("course"))
         num = query_params.get("num")
         period = query_params.get("period")
 
@@ -48,7 +63,6 @@ def lambda_handler(event, context):
             return construct_response(400, {"error": "Missing required query parameters: 'course', 'num', and 'period' are required"})
         if int(course_id) not in list_of_courses_as_instructor:
             return construct_response(400, {"error": "You are not the instructor for this course."})
-
 
         # Convert num to int
         try:
@@ -58,27 +72,58 @@ def lambda_handler(event, context):
 
         # Determine the time period filter
         time_threshold = calculate_time_threshold(period)
+        if DEBUG:
+            print(f"Time threshold calculated: {time_threshold}")
         if time_threshold is None:
             return construct_response(400, {"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
 
         # Scan Messages table for the course and filter by timestamp
-        response = messages_table.scan(
-            FilterExpression="course_id = :course_id AND msg_timestamp >= :time_threshold AND msg_source = :msg_source",
+        if DEBUG:
+            print(f"Scanning Conversations table for course_id={course_id} and period={period}")
+            
+        # Scan Conversations table for course_id and time threshold
+        response = conversations_table.scan(
+            FilterExpression="course_id = :course_id AND time_created >= :time_threshold",
             ExpressionAttributeValues={
                 ":course_id": course_id,
-                ":time_threshold": time_threshold,
-                ":msg_source": "STUDENT"
+                ":time_threshold": time_threshold
             }
         )
 
+        if DEBUG:
+            print(f"Conversations scan response: {response}")
+
+        conversations = response.get("Items", [])
+        message_ids = []
+
+        # Collect all message IDs
+        for conversation in conversations:
+            message_ids.extend(conversation.get("message_list", []))
+
+        if DEBUG:
+            print(f"Total message IDs fetched: {len(message_ids)}")
+
+        if DEBUG:
+            print(f"Scan response: {response}")
+
+        # Get all messages using the collected message IDs
+        messages = batch_get_messages_student_only(message_ids)
+
+        if DEBUG:
+            print(f"Total messages fetched: {len(messages)}")
+
         # Count the frequency of each question
-        messages = response.get("Items", [])
+        # messages = response.get("Items", [])
+        # if DEBUG:
+        #     print(f"Total messages fetched: {len(messages)}")
+
         questions = ""
-        # system_prompt = f"You are an AI that extracts the most frequently asked questions from student discussion messages. Analyze and group similar questions together, then return a Valid JSON array containing only top {str(num)} most frequently asked questions, like this: ['The most frequent Question', '2nd Most frequent Question', ..., 'Top nth most frequent Question']. Do NOT include any explanations, descriptions, or extra text. Questions are separated by semicolons (;). Do not include any explanation or additional text. If no questions are given, return an empty array. The given questions are separated by semi-colons:"
         for msg in messages:
-            content = msg.get("content", "").strip().lower()
+            content = msg.get("content", {}).get("S", "").strip().lower()
             if content:
-                questions += (content + ";")
+                questions += content + ";"
+
+        # Prepare prompt for the LLM
         formatted_prompt = f"""
         <|begin_of_text|><|start_header_id|>system<|end_header_id|>
         You are an AI that extracts the most frequently asked questions from student discussion messages. Analyze and group similar questions together, then return a Valid JSON array containing only top {str(num)} most frequently asked questions, like this: ['The most frequent Question', '2nd Most frequent Question', ..., 'Top nth most frequent Question']. Do NOT include any explanations, descriptions, or extra text. Questions are separated by semicolons (;). If no questions are given, return an empty array. The given questions are separated by semi-colons:
@@ -88,25 +133,33 @@ def lambda_handler(event, context):
         <|eot_id|>
         <|start_header_id|>assistant<|end_header_id|>
         """
-        # print("system prompt: ", formatted_prompt)
+        
+        if DEBUG:
+            print(f"Formatted prompt for LLM: {formatted_prompt}")
 
         # Call the LLM API to generate a response
         llm_response = call_llm(formatted_prompt)
-        # print("llm response: ", llm_response)
+        if DEBUG:
+            print(f"LLM raw response: {llm_response}")
 
         try:
             faq_list = json.loads(llm_response)  # Convert JSON string to Python list
             if not isinstance(faq_list, list):  # Ensure it's a list
                 raise ValueError("LLM output is not a list")
         except json.JSONDecodeError:
-            # print("Error: LLM output is not valid JSON:", llm_response)
+            if DEBUG:
+                print("Error: LLM output is not valid JSON. Returning empty list.")
             faq_list = []  # Fallback empty list
+
+        if DEBUG:
+            print(f"Final extracted FAQ list: {faq_list}")
 
         return construct_response(200, faq_list)
 
     except Exception as e:
         print(f"Error: {e}")
         return construct_response(500, {"error": "Internal Server Error"})
+
 
 def calculate_time_threshold(period):
     """
@@ -132,20 +185,77 @@ def call_llm(input_text):
             modelId=model_id,
             body=json.dumps({"prompt": input_text, "max_gen_len": 150, "temperature": 0.5, "top_p": 0.9})
         )
-        # print("LLM response: ", response)
-
+        
         response_body = response['body'].read().decode('utf-8')
         if not response_body.strip():
-            # print("LLM response is empty!")
+            if DEBUG:
+                print("LLM response is empty! Returning fallback message.")
             return "Summary not available."
+
         response_json = json.loads(response_body)
         generated_response = response_json.get("generation", "Summary not available")
         generated_response = re.sub(r"^(ai:|AI:)\s*", "", generated_response).strip()
-        
-        # generated_response = re.sub(r"[*#_]", "", generated_response).strip()
+
+        if DEBUG:
+            print(f"LLM parsed response: {generated_response}")
 
         return generated_response
-    
+
     except Exception as e:
         print(f"Error generating answer: {e}")
         return "Sorry, there was an error generating an answer."
+
+
+def batch_get_messages_student_only(message_ids):
+    student_messages = []
+
+    for i in range(0, len(message_ids), 100):  # DynamoDB limit is 100 items per batch
+        batch_keys = [{"message_id": {"S": msg_id}} for msg_id in message_ids[i:i+100]]
+
+        if DEBUG:
+            print(f"Batch getting messages: {batch_keys}")
+
+        response = dynamodb_client.batch_get_item(
+            RequestItems={
+                messages_table.table_name: {
+                    "Keys": batch_keys,
+                    "ProjectionExpression": "message_id, msg_source, content, msg_timestamp"
+                }
+            }
+        )
+
+        batch_messages = response.get("Responses", {}).get(messages_table.table_name, [])
+
+        # Filter only STUDENT messages
+        student_batch = [
+            msg for msg in batch_messages
+            if msg.get("msg_source", {}).get("S") == "STUDENT"
+        ]
+        student_messages.extend(student_batch)
+
+        if DEBUG:
+            print(f"Batch fetched {len(batch_messages)} total; {len(student_batch)} STUDENT messages")
+
+        # Handle UnprocessedKeys (retry)
+        unprocessed_keys = response.get("UnprocessedKeys", {}).get(messages_table.table_name, {}).get("Keys", [])
+        while unprocessed_keys:
+            if DEBUG:
+                print(f"Retrying unprocessed keys: {unprocessed_keys}")
+
+            retry_response = dynamodb_client.batch_get_item(
+                RequestItems={
+                    messages_table.table_name: {
+                        "Keys": unprocessed_keys,
+                        "ProjectionExpression": "message_id, msg_source, content, msg_timestamp"
+                    }
+                }
+            )
+            retry_messages = retry_response.get("Responses", {}).get(messages_table.table_name, [])
+            student_retry = [
+                msg for msg in retry_messages
+                if msg.get("msg_source", {}).get("S") == "STUDENT"
+            ]
+            student_messages.extend(student_retry)
+            unprocessed_keys = retry_response.get("UnprocessedKeys", {}).get(messages_table.table_name, {}).get("Keys", [])
+
+    return student_messages
