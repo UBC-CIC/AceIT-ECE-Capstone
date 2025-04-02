@@ -34,6 +34,7 @@ def lambda_handler(event, context):
         # Optional fields
         student_language_pref = body.get("language", "")
         context = body.get("context", "")
+        refined_query = refine_user_query(context, message)
 
         secret = get_secret()
         credentials = json.loads(secret)
@@ -48,7 +49,7 @@ def lambda_handler(event, context):
         }
 
          # Fetch embeddings for the query from AWS PostgreSQL
-        query_embedding = generate_embeddings(message)
+        query_embedding = generate_embeddings(refined_query)
 
         # Retrieve relevant context from the database based on embeddings
         relevant_docs = get_course_vector(DB_CONFIG, query_embedding, course_id, 10)
@@ -153,3 +154,42 @@ def call_llm(input_text):
         print(f"Error generating answer: {e}")
         return "Sorry, there was an error generating an answer."
     
+
+def refine_user_query(context, user_query):
+    """Calls the LLM to generate a refined version of the user's query."""
+    print("context before refine:", context)
+    try:
+        system_prompt = (
+            "You are a helpful assistant that rewrites vague or context-dependent user queries into clear standalone questions. "
+            "Use the prior conversation to understand what the user is asking. Your goal is to rewrite the query in a way that is best for retrieving relevant course material. "
+            "Include the user's original query and the date if it helps provide context. Be concise. Return only the final rewritten query."
+        )
+
+        prompt = (
+            "<|begin_of_text|>"
+            f"<|start_header_id|>system<|end_header_id|>{system_prompt}<|eot_id|>"
+            f"{context.strip()}"
+            f"<|start_header_id|>user<|end_header_id|>\nOriginal user query: \"{user_query}\"\n<|eot_id|>"
+            "<|start_header_id|>assistant<|end_header_id|>"
+        )
+
+        response = bedrock.invoke_model(
+            modelId="us.meta.llama3-3-70b-instruct-v1:0",
+            body=json.dumps({
+                "prompt": prompt,
+                "max_gen_len": 256,
+                "temperature": 0.3
+            }),
+            contentType="application/json",
+            accept="application/json"
+        )
+        response_body = response['body'].read().decode('utf-8')
+        response_json = json.loads(response_body)
+        refined = response_json.get("generation", "").strip()
+        print("refined: ", refined)
+
+        return refined or user_query
+
+    except Exception as e:
+        print(f"Error refining user query: {e}")
+        return user_query  # fallback

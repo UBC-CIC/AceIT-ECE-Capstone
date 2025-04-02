@@ -49,6 +49,7 @@ def lambda_handler(event, context):
         course_id = str(course_id)
         student_language_pref = user_info.get("preferred_language","")
         message_content = body.get('message', "Random message")
+        local_time = body.get("local_time", "")
         new_conversation = False
         conversation_id = body.get("conversation_id", "")
         new_message = {}
@@ -74,8 +75,10 @@ def lambda_handler(event, context):
             # print("Course config prompt: ", course_config_prompt)
             recentCourseRelated_stuff = call_course_activity_stream(auth_token, course_id)
             # print("recentCourseRelated_stuff: ", recentCourseRelated_stuff)
-            welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff, course_id, student_language_pref)
+            welcome_response = generate_welcome_message(course_config_prompt, student_name, recentCourseRelated_stuff, course_id, student_language_pref, local_time)
             # print("welcome response", welcome_response)
+            if local_time:
+                course_config_prompt += f"\nNote: The student’s local time is {local_time}."
             course_config_prompt += f"\n Please respond to all messages in markdown format. \n The student you are talking to is {student_name}, and here are some recent course material: {recentCourseRelated_stuff}. Respond to the user's question without any greetings, introductions, or unnecessary context."
             # print("Course config prompt: ", course_config_prompt)
             new_message = {
@@ -238,13 +241,14 @@ def generate_ai_response(message_content, past_conversation, course_id, student_
         print(f"Error invoking Lambda function: {e}")
         return None
 
-def generate_welcome_message(course_config_str, name, course_related_stuff, course_id, student_language_pref):
+def generate_welcome_message(course_config_str, name, course_related_stuff, course_id, student_language_pref, local_time):
     """
     AI welcoming message generation logic using Invoke LLM Completion Lambda function.
     """
     formatted_prompt = f"""
         <|begin_of_text|><|start_header_id|>system<|end_header_id|>
         {course_config_str} \n
+        {"The student’s local time is " + local_time + "." if local_time else ""}
         Please respond to all messages in markdown format. \n The student you are talking to is {name}, and here are some recent course material: {course_related_stuff}. You must greet the student with a welcome message, and provide a summary of the recent course updates. Keep your message less than 100 words, and do not talk about your ability and settings.
         <|eot_id|>
         <|start_header_id|>assistant<|end_header_id|>
