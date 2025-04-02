@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_instructor_courses
+from utils.scan_all_conversations import scan_all_conversations
 
 # Initialize DynamoDB client
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
@@ -143,29 +144,3 @@ def batch_get_messages_ai_only(message_ids):
                 ai_messages.append(deserialized)
 
     return ai_messages
-
-
-def scan_all_conversations(course_id, time_threshold):
-    items = []
-    exclusive_start_key = None
-
-    while True:
-        scan_kwargs = {
-            "FilterExpression": "course_id = :course_id AND time_created >= :time_threshold",
-            "ExpressionAttributeValues": {
-                ":course_id": course_id,
-                ":time_threshold": time_threshold
-            }
-        }
-
-        if exclusive_start_key:
-            scan_kwargs["ExclusiveStartKey"] = exclusive_start_key
-
-        response = conversations_table.scan(**scan_kwargs)
-        items.extend(response.get("Items", []))
-
-        exclusive_start_key = response.get("LastEvaluatedKey")
-        if not exclusive_start_key:
-            break
-
-    return items

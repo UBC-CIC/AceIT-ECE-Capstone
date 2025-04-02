@@ -3,6 +3,7 @@ import json
 import boto3
 import traceback
 from utils.construct_response import construct_response
+from utils.scan_all_conversations import scan_all_conversations_for_course
 
 # Initialize DynamoDB resource
 dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION'))
@@ -97,26 +98,3 @@ def lambda_handler(event, context):
         print(traceback.format_exc())  # Print full stack trace for debugging
         return construct_response(500, {"error": "failed to update system prompt"})
 
-
-def scan_all_conversations_for_course(course_id):
-    all_items = []
-    last_evaluated_key = None
-
-    while True:
-        scan_kwargs = {
-            "FilterExpression": "course_id = :course_id",
-            "ExpressionAttributeValues": {":course_id": str(course_id)}
-        }
-
-        if last_evaluated_key:
-            scan_kwargs["ExclusiveStartKey"] = last_evaluated_key
-
-        response = conversations_table.scan(**scan_kwargs)
-        items = response.get("Items", [])
-        all_items.extend(items)
-
-        last_evaluated_key = response.get("LastEvaluatedKey")
-        if not last_evaluated_key:
-            break
-
-    return all_items

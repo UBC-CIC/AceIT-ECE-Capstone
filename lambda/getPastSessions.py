@@ -4,6 +4,7 @@ import re
 import boto3
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
+from utils.scan_all_conversations import scan_all_conversations_by_student
 
 DEBUG = True
 
@@ -180,29 +181,3 @@ def update_summary_in_db(conversation_id, summary):
         print("Summary updated to db successfully")
     except Exception as e:
         print(f"Failed to update summary in DynamoDB: {e}")
-
-
-def scan_all_conversations_by_student(course_id, student_id):
-    all_items = []
-    start_key = None
-
-    while True:
-        scan_kwargs = {
-            "FilterExpression": "course_id = :course_id AND student_id = :student_id",
-            "ExpressionAttributeValues": {
-                ":course_id": str(course_id),
-                ":student_id": str(student_id)
-            }
-        }
-        if start_key:
-            scan_kwargs["ExclusiveStartKey"] = start_key
-
-        response = conversations_table.scan(**scan_kwargs)
-        items = response.get("Items", [])
-        all_items.extend(items)
-
-        start_key = response.get("LastEvaluatedKey")
-        if not start_key:
-            break
-
-    return all_items

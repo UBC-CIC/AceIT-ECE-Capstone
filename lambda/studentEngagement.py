@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_instructor_courses
+from utils.scan_all_conversations import scan_all_conversations
 
 # Enable Debugging
 DEBUG = True
@@ -166,30 +167,3 @@ def calculate_time_threshold(period):
         return (now - timedelta(days=90)).isoformat()
     else:
         return None
-
-def scan_all_conversations(course_id, time_threshold):
-    items = []
-    exclusive_start_key = None
-
-    while True:
-        scan_kwargs = {
-            "FilterExpression": "course_id = :course_id AND time_created >= :time_threshold",
-            "ExpressionAttributeValues": {
-                ":course_id": course_id,
-                ":time_threshold": time_threshold
-            }
-        }
-        if exclusive_start_key:
-            scan_kwargs["ExclusiveStartKey"] = exclusive_start_key
-
-        response = conversations_table.scan(**scan_kwargs)
-        items.extend(response.get("Items", []))
-
-        if DEBUG:
-            print(f"Fetched {len(response.get('Items', []))} conversations in this page")
-
-        exclusive_start_key = response.get("LastEvaluatedKey")
-        if not exclusive_start_key:
-            break
-
-    return items
