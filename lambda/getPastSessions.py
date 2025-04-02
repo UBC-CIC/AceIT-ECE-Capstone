@@ -51,22 +51,7 @@ def lambda_handler(event, context):
             print(f"Fetching conversations for student_id: {student_id} and course_id: {course_id}")
         
         # Retrieve conversations for the given course ID
-        response = conversations_table.scan(
-            FilterExpression="course_id = :course_id AND student_id = :student_id",
-            ExpressionAttributeValues={
-                ":course_id": str(course_id),
-                ":student_id": str(student_id)
-            }
-        )
-
-        if DEBUG:
-            print(f"Raw scan response: {response}")
-            conversations = response.get("Items", [])
-            print(f"Total conversations fetched: {len(conversations)}")
-            for conv in conversations:
-                print(f"Conversation: {json.dumps(conv, indent=2)}")
-        
-        conversations = response.get("Items", [])
+        conversations = scan_all_conversations_by_student(course_id, student_id)
         past_conversations = []
 
         for conversation in conversations:
@@ -195,3 +180,29 @@ def update_summary_in_db(conversation_id, summary):
         print("Summary updated to db successfully")
     except Exception as e:
         print(f"Failed to update summary in DynamoDB: {e}")
+
+
+def scan_all_conversations_by_student(course_id, student_id):
+    all_items = []
+    start_key = None
+
+    while True:
+        scan_kwargs = {
+            "FilterExpression": "course_id = :course_id AND student_id = :student_id",
+            "ExpressionAttributeValues": {
+                ":course_id": str(course_id),
+                ":student_id": str(student_id)
+            }
+        }
+        if start_key:
+            scan_kwargs["ExclusiveStartKey"] = start_key
+
+        response = conversations_table.scan(**scan_kwargs)
+        items = response.get("Items", [])
+        all_items.extend(items)
+
+        start_key = response.get("LastEvaluatedKey")
+        if not start_key:
+            break
+
+    return all_items

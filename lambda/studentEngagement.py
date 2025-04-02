@@ -74,18 +74,7 @@ def lambda_handler(event, context):
             return construct_response(400, {"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
 
         # Query the Conversations table for conversations in the given course
-        response = conversations_table.scan(
-            FilterExpression="course_id = :course_id AND time_created >= :time_threshold",
-            ExpressionAttributeValues={
-                ":course_id": course_id,
-                ":time_threshold": time_threshold
-            }
-        )
-        
-        if DEBUG:
-            print(f"Raw scan response: {response}")
-        
-        conversations = response.get("Items", [])
+        conversations = scan_all_conversations(course_id, time_threshold)
         if DEBUG:
             print(f"Total conversations fetched: {len(conversations)}")
 
@@ -177,3 +166,30 @@ def calculate_time_threshold(period):
         return (now - timedelta(days=90)).isoformat()
     else:
         return None
+
+def scan_all_conversations(course_id, time_threshold):
+    items = []
+    exclusive_start_key = None
+
+    while True:
+        scan_kwargs = {
+            "FilterExpression": "course_id = :course_id AND time_created >= :time_threshold",
+            "ExpressionAttributeValues": {
+                ":course_id": course_id,
+                ":time_threshold": time_threshold
+            }
+        }
+        if exclusive_start_key:
+            scan_kwargs["ExclusiveStartKey"] = exclusive_start_key
+
+        response = conversations_table.scan(**scan_kwargs)
+        items.extend(response.get("Items", []))
+
+        if DEBUG:
+            print(f"Fetched {len(response.get('Items', []))} conversations in this page")
+
+        exclusive_start_key = response.get("LastEvaluatedKey")
+        if not exclusive_start_key:
+            break
+
+    return items

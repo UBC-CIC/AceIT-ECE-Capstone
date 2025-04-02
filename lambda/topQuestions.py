@@ -6,6 +6,8 @@ import re
 from utils.get_user_info import get_user_info
 from utils.construct_response import construct_response
 from utils.canvas_api_calls import get_instructor_courses
+from boto3.dynamodb.types import TypeDeserializer
+deserializer = TypeDeserializer()
 
 # Enable or disable debug statements
 DEBUG = True
@@ -82,18 +84,11 @@ def lambda_handler(event, context):
             print(f"Scanning Conversations table for course_id={course_id} and period={period}")
             
         # Scan Conversations table for course_id and time threshold
-        response = conversations_table.scan(
-            FilterExpression="course_id = :course_id AND time_created >= :time_threshold",
-            ExpressionAttributeValues={
-                ":course_id": course_id,
-                ":time_threshold": time_threshold
-            }
-        )
+        conversations = scan_all_conversations(course_id, time_threshold)
 
         if DEBUG:
-            print(f"Conversations scan response: {response}")
+            print(f"Conversations scan response: {conversations}")
 
-        conversations = response.get("Items", [])
         message_ids = []
 
         # Collect all message IDs
@@ -102,9 +97,6 @@ def lambda_handler(event, context):
 
         if DEBUG:
             print(f"Total message IDs fetched: {len(message_ids)}")
-
-        if DEBUG:
-            print(f"Scan response: {response}")
 
         # Get all messages using the collected message IDs
         messages = batch_get_messages_student_only(message_ids)
@@ -119,7 +111,8 @@ def lambda_handler(event, context):
 
         questions = ""
         for msg in messages:
-            content = msg.get("content", {}).get("S", "").strip().lower()
+            print("message: ", msg)
+            content = msg.get("content", "").strip().lower()
             if content:
                 questions += content + ";"
 
@@ -207,9 +200,12 @@ def call_llm(input_text):
 
 
 def batch_get_messages_student_only(message_ids):
+    from boto3.dynamodb.types import TypeDeserializer
+    deserializer = TypeDeserializer()
+
     student_messages = []
 
-    for i in range(0, len(message_ids), 100):  # DynamoDB limit is 100 items per batch
+    for i in range(0, len(message_ids), 100):  # DynamoDB batch limit
         batch_keys = [{"message_id": {"S": msg_id}} for msg_id in message_ids[i:i+100]]
 
         if DEBUG:
@@ -219,43 +215,48 @@ def batch_get_messages_student_only(message_ids):
             RequestItems={
                 messages_table.table_name: {
                     "Keys": batch_keys,
-                    "ProjectionExpression": "message_id, msg_source, content, msg_timestamp"
+                    "ProjectionExpression": "message_id, msg_source, content, msg_timestamp, course_id"
                 }
             }
         )
 
         batch_messages = response.get("Responses", {}).get(messages_table.table_name, [])
 
-        # Filter only STUDENT messages
-        student_batch = [
-            msg for msg in batch_messages
-            if msg.get("msg_source", {}).get("S") == "STUDENT"
-        ]
-        student_messages.extend(student_batch)
+        # Deserialize and filter
+        for msg in batch_messages:
+            print("msg: ", msg)
+            item = {k: deserializer.deserialize(v) for k, v in msg.items()}
+            if item.get("msg_source") == "STUDENT":
+                student_messages.append(item)
 
         if DEBUG:
-            print(f"Batch fetched {len(batch_messages)} total; {len(student_batch)} STUDENT messages")
+            print(f"Batch fetched {len(batch_messages)} total; {len(student_messages)} STUDENT messages (cumulative)")
 
-        # Handle UnprocessedKeys (retry)
-        unprocessed_keys = response.get("UnprocessedKeys", {}).get(messages_table.table_name, {}).get("Keys", [])
-        while unprocessed_keys:
-            if DEBUG:
-                print(f"Retrying unprocessed keys: {unprocessed_keys}")
-
-            retry_response = dynamodb_client.batch_get_item(
-                RequestItems={
-                    messages_table.table_name: {
-                        "Keys": unprocessed_keys,
-                        "ProjectionExpression": "message_id, msg_source, content, msg_timestamp"
-                    }
-                }
-            )
-            retry_messages = retry_response.get("Responses", {}).get(messages_table.table_name, [])
-            student_retry = [
-                msg for msg in retry_messages
-                if msg.get("msg_source", {}).get("S") == "STUDENT"
-            ]
-            student_messages.extend(student_retry)
-            unprocessed_keys = retry_response.get("UnprocessedKeys", {}).get(messages_table.table_name, {}).get("Keys", [])
+        # Handle unprocessed keys if needed...
 
     return student_messages
+
+
+def scan_all_conversations(course_id, time_threshold):
+    items = []
+    exclusive_start_key = None
+
+    while True:
+        scan_kwargs = {
+            "FilterExpression": "course_id = :course_id AND time_created >= :time_threshold",
+            "ExpressionAttributeValues": {
+                ":course_id": course_id,
+                ":time_threshold": time_threshold
+            }
+        }
+        if exclusive_start_key:
+            scan_kwargs["ExclusiveStartKey"] = exclusive_start_key
+
+        response = conversations_table.scan(**scan_kwargs)
+        items.extend(response.get("Items", []))
+
+        exclusive_start_key = response.get("LastEvaluatedKey")
+        if not exclusive_start_key:
+            break
+
+    return items

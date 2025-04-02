@@ -60,18 +60,7 @@ def lambda_handler(event, context):
             return construct_response(400, {"error": "Invalid period value. Must be WEEK, MONTH, or TERM."})
 
         # Scan Conversations table for course_id and time threshold
-        response = conversations_table.scan(
-            FilterExpression="course_id = :course_id AND time_created >= :time_threshold",
-            ExpressionAttributeValues={
-                ":course_id": course_id,
-                ":time_threshold": time_threshold
-            }
-        )
-
-        if DEBUG:
-            print(f"Conversations scan response: {response}")
-
-        conversations = response.get("Items", [])
+        conversations = scan_all_conversations(course_id, time_threshold)
         message_ids = []
 
         # Collect all message IDs
@@ -80,7 +69,6 @@ def lambda_handler(event, context):
 
         if DEBUG:
             print(f"Total message IDs fetched: {len(message_ids)}")
-            print(f"Scan response: {response}")
 
         # Get all messages using the collected message IDs
         messages = batch_get_messages_ai_only(message_ids)
@@ -155,3 +143,29 @@ def batch_get_messages_ai_only(message_ids):
                 ai_messages.append(deserialized)
 
     return ai_messages
+
+
+def scan_all_conversations(course_id, time_threshold):
+    items = []
+    exclusive_start_key = None
+
+    while True:
+        scan_kwargs = {
+            "FilterExpression": "course_id = :course_id AND time_created >= :time_threshold",
+            "ExpressionAttributeValues": {
+                ":course_id": course_id,
+                ":time_threshold": time_threshold
+            }
+        }
+
+        if exclusive_start_key:
+            scan_kwargs["ExclusiveStartKey"] = exclusive_start_key
+
+        response = conversations_table.scan(**scan_kwargs)
+        items.extend(response.get("Items", []))
+
+        exclusive_start_key = response.get("LastEvaluatedKey")
+        if not exclusive_start_key:
+            break
+
+    return items

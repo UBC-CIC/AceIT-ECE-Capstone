@@ -45,13 +45,7 @@ def lambda_handler(event, context):
     try:
         # Query all conversations for the given course_id
         log_debug(f"Querying conversations for course_id: {course_id}")
-        response = conversations_table.scan(
-            FilterExpression="course_id = :course_id",
-            ExpressionAttributeValues={":course_id": str(course_id)}  # Ensure course_id is string
-        )
-        print(f"DEBUG: Raw scan response: {json.dumps(response, indent=2)}")  # Debugging output
-
-        conversations = response.get("Items", [])
+        conversations = scan_all_conversations_for_course(course_id)
         print(f"DEBUG: Found {len(conversations)} conversations for course_id {course_id}.")
 
         for conversation in conversations:
@@ -102,3 +96,27 @@ def lambda_handler(event, context):
         print("ERROR: Exception occurred while updating system prompt.")
         print(traceback.format_exc())  # Print full stack trace for debugging
         return construct_response(500, {"error": "failed to update system prompt"})
+
+
+def scan_all_conversations_for_course(course_id):
+    all_items = []
+    last_evaluated_key = None
+
+    while True:
+        scan_kwargs = {
+            "FilterExpression": "course_id = :course_id",
+            "ExpressionAttributeValues": {":course_id": str(course_id)}
+        }
+
+        if last_evaluated_key:
+            scan_kwargs["ExclusiveStartKey"] = last_evaluated_key
+
+        response = conversations_table.scan(**scan_kwargs)
+        items = response.get("Items", [])
+        all_items.extend(items)
+
+        last_evaluated_key = response.get("LastEvaluatedKey")
+        if not last_evaluated_key:
+            break
+
+    return all_items
