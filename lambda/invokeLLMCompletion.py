@@ -12,6 +12,9 @@ session = boto3.Session()
 bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION')) 
 translate_client = boto3.client("translate", region_name=os.getenv('AWS_REGION'))
 
+# Use refined query if the toggle is on; otherwise use the original message
+refine_user_query_on = True
+
 def lambda_handler(event, context):
     try:
         # Parse the request body
@@ -34,7 +37,7 @@ def lambda_handler(event, context):
         # Optional fields
         student_language_pref = body.get("language", "")
         context = body.get("context", "")
-        refined_query = refine_user_query(context, message)
+        refined_query = refine_user_query(context, message) if refine_user_query_on else message
 
         secret = get_secret()
         credentials = json.loads(secret)
