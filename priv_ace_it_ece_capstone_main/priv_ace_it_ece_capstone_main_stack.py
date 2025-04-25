@@ -790,7 +790,6 @@ class PrivAceItEceCapstoneMainStack(Stack):
                     resources=[
                         # "arn:aws:s3:::bucketfortextextract",     # Needed for ListBucket
                         # "arn:aws:s3:::bucketfortextextract/*",    # Needed for GetObject
-                        # "arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0",
                         "*"
                     ]
                 )
