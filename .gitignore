@@ -13,5 +13,5 @@ __pycache__
 cdk.out
 
 *.DS_Store
-config.json
+# config.json
 
