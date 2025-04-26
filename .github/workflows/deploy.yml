@@ -48,8 +48,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/permissions_lots
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/permissions_lots
+          aws-region: ${{ secrets.AWS_REGION }}
       
       - name: CDK Bootstrap
         run: npx cdk bootstrap
