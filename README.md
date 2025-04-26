@@ -1,5 +1,18 @@
 # Ace It - AI Study Assistant
 
+## Table of Contents
+
+| **Index** | **Description** |
+|:---------:|:----------------|
+| [Project Overview](#project-overview) | A detailed summary of this project solution and this repository. |
+| [Demo](#demo) | A video and a GIF recorded from our live demo. |
+| [User Experience & Features](#user-experience--features) | Overview of user roles and capabilities |
+| [Technical Details](#technical-details) | Include key technologies and an explanation for an AWS Architecture Diagram. |
+| [Deploying & Running Ace It on AWS](#deploying--running-ace-it-on-aws) | A step-by-step deployment guide on how to deploy this project. |
+| [User Guide](#user-guide) | Overview of the user experience. |
+| [Change Log](#change-log) | Any changes post publish. |
+| [Credits](#credits) | Meet the team behind the solution. |
+
 ## Project Overview
 
 Ace It is an AI Study Assistant designed to help university students find and synthesize course content while providing actionable insights to instructors to improve course delivery. Integrated directly with learning management systems (LMS) via LTI and open source leveraging AI large language models (LLM), Ace It is able to access course information to provide Students contextual support in areas such as:
@@ -15,11 +28,14 @@ Ace It currently only supports Canvas LMS, however, this project can be extended
 
 ### Demo
 
-Note that the quality of the demo video is lower than actual due to gif compression.
+Here is a link to our [demo video](https://drive.google.com/file/d/1Y0eHjTPotDVpvo_G89ka-62A2dA2gjOo/view?usp=sharing).
+
+Below is a quick demo gif of our deployed demo version of the solution.
+
+Note that the quality of the demo gif is lower than actual due to gif compression.
 
 <img src="./docs/demo.gif" width="750">
 
-A deployed demo version of the solution can be found here: https://d2rs0jk5lfd7j4.cloudfront.net.
 
 ### User Experience & Features
 
@@ -69,8 +85,6 @@ The solution also features:
 ---
 
 ## Technical Details
-
-### Key Technologies
 
 Ace It leverages the following key technologies:
 
@@ -127,7 +141,6 @@ The repository is organized into the following main directories:
 - `app.py`: Entry point for the backend application.
 - `cdk.context.json`: AWS CDK context configuration.
 - `cdk.json`: AWS CDK project configuration.
-- `makefile`: Makefile for build automation.
 - `README.md`: Project documentation.
 - `requirements-dev.txt`: Development dependencies for the backend.
 - `requirements.txt`: Production dependencies for the backend.
@@ -326,3 +339,18 @@ There are two key types of frontend configuration. They are as follows:
 2. Configure API destinations in `frontend/.env`
 
 Further details on what to configure in each of these files can be found within the files themselves.
+
+
+## User Guide
+
+To learn how to use the application, see the [User Guide](https://github.com/UBC-CIC/AceIT-ECE-Capstone/blob/main/docs/User%20Guide.pdf).
+
+## Change Log
+
+N/A
+
+## Credits
+
+This application was architected and developed by SF-59: Zane Frantzen, Christine Jiang, Tony Li, Catherine Zhao, with guidance from our Capstone supervising professor Sidney Fels and supervising TA Hamidreza Aftabi.
+
+Special thanks to the UBC Cloud Innovation Centre Technical and Project Management teams for their guidance and support.

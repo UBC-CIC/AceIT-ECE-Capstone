@@ -9,6 +9,7 @@ permissions:
   id-token: write
   contents: read
 
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,10 +20,8 @@ jobs:
       - name: Load AWS Account ID from Config
         working-directory: .
         run: |
-          ACCOUNT_ID=$(jq -r '.AWS_ACCOUNT_ID' config.json)
-          REGION=$(jq -r '.AWS_REGION' config.json)
-          echo "AWS_ACCOUNT_ID=$ACCOUNT_ID" >> $GITHUB_ENV
-          echo "AWS_REGION=$REGION" >> $GITHUB_ENV
+          echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}" >> $GITHUB_ENV
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> $GITHUB_ENV
       
       - name: Clean npm cache and remove node_modules
         working-directory: ./frontend
