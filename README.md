@@ -330,6 +330,7 @@ Now if you visit the Distribution domain name from cloudfront, you can visit Ace
 - Important:
   > Please note that due to aws resource name constraints, the prefix should only contain lowercase letters.
   > First time deploying will take ~25 minutes, please be patient.
+  > If your Canvas server has an TLS certificate, then replace all `verify=False` to `verify=True` in this repository to enable secure communication.
 
 #### Frontend Configuration
 
