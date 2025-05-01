@@ -57,8 +57,6 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
             # print("soup: ", soup.get_text(separator="\n").strip())
             str_syllabus = "syllabus: " + soup.get_text(separator="\n").strip() + "; syllabus link: " + url_syllabus
             return str_syllabus
-    
-    print(f"Failed to fetch syllabus: {response.status_code}, {response.text}")
     return None
 
 def fetch_announcments_from_canvas(auth_token, base_url, course_id):
@@ -94,7 +92,6 @@ def fetch_announcments_from_canvas(auth_token, base_url, course_id):
             return_str += announcement_str
         return_str += "Announcements link: " + url_announcements
         return return_str
-    print(f"Failed to fetch announcements: {response.status_code}, {response.text}")
     return None
 
 def fetch_discussions_from_canvas(auth_token, base_url, course_id):
@@ -134,7 +131,6 @@ def fetch_discussions_from_canvas(auth_token, base_url, course_id):
         url_discussions = f"{base_url}/courses/{course_id}/discussion_topics"
         return_str += "Dicussions link: " + url_discussions   
         return return_str
-    print(f"Failed to fetch discussion: {response.status_code}, {response.text}")
     return None
 
 def extract_messages(threads, depth=0):
@@ -197,7 +193,6 @@ def fetch_assignments_from_canvas(auth_token, base_url, course_id):
         url_assignments = f"{base_url}/courses/{course_id}/assignments"
         return_str += "Assignments link: " + url_assignments   
         return return_str
-    print(f"Failed to fetch assignments: {response.status_code}, {response.text}")
     return None
     
 def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
@@ -336,7 +331,6 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
         url_quizzes = f"{base_url}/courses/{course_id}/quizzes"
         return_str += "Quizzes link: " + url_quizzes   
         return return_str
-    print(f"Failed to fetch discussion: {response.status_code}, {response.text}")
     return None
 
 def fetch_pages_from_canvas(auth_token, base_url, course_id):
@@ -375,5 +369,4 @@ def fetch_pages_from_canvas(auth_token, base_url, course_id):
         url_pages = f"{base_url}/courses/{course_id}/pages"
         return_str += "Pages link: " + url_pages   
         return return_str
-    print(f"Failed to fetch pages: {response.status_code}, {response.text}")
     return None

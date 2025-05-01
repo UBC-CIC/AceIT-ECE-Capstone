@@ -25,9 +25,6 @@ bedrock = session.client('bedrock-runtime', region_name=os.getenv('AWS_REGION'))
 
 def lambda_handler(event, context):
     try:
-        if DEBUG:
-            print(f"Received event: {json.dumps(event)}")
-
         headers = event.get("headers", {})
         auth_token = headers.get("Authorization", "")
         if not auth_token:
@@ -47,14 +44,10 @@ def lambda_handler(event, context):
 
         # Get instructor courses
         courses_as_instructor = get_instructor_courses(auth_token)
-        if DEBUG:
-            print(f"Instructor courses fetched: {courses_as_instructor}")
         if courses_as_instructor is None:
             return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
 
         list_of_courses_as_instructor = [course["id"] for course in courses_as_instructor]
-        if DEBUG:
-            print("List of courses as instructor:", list_of_courses_as_instructor)
 
         # Extract query parameters
         query_params = event.get("queryStringParameters", {})

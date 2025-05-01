@@ -57,15 +57,10 @@ def lambda_handler(event, context):
         for file in files:
             if file["locked"] == False and file['upload_status'] == 'success' and file["hidden"] == False and get_extension(file["display_name"]) in text_format:
                 file_name = file["display_name"]
-                print("file name: ", file_name)
-
                 file_url = file["url"]  # Canvas file URL
                 file_key = f"{course_id}/{file['filename']}"  # Store in "course_id/" folder
                 file_updated = file["updated_at"]
-            
                 try:
-                    print(f"Streaming {file_key} to S3...")
-
                     with requests.get(file_url, stream=True, verify=False) as response:
                         response.raise_for_status()  # Ensure request success
 
@@ -82,11 +77,9 @@ def lambda_handler(event, context):
                                 }
                             }
                         )
-
-                    print(f"Successfully uploaded {file_key} to S3 with metadata.")
                 
                 except Exception as e:
-                    print(f"Failed to upload {file_key}: {e}")
+                    print(f"Failed to upload: {e}")
                 
         secret = utils.get_rds_secret.get_secret()
         credentials = json.loads(secret)

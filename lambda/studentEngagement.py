@@ -42,15 +42,11 @@ def lambda_handler(event, context):
         student_id = str(student_id)
 
         courses_as_instructor = get_instructor_courses(auth_token)
-        if DEBUG:
-            print(f"Instructor courses fetched: {courses_as_instructor}")
         
         if courses_as_instructor is None:
             return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
         
         list_of_courses_as_instructor = [course["id"] for course in courses_as_instructor]
-        if DEBUG:
-            print(f"List of courses as instructor: {list_of_courses_as_instructor}")
         
         # Extract query parameters
         query_params = event.get("queryStringParameters", {})

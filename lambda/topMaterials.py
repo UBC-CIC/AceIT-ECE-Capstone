@@ -35,7 +35,6 @@ def lambda_handler(event, context):
             return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
         
         list_of_courses_as_instructor = [course["id"] for course in courses_as_instructor]
-        print("List of courses as instructor: ", list_of_courses_as_instructor)
 
         # Extract query parameters
         query_params = event.get("queryStringParameters", {})
@@ -90,7 +89,6 @@ def lambda_handler(event, context):
                         material_dict[(doc_name, doc_url)] = material_dict.get((doc_name, doc_url), 0) + 1
         
         top_materials = sorted(material_dict.items(), key=lambda x: x[1], reverse=True)[:num]
-        print(f"Top materials: {top_materials}")
         
         top_materials_list = [{"title": material[0], "link": material[1]} for (material, _count) in top_materials]
 

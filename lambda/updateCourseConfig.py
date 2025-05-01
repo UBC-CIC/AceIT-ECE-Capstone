@@ -36,7 +36,6 @@ def lambda_handler(event, context):
         return construct_response(500, {"error": "Failed to fetch instructor courses from Canvas"})
     
     list_of_courses_as_instructor = [course["id"] for course in courses_as_instructor]
-    print("List of courses as instructor: ", list_of_courses_as_instructor)
     
     # Parse and validate the request body
     body = ""
