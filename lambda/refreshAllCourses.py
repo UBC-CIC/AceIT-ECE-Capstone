@@ -60,7 +60,6 @@ def invoke_refresh_course(course_id):
             InvocationType="Event",
             Payload=json.dumps(payload)
         )
-        print(f"Successfully invoked RefreshContentLambda for course {course_id}")
         return
     except Exception as e:
         print(f"Error invoking Lambda function: {e}")
