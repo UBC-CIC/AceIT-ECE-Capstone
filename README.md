@@ -226,7 +226,7 @@ To deploy Ace It on AWS, you'll need an AWS account with the appropriate permiss
    - AWS_ROLE_ARN: The ARN of the IAM Role created.
    - AWS_REGION: Your preferred AWS region (e.g., us-west-2).
    - AWS_ACCOUNT_ID: Your AWS Account ID.
-     1.10 Open the github workflows in .github/workflows/deploy.yml, replace the value of `role-to-assume` and `aws-region` to be `${{ secrets.AWS_ROLE_ARN }}` and `${{ secrets.AWS_REGION }}` respectively. (i.e. comment out line 57, 58, and uncomment line 55, 56)
+     1.10 Open the github workflows in .github/workflows/deploy.yml, replace the value of `role-to-assume` and `aws-region` to be `${{ secrets.AWS_ROLE_ARN }}` and `${{ secrets.AWS_REGION }}` respectively. (i.e. comment out line 57, 58, uncomment line 55, 56, and delete line 25-28)
 2. Create an S3 bucket to host the frontend files.
    2.1 Go to AWS Console > S3 > Create bucket > General Purpose, make sure you are in the desired region.
    2.2 Give a name to the bucket, this is for the front end, so uncheck `Block all public access`
@@ -259,7 +259,7 @@ To deploy Ace It on AWS, you'll need an AWS account with the appropriate permiss
      3.3 After creating distribution, Copy the Distribution domain name. It'll be used for Access-Control-Allow-Origin.
 4. Modify .github/workflows/deploy.yml:
    - replace `role-to-assume` to be `${{ secrets.AWS_ROLE_ARN }}`
-     `aws-region`: `${{ secrets.AWS_REGION }}`
+     `aws-region`: `${{ secrets.AWS_REGION }}` if you have not done so.
 
 ##### Method II. No Github Action
 
