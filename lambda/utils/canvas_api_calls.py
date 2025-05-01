@@ -9,21 +9,21 @@ def make_canvas_api_call(url, request_type, headers, data={}, params={}):
     try:
         result = {}
         if request_type == "get":
-            response = requests.get(url, headers=headers, data=data, params=params, verify=False)
+            response = requests.get(url, headers=headers, data=data, params=params)
             response.raise_for_status()
 
             # deal with pagination
             result = response.json()
             while 'next' in response.links and 'url' in response.links['next']:
-                response = requests.get(response.links['next']['url'], headers=headers, verify=False)
+                response = requests.get(response.links['next']['url'], headers=headers)
                 response.raise_for_status()
                 result.extend(response.json())
         elif request_type == "post":
-            response = requests.post(url, headers=headers, data=data, params=params, verify=False)
+            response = requests.post(url, headers=headers, data=data, params=params)
             response.raise_for_status()
             result = response.json()
         elif request_type == "delete":
-            response = requests.delete(url, headers=headers, data=data, params=params, verify=False)
+            response = requests.delete(url, headers=headers, data=data, params=params)
             response.raise_for_status()
             result = response.json()
         else:
