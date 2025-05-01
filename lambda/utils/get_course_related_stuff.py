@@ -18,7 +18,7 @@ def call_course_activity_stream(auth_token, course_id):
 
     url = f"{BASE_URL}/api/v1/courses/{course_id}/activity_stream"
     try:
-        response = requests.get(url, headers=HEADERS)
+        response = requests.get(url, headers=HEADERS, verify=False)
         response.raise_for_status()
         # Lambda function to extract and format the data
         response = response.json()
@@ -45,7 +45,7 @@ def fetch_syllabus_from_canvas(auth_token, base_url, course_id):
     headers = {"Authorization": f"Bearer {auth_token}"}
     url_syllabus = f"{base_url}/courses/{course_id}/assignments/syllabus"
 
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=False)
     if response.status_code == 200:
         course_data = response.json()
         syllabus_body = course_data.get("syllabus_body", "")
@@ -65,7 +65,7 @@ def fetch_announcments_from_canvas(auth_token, base_url, course_id):
     announcments_url = f"{base_url}/api/v1/announcements?context_codes[]=course_{course_id}&active_only=true&end_date={end_date}&start_date={start_date}"
     headers = {"Authorization": f"Bearer {auth_token}"}
     url_announcements = f"{base_url}/courses/{course_id}/announcements"
-    response = requests.get(announcments_url, headers=headers)
+    response = requests.get(announcments_url, headers=headers, verify=False)
     return_str = "Announcements: \n"
     if response.status_code == 200:
         announcement_list = response.json()
@@ -97,7 +97,7 @@ def fetch_announcments_from_canvas(auth_token, base_url, course_id):
 def fetch_discussions_from_canvas(auth_token, base_url, course_id):
     message_url = f"{base_url}/api/v1/courses/{course_id}/discussion_topics"
     headers = {"Authorization": f"Bearer {auth_token}"}
-    response = requests.get(message_url, headers=headers)
+    response = requests.get(message_url, headers=headers, verify=False)
     if response.status_code == 200:
         discussion_list = response.json()
         return_str = "Discussions: \n"
@@ -113,7 +113,7 @@ def fetch_discussions_from_canvas(auth_token, base_url, course_id):
             # get student reply threads
             topic_id = discussion.get("id", "")
             topic_url = f"{base_url}/api/v1/courses/{course_id}/discussion_topics/{topic_id}/view"
-            view_response = requests.get(topic_url, headers=headers)
+            view_response = requests.get(topic_url, headers=headers, verify=False)
             if view_response.status_code == 200:
                 discussion_info = view_response.json()
                 discussion_threads = discussion_info.get("view", "")
@@ -158,7 +158,7 @@ def indent_string(text, indent_level=1, indent_char="  "):
 def fetch_assignments_from_canvas(auth_token, base_url, course_id):
     assignments_url = f"{base_url}/api/v1/courses/{course_id}/assignments"
     headers = {"Authorization": f"Bearer {auth_token}"}
-    response = requests.get(assignments_url, headers=headers)
+    response = requests.get(assignments_url, headers=headers, verify=False)
     if response.status_code == 200:
         assignments_list = response.json()
         return_str = "Assignments: \n"
@@ -198,7 +198,7 @@ def fetch_assignments_from_canvas(auth_token, base_url, course_id):
 def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
     quizzes_url = f"{base_url}/api/v1/courses/{course_id}/quizzes"
     headers = {"Authorization": f"Bearer {auth_token}"}
-    response = requests.get(quizzes_url, headers=headers)
+    response = requests.get(quizzes_url, headers=headers, verify=False)
     if response.status_code == 200:
         quizzes_list = response.json()
         return_str = "Quizzes: \n"
@@ -248,7 +248,7 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
                 quiz_id = quiz.get("id", "")
                 if quiz_id:
                     questions_url = f"{base_url}/api/v1/courses/{course_id}/quizzes/{quiz_id}/questions"
-                    questions_response = requests.get(questions_url, headers=headers)
+                    questions_response = requests.get(questions_url, headers=headers, verify=False)
                     if questions_response.status_code == 200:
                         questions_list = questions_response.json()
                         quiz_str += indent_string("Quiz questions: \n", 2)
@@ -336,7 +336,7 @@ def fetch_quizzes_from_canvas(auth_token, base_url, course_id):
 def fetch_pages_from_canvas(auth_token, base_url, course_id):
     pages_url = f"{base_url}/api/v1/courses/{course_id}/pages?include[]=body"
     headers = {"Authorization": f"Bearer {auth_token}"}
-    response = requests.get(pages_url, headers=headers)
+    response = requests.get(pages_url, headers=headers, verify=False)
     if response.status_code == 200:
         pages_list = response.json()
         return_str = "Pages: \n" 

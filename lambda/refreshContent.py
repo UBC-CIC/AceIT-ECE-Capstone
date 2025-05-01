@@ -61,7 +61,7 @@ def lambda_handler(event, context):
                 file_key = f"{course_id}/{file['filename']}"  # Store in "course_id/" folder
                 file_updated = file["updated_at"]
                 try:
-                    with requests.get(file_url, stream=True) as response:
+                    with requests.get(file_url, stream=True, verify=False) as response:
                         response.raise_for_status()  # Ensure request success
 
                         # Upload stream directly to S3 with metadata
