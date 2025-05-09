@@ -12,6 +12,7 @@
 | [User Guide](#user-guide) | Overview of the user experience. |
 | [Change Log](#change-log) | Any changes post publish. |
 | [Credits](#credits) | Meet the team behind the solution. |
+| [License](#license)| License details. |
 
 ## Project Overview
 
@@ -355,3 +356,17 @@ N/A
 This application was architected and developed by SF-59: Zane Frantzen, Christine Jiang, Tony Li, Catherine Zhao, with guidance from our Capstone supervising professor Sidney Fels and supervising TA Hamidreza Aftabi.
 
 Special thanks to the UBC Cloud Innovation Centre Technical and Project Management teams for their guidance and support.
+
+## License
+
+This project is distributed under the [MIT License](https://github.com/UBC-CIC/AceIT-ECE-Capstone/blob/main/LICENSE).
+
+Licenses of libraries and tools used by the system are listed below:
+
+[PostgreSQL license](https://www.postgresql.org/about/licence/)
+- For PostgreSQL and pgvector
+- "a liberal Open Source license, similar to the BSD or MIT licenses."
+
+[LLaMa 3 Community License Agreement](https://www.llama.com/llama3/license/)
+
+For Llama 3 70B Instruct model
